@@ -3,20 +3,20 @@ import { useCurrentFrame } from "remotion";
 import { corpo } from "../anim";
 import { INCHIOSTRO } from "../editoriale/carta/stile";
 import { pianoTelefono } from "../editoriale/piani/telefono";
-import { fase, mix, uscita } from "../editoriale/regia";
+import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
 import { proietta } from "../editoriale/set/geometria";
 import { Ingombro } from "../editoriale/set/Ingombro";
-import { avvicina } from "../editoriale/set/inquadrature";
 import { Smartphone } from "../editoriale/set/oggetti/Oggetti";
 import { Scrivania } from "../editoriale/set/Scrivania";
-import { angoliSchermoTelefono, opzionePx, puntoTelefono, rettangoloTelefono, sopraIlTelefono } from "../editoriale/set/telefono";
+import { angoliSchermoTelefono, cameraOpzioni, opzionePx, puntoTelefono, rettangoloTelefono } from "../editoriale/set/telefono";
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { Velo } from "../editoriale/set/Velo";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import type { Punto } from "../editoriale/tratto";
 import { cerchiatura, sottolineatura } from "../editoriale/tratto";
+import { altezzaRighe } from "../editoriale/titoli";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
 import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
@@ -30,14 +30,17 @@ function barrato(i: number, cam: Parameters<typeof proietta>[1]): Punto[] {
   return sottolineatura(Math.hypot(z.x - a.x, z.y - a.y), 31).map(([x, y]): Punto => [a.x + x * Math.cos(ang) - y * Math.sin(ang), a.y + x * Math.sin(ang) + y * Math.cos(ang)]);
 }
 
+/** Occhiello (36 px, una riga) e lo spazio fra occhiello e titolo. */
+const OCCHIELLO = 44 + 14;
+
 // Il telefono in primo piano sulla scrivania, con le opzioni a schermo: occhiello e titolo in alto, il barrato a pennarello
 // sull'opzione esclusa, il cerchio su quella che resta.
 export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
   const f = useCurrentFrame();
   const { durata, etichetta, opzioni } = props;
   const piano = pianoTelefono(props, durata);
-  const base = sopraIlTelefono(360, 560, mix(6.3, 5.9, uscita(fase(f, 0, durata))), 1.16, 0.13);
-  const cam = avvicina(base, 0.92 ** piano.stacchi.filter((s) => f >= s).length);
+  const sottoITitoli = TITOLO_TOP + OCCHIELLO + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16) }]);
+  const cam = cameraOpzioni(uscita(fase(f, 0, durata)), 0.92 ** piano.stacchi.filter((s) => f >= s).length, sottoITitoli, opzioni.length);
   const resta = piano.cerchio && rettangoloTelefono(opzionePx(piano.cerchio.indice), cam);
   const righe: Riga[] = [
     {

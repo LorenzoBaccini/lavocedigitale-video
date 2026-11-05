@@ -119,7 +119,8 @@ export function chiediAClaude(prompt: string): Promise<string> {
     figlio.on("close", (codice) => {
       clearTimeout(timer);
       if (codice === 0) resolve(out);
-      else reject(new Error(`claude -p uscito con codice ${codice}: ${err.trim()}`));
+      // La CLI scrive alcuni errori (login, token) su stdout: senza stderr si riporta l'inizio di stdout.
+      else reject(new Error(`claude -p uscito con codice ${codice}: ${(err.trim() || out.trim()).slice(0, 300)}`));
     });
     figlio.stdin.end(prompt);
   });

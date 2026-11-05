@@ -105,7 +105,7 @@ def set_vari():
             if disp:
                 s["dispositivo"] = disp
             out.append(frase(DETTA, "preciso", s))
-    op = lambda n, mx: [esatto(24, j) if mx else f"Entra {j + 1}" for j in range(n)] if mx else [["Entra con SPID", "Entra con CIE", "Entra con PIN"][j] for j in range(n)]
+    op = lambda n, mx: [esatto(24, j) for j in range(n)] if mx else ["Entra con SPID", "Entra con CIE", "Entra con PIN"][:n]
     for n, escl, mx in [(2, False, False), (2, True, True), (3, False, True), (3, True, True), (3, True, False)]:
         opz = op(n, mx)
         s = {"tipo": "telefono", "etichetta": esatto(32, n) if mx else "Dall'app", "titolo": esatto(24, n + 1) if mx else "Solo con SPID", "opzioni": opz}

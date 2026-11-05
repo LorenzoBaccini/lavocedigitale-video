@@ -11,6 +11,7 @@ import { Smartphone } from "../editoriale/set/oggetti/Oggetti";
 import { Scrivania } from "../editoriale/set/Scrivania";
 import { angoliSchermoTelefono, cameraOpzioni, opzionePx, puntoTelefono, rettangoloTelefono } from "../editoriale/set/telefono";
 import { Occhiello } from "../editoriale/set/Occhiello";
+import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -30,8 +31,6 @@ function barrato(i: number, cam: Parameters<typeof proietta>[1]): Punto[] {
   return sottolineatura(Math.hypot(z.x - a.x, z.y - a.y), 31).map(([x, y]): Punto => [a.x + x * Math.cos(ang) - y * Math.sin(ang), a.y + x * Math.sin(ang) + y * Math.cos(ang)]);
 }
 
-/** Occhiello (36 px, una riga) e lo spazio fra occhiello e titolo. */
-const OCCHIELLO = 44 + 14;
 
 // Il telefono in primo piano sulla scrivania, con le opzioni a schermo: occhiello e titolo in alto, il barrato a pennarello
 // sull'opzione esclusa, il cerchio su quella che resta.
@@ -39,7 +38,7 @@ export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
   const f = useCurrentFrame();
   const { durata, etichetta, opzioni } = props;
   const piano = pianoTelefono(props, durata);
-  const sottoITitoli = TITOLO_TOP + OCCHIELLO + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16) }]);
+  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16) }]);
   const cam = cameraOpzioni(uscita(fase(f, 0, durata)), 0.92 ** piano.stacchi.filter((s) => f >= s).length, sottoITitoli, opzioni.length);
   const resta = piano.cerchio && rettangoloTelefono(opzionePx(piano.cerchio.indice), cam);
   const righe: Riga[] = [
@@ -59,7 +58,7 @@ export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
       <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} pieno />
       {piano.esclusa && <SegnoInQuadro punti={barrato(piano.esclusa.indice, cam)} colore={C.amber} spessore={14} progresso={(f - piano.esclusa.da) / 10} />}
       {resta && piano.cerchio && <SegnoInQuadro punti={cerchiatura(resta.x + resta.w / 2, resta.y + resta.h / 2, resta.w / 2 + 22, resta.h / 2 + 20, 17)} colore={INCHIOSTRO.testo} spessore={7} progresso={(f - piano.cerchio.da) / 15} />}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>

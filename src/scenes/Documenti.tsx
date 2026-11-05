@@ -12,6 +12,7 @@ import { PezziSulTavolo } from "../editoriale/set/oggetti/Pezzi";
 import { CENTRO_PEZZI, MEZZA_LARGHEZZA, MEZZA_PROFONDITA, postiPezzi } from "../editoriale/set/oggetti/posti";
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
+import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Scrivania } from "../editoriale/set/Scrivania";
 import { Velo } from "../editoriale/set/Velo";
 import type { Riga } from "../editoriale/Titolo";
@@ -63,7 +64,7 @@ export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
       {pezzi.map((p, i) => (
         <NotaAccanto key={p.oggetto} nome={`nota-${i + 1}`} testo={p.nota} x={punti[i].destra.x} y={punti[i].destra.y} sinistra={Math.max(NOTA_DA, punti[i].destra.x + 70)} da={piano.note[i]} f={f} seme={41 + i} />
       ))}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>

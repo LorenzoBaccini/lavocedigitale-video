@@ -121,7 +121,7 @@ export const sopraLaQuota = (cam: Camera, punti: Vector3[], limite: number): Cam
 
 function spostaVerticale(cam: Camera, punti: Vector3[], limite: number, verso: 1 | -1): Camera {
   let c = cam;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 8; i++) {
     const ys = punti.map((p) => proietta(p, c).y);
     const fuori = verso === 1 ? limite - Math.min(...ys) : Math.max(...ys) - limite;
     if (fuori <= 1) return c;

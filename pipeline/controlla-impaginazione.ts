@@ -70,10 +70,10 @@ export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?
 }
 
 // Gli storyboard senza voce (fixture tutte-le-scene) girano con 3 s a frase e i wav della fixture.
-function propsDa(file: string): PropsNotizia {
+function propsDa(file: string, secondi = 3): PropsNotizia {
   const letto = JSON.parse(readFileSync(file, "utf8")) as PropsNotizia | Storyboard;
   if ("storyboard" in letto) return letto;
-  const clips = letto.frasi.map((_, i) => ({ file: `s${i % 8}.wav`, secondi: 3, inviluppo: Array(90).fill(0.5) }));
+  const clips = letto.frasi.map((_, i) => ({ file: `s${i % 8}.wav`, secondi, inviluppo: Array(Math.round(secondi * FPS)).fill(0.5) }));
   return { storyboard: letto, timing: { voce: "elevenlabs", clips }, audioBase: "audio/fixture" };
 }
 
@@ -84,13 +84,14 @@ export function varianteDaArgomento(argomento: string | undefined, base: Variant
 }
 
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
-//        [--variante=musica:chiaro,luce:sera,apertura:alta] [--ogni-apertura] [--passo=N]
+//        [--variante=musica:chiaro,luce:sera,apertura:alta] [--ogni-apertura] [--passo=N] [--secondi=N]
+// --secondi: durata delle frasi di uno storyboard senza voce (3 di default).
 // Con --ogni-apertura il controllo gira una volta per ogni inquadratura d'apertura del gancio.
 if (èPrincipale(import.meta.url)) {
   const argomenti = process.argv.slice(2);
   const [file, cartellaStill] = argomenti.filter((a) => !a.startsWith("--")).map((a) => resolve(a));
   if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--ogni-apertura]");
-  const props = propsDa(file);
+  const props = propsDa(file, Number(argomenti.find((a) => a.startsWith("--secondi="))?.slice("--secondi=".length)) || undefined);
   const variante = varianteDaArgomento(argomenti.find((a) => a.startsWith("--variante="))?.slice("--variante=".length), props.variante);
   const aperture = argomenti.includes("--ogni-apertura") ? APERTURE : [variante.apertura];
   const passo = Number(argomenti.find((a) => a.startsWith("--passo="))?.slice("--passo=".length)) || undefined;

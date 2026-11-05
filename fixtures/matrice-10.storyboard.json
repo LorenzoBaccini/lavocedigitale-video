@@ -1,0 +1,127 @@
+{
+ "slug": "matrice-10",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "telefono",
+    "etichetta": "Accesso credenziali verifica Min",
+    "titolo": "Credenziali verifica Min",
+    "opzioni": [
+     "Amministrazione Comune s",
+     "Comune sportello accesso",
+     "Sportello accesso creden"
+    ],
+    "esclusa": "Sportello accesso creden"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "telefono",
+    "etichetta": "Dall'app",
+    "titolo": "Solo con SPID",
+    "opzioni": [
+     "Entra con SPID",
+     "Entra con CIE",
+     "Entra con PIN"
+    ],
+    "esclusa": "Entra con PIN"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "documenti",
+    "etichetta": "Sul tavolo",
+    "titolo": "Prepara",
+    "pezzi": [
+     {
+      "oggetto": "tessera",
+      "nota": "la tessera"
+     },
+     {
+      "oggetto": "lettore",
+      "nota": "la tessera"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "documenti",
+    "etichetta": "Comune sportello accesso credenz",
+    "titolo": "Sportello accesso creden",
+    "pezzi": [
+     {
+      "oggetto": "tessera",
+      "nota": "Amministrazione Comune s"
+     },
+     {
+      "oggetto": "documento",
+      "nota": "Comune sportello accesso"
+     },
+     {
+      "oggetto": "lettore",
+      "nota": "Sportello accesso creden"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "documenti",
+    "etichetta": "Comune sportello accesso credenz",
+    "titolo": "Sportello accesso creden",
+    "pezzi": [
+     {
+      "oggetto": "lettore",
+      "nota": "Amministrazione Comune s"
+     },
+     {
+      "oggetto": "pin",
+      "nota": "Comune sportello accesso"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "documenti",
+    "etichetta": "Sul tavolo",
+    "titolo": "Prepara",
+    "pezzi": [
+     {
+      "oggetto": "documento",
+      "nota": "la tessera"
+     },
+     {
+      "oggetto": "tessera",
+      "nota": "la tessera"
+     },
+     {
+      "oggetto": "pin",
+      "nota": "la tessera"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

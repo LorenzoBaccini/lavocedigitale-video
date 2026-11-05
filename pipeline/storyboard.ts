@@ -99,6 +99,10 @@ export async function scriviStoryboard(
   return { ...esito.storyboard, slug: a.slug };
 }
 
+/** Il messaggio d'errore di `claude -p`: la CLI scrive alcuni errori (login, token) su stdout, quindi senza stderr vale l'inizio di stdout. */
+export const messaggioErrore = (codice: number | null, err: string, out: string): string =>
+  `claude -p uscito con codice ${codice}: ${(err.trim() || out.trim()).slice(0, 300)}`;
+
 export function chiediAClaude(prompt: string): Promise<string> {
   return new Promise((resolve, reject) => {
     // cwd neutra: dalla radice del repo la CLI caricherebbe il CLAUDE.md del progetto
@@ -119,7 +123,7 @@ export function chiediAClaude(prompt: string): Promise<string> {
     figlio.on("close", (codice) => {
       clearTimeout(timer);
       if (codice === 0) resolve(out);
-      else reject(new Error(`claude -p uscito con codice ${codice}: ${err.trim()}`));
+      else reject(new Error(messaggioErrore(codice, err, out)));
     });
     figlio.stdin.end(prompt);
   });

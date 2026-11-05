@@ -1,0 +1,68 @@
+{
+ "slug": "matrice-02",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Devi rinnovare la carta d'identità elettronica del Comune prima delle vacanze estive di agosto?",
+   "chiave": "Devi",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Verifica Ministero docum",
+    "evidenza": "Identità richies",
+    "sottotitolo": "Prenotazione portale aggiornamento s",
+    "oggetto": "chiavetta"
+   }
+  },
+  {
+   "testo": "Devi rinnovare la carta d'identità elettronica scaduta da poco?",
+   "chiave": "Devi",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Carta scaduta",
+    "evidenza": "Rinnovo",
+    "sottotitolo": "Dal sito",
+    "oggetto": "smartphone"
+   }
+  },
+  {
+   "testo": "Devi rinnovare la carta d'identità elettronica del Comune prima delle vacanze estive di agosto?",
+   "chiave": "Devi",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Documento identità richi",
+    "evidenza": "Prenotazione por",
+    "sottotitolo": "Aggiornamento sicurezza impostazioni",
+    "oggetto": "router"
+   }
+  },
+  {
+   "testo": "Devi cambiare la password del conto?",
+   "chiave": "Devi",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Carta scaduta",
+    "evidenza": "Rinnovo",
+    "sottotitolo": "Dal sito",
+    "oggetto": "carta"
+   }
+  },
+  {
+   "testo": "Devi rinnovare la carta d'identità elettronica del Comune prima delle vacanze estive di agosto?",
+   "chiave": "Devi",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Richiesta prenotazione p",
+    "evidenza": "Aggiornamento si",
+    "sottotitolo": "Impostazioni dispositivo Amministraz",
+    "oggetto": "nessuno"
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

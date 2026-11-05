@@ -21,6 +21,16 @@ node --experimental-strip-types suoni/foley.ts
 node --experimental-strip-types pipeline/controlla-impaginazione.ts fixtures/tutte-le-scene.storyboard.json out/still
 ```
 
+Prima di cambiare una scena, il controllo esaustivo sulla matrice (ogni tipo di scena per ogni dispositivo e
+schermata, testi corti e al limite; le fixture si rigenerano con `python3 fixtures/matrice.py`): un fotogramma ogni 5,
+frasi da 4 s, le ganci con le tre aperture. Deve uscire pulito per tutte (vedi `fixtures/README.md`).
+
+```
+for f in fixtures/matrice-*.storyboard.json; do
+  node --experimental-strip-types pipeline/controlla-impaginazione.ts $f out/matrice --passo=5 --secondi=4
+done
+```
+
 La pipeline intera vuole le chiavi dei servizi; con `--prova` non scrive su S3 e non posta:
 
 ```
@@ -70,7 +80,11 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    frase. Se ElevenLabs fallisce il video salta: nessuna voce di riserva.
 3. **Controllo d'impaginazione** (`pipeline/controlla-impaginazione.ts`): fotogrammi a inizio, metà
    e fine di ogni frase; `src/impaginazione.ts` segnala testo fuori dai margini, sul logo, sulla zona
-   del sottotitolo o a cavallo di uno schermo 3D. Se c'è un problema il video salta.
+   del sottotitolo o a cavallo di uno schermo 3D. Se c'è un problema il video salta. Le scene con testo
+   sopra e sotto un oggetto 3D (rischio, telefono) tengono l'oggetto nella fascia in ogni fotogramma con
+   `fraLeQuote` (`src/editoriale/set/geometria.ts`); i titoli animati appoggiati in basso partono da
+   `FONDO_TITOLO`, che lascia il posto all'entrata delle parole; le note a mano scendono di corpo, e poi
+   si spostano, perché la parola più lunga stia nel margine, ma mai oltre 20 px a sinistra del punto indicato (`src/editoriale/set/nota.ts`): per questo `indica` e le note dei pezzi non hanno parole oltre 15 lettere (`LIMITI.parolaNota`).
 4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, una variante visiva per video (musica,
    luce, apertura: `src/editoriale/variante.ts`) diversa dagli ultimi.
 5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su

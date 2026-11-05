@@ -5,7 +5,8 @@ import { Vector3 } from "three";
 
 import { centroDi, distanzaPer, fraCamere, fraLeQuote, inAsse, sferica, NOTIFICA_PX, proietta, puntoSchermo, rettangoloInQuadro, SCHERMO, SCHERMO_PX, sopraLaQuota, sottoLaQuota } from "./geometria.ts";
 import { larga } from "./inquadrature.ts";
-import { opzionePx, rettangoloTelefono, sopraIlTelefono, TELEFONO_PX } from "./telefono.ts";
+import { FONDO_UTILE } from "../../impaginazione.ts";
+import { cameraOpzioni, opzionePx, puntoTelefono, rettangoloTelefono, sopraIlTelefono, TELEFONO_PX } from "./telefono.ts";
 
 test("in asse con lo schermo, il punto scelto cade centrato alla quota chiesta", () => {
   for (const [d, quota] of [[5, 780], [3.2, 960], [8, 1200]]) {
@@ -87,4 +88,23 @@ test("fra le quote: se lo schermo ci sta gia', la camera non arretra", () => {
   const c = fraLeQuote(cam, alti, bassi, 200, 1700);
   const dist = (k: { pos: number[]; look: number[] }) => Math.hypot(...k.pos.map((v, i) => v - k.look[i]));
   assert.ok(Math.abs(dist(c) - dist(cam)) < 1e-9);
+});
+
+// La scena telefono della prova sul runner del 5 novembre: il titolo cadeva sul bordo alto del telefono.
+test("telefono: bordo alto sotto i titoli e ultima opzione sopra i sottotitoli, in ogni fotogramma e con gli stacchi", () => {
+  for (const sottoITitoli of [560, 640, 760]) {
+    for (const opzioni of [2, 3]) {
+      for (const k of [1, 0.92, 0.92 ** 2]) {
+        for (let t = 0; t <= 1.0001; t += 0.1) {
+          const cam = cameraOpzioni(t, k, sottoITitoli, opzioni);
+          const su = Math.min(...[puntoTelefono(0, 0), puntoTelefono(TELEFONO_PX.w, 0)].map((p) => proietta(p, cam).y));
+          const b = opzionePx(opzioni - 1);
+          const giu = Math.max(...[puntoTelefono(b.x, b.y + b.h), puntoTelefono(b.x + b.w, b.y + b.h)].map((p) => proietta(p, cam).y));
+          const caso = `titoli ${sottoITitoli}, ${opzioni} opzioni, k ${k.toFixed(2)}, t ${t.toFixed(1)}`;
+          assert.ok(su >= sottoITitoli + 25, `${caso}: bordo alto ${su}`);
+          assert.ok(giu <= FONDO_UTILE - 25, `${caso}: ultima opzione ${giu}`);
+        }
+      }
+    }
+  }
 });

@@ -16,6 +16,7 @@ import { POSTI, puntoCaldo } from "../editoriale/set/oggetti/posti";
 import { Scrivania } from "../editoriale/set/Scrivania";
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
+import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -28,7 +29,6 @@ import type { ScenaDi } from "./props";
 
 const LARGHEZZA_PULSANTE = (PULSANTE_PX.w / SCHERMO_PX.w) * SCHERMO.larghezza;
 const SPUNTA = 72;
-const ALTEZZA_ETICHETTA = 60;
 const NOTA_DA = 580;
 // il telefono tutto intero e a sinistra, fra i titoli e la conferma: a destra c'e' posto per la nota di `indica`
 const TELEFONO_A_SINISTRA = sopraIlTelefono(900, 752, 12, 1.2, 0.1);
@@ -78,7 +78,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
     : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
   const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
   const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15) }] : [])];
-  const limite = TITOLO_TOP + ALTEZZA_ETICHETTA + altezzaRighe(testata) + 36;
+  const limite = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe(testata) + 36;
   const cam = telefono
     ? fraTitoloEConferma(avvicinata, limite, conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA : FONDO_UTILE)
     : oggetto === "portatile" && !suPulsante
@@ -104,7 +104,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
       {oggetto === "portatile" && !inchiostro && <Ingombro nome="schermo" angoli={angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />}
       {chiara && schermo?.tipo === "finestra" && <Ingombro nome="pagina" angoli={angoliInQuadro(FINESTRA_PX, cam)} pieno />}
       {oggetto === "smartphone" && <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} />}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>

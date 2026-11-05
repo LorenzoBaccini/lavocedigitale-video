@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { ambienteClaude, argomentiClaude, MODELLO_CLAUDE, scriviStoryboard, StoryboardScartato } from "./storyboard.ts";
+import { ambienteClaude, argomentiClaude, messaggioErrore, MODELLO_CLAUDE, scriviStoryboard, StoryboardScartato } from "./storyboard.ts";
 import type { ArticoloVideo } from "./articolo.ts";
 
 const FIXTURE = readFileSync(new URL("../fixtures/windows10.storyboard.json", import.meta.url), "utf8");
@@ -167,4 +167,11 @@ test("claude -p non riceve i segreti del job", () => {
     GITHUB_TOKEN: "x",
   });
   assert.deepEqual(Object.keys(env).sort(), ["CLAUDE_CODE_OAUTH_TOKEN", "HOME", "PATH"]);
+});
+
+test("errore di claude -p: lo stderr se c'e', altrimenti l'inizio di stdout, al massimo 300 caratteri", () => {
+  assert.equal(messaggioErrore(1, "  token scaduto\n", "ignorato"), "claude -p uscito con codice 1: token scaduto");
+  assert.equal(messaggioErrore(1, "", "Invalid API key · Please run /login\n"), "claude -p uscito con codice 1: Invalid API key · Please run /login");
+  const lungo = messaggioErrore(2, "", "x".repeat(1000));
+  assert.equal(lungo, `claude -p uscito con codice 2: ${"x".repeat(300)}`);
 });

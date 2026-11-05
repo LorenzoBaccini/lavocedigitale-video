@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 import type { Storyboard } from "./tipi.ts";
 import { erroriVarieta, sequenzaDi, somiglianza, validaStoryboard } from "./valida.ts";
@@ -58,5 +58,10 @@ test("due data di fila con la stessa data si scartano", () => {
 });
 
 test("le fixture tutte-le-scene restano valide come storyboard", () => {
-  for (const nome of ["tutte-le-scene", "tutte-le-scene-2", "tutte-le-scene-3", "rischio-portatile"]) assert.equal(validaStoryboard(fixture(nome)).ok, true, nome);
+  const matrice = readdirSync(new URL("../../fixtures/", import.meta.url)).filter((f) => /^matrice-\d+\.storyboard\.json$/.test(f)).map((f) => f.replace(".storyboard.json", ""));
+  assert.ok(matrice.length >= 10, "le fixture della matrice ci sono");
+  for (const nome of ["tutte-le-scene", "tutte-le-scene-2", "tutte-le-scene-3", "rischio-portatile", ...matrice]) {
+    const esito = validaStoryboard(fixture(nome));
+    assert.equal(esito.ok, true, `${nome}: ${esito.ok ? "" : esito.errori.join("; ")}`);
+  }
 });

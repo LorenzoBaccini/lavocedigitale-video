@@ -8,10 +8,9 @@ name: Video social
 # Repo pubblico: i log e gli artifact si leggono da fuori. Nessun segreto nel codice; ARN del ruolo,
 # bucket e ID dei canali stanno nei secret dell'environment `produzione` (mascherati nei log).
 
+# Solo workflow_dispatch: il sito lo lancia alla prima pubblicazione di un articolo con un token che ha
+# soltanto Actions: write (lancia i run, non scrive codice); a mano si lancia uguale, in prova.
 on:
-  # Lanciato dal sito alla prima pubblicazione di un articolo: il client_payload e' l'articolo.
-  repository_dispatch:
-    types: [article-published]
   workflow_dispatch:
     inputs:
       articolo:
@@ -29,7 +28,8 @@ permissions:
 
 # Un video alla volta, per tutti gli slug: lo storico su S3 si legge all'inizio e si riscrive dopo
 # l'upload, due job in parallelo si perderebbero una voce. Attenzione: GitHub tiene un solo run in
-# attesa per gruppo, un terzo lancio mentre uno gira e uno aspetta annulla quello in attesa.
+# attesa per gruppo, un terzo lancio mentre uno gira e uno aspetta annulla quello in attesa senza
+# nessun avviso (nessuno step parte). Accettato: le pubblicazioni sono poche e a ore distanti.
 concurrency:
   group: video-social
   cancel-in-progress: false
@@ -41,9 +41,9 @@ jobs:
     # Render ~43 min sui runner da 2 vCPU (5 nov 2026); i repo pubblici hanno runner da 4 vCPU.
     timeout-minutes: 75
     env:
-      # Si pubblica solo da repository_dispatch o da workflow_dispatch con prova spenta.
-      # Attenzione: `cond && '' || x` darebbe sempre x, '' e' falso.
-      PROVA: ${{ (github.event_name != 'repository_dispatch' && !(github.event_name == 'workflow_dispatch' && !inputs.prova)) && '--prova' || '' }}
+      # Si pubblica solo con prova spenta (il sito la manda spenta). Attenzione: `cond && '' || x`
+      # darebbe sempre x, '' e' falso.
+      PROVA: ${{ inputs.prova && '--prova' || '' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -54,8 +54,9 @@ jobs:
           node-version: '22.14'
           cache: npm
 
+      # Nessuna dipendenza del lockfile ha script d'installazione: --ignore-scripts lo garantisce.
       - name: Installa le dipendenze
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       # ffmpeg statico da una release GitHub con versione e checksum fissati, al posto di apt: un
       # mirror Ubuntu lento ha bloccato lo step per oltre 25 minuti il 5 nov 2026. Non l'ffmpeg di
@@ -73,6 +74,8 @@ jobs:
           "$RUNNER_TEMP/bin/ffmpeg" -hide_banner -version | head -1
 
       # Versione fissata: un cambio di flag o di output della CLI farebbe saltare i video del giorno.
+      # Il suo postinstall scarica un binario: resta prima delle credenziali AWS, come ogni codice di
+      # terzi che si installa.
       - name: Installa Claude Code
         run: npm install -g @anthropic-ai/claude-code@2.1.308
 
@@ -81,7 +84,7 @@ jobs:
       # completa la fa la pipeline.
       - name: Scrivi l'articolo
         env:
-          ARTICOLO: ${{ github.event_name == 'repository_dispatch' && toJSON(github.event.client_payload) || inputs.articolo }}
+          ARTICOLO: ${{ inputs.articolo }}
         run: |
           printf '%s' "$ARTICOLO" > "$RUNNER_TEMP/articolo.json"
           SLUG="$(jq -r '.slug // empty' "$RUNNER_TEMP/articolo.json" 2>/dev/null || true)"

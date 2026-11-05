@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 
 /**
- * L'articolo come arriva dal sito nel `client_payload` del `repository_dispatch` (o nell'input
- * `articolo` di un lancio a mano): il testo e' gia' senza HTML. Nessuna lettura dal database.
+ * L'articolo come arriva dal sito nell'input `articolo` del workflow_dispatch: il testo e' gia'
+ * senza HTML. Nessuna lettura dal database.
  */
 export interface ArticoloVideo {
   slug: string;

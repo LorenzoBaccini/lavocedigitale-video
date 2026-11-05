@@ -35,14 +35,22 @@ node --experimental-strip-types pipeline/main.ts articolo.json --prova
 
 ## Come parte
 
-Il sito, alla prima pubblicazione di un articolo (non le guide), manda un `repository_dispatch`
-`article-published` con l'articolo come `client_payload` (6 proprietà, sotto i 64 KB: il testo è
-già senza HTML e il sito lo accorcia se servisse). Il workflow `.github/workflows/video-social.yml`
-lo scrive su file e lancia `pipeline/main.ts`. A mano: `workflow_dispatch` con l'input `articolo`
-(il JSON, per esempio `articolo.json` dall'artifact di un run) e `prova`.
+Il sito, alla prima pubblicazione di un articolo (non le guide), lancia il workflow
+`.github/workflows/video-social.yml` con `workflow_dispatch` su `main`: input `articolo` (il JSON
+qui sopra, testo già senza HTML e accorciato dal sito sotto il limite di 65.535 caratteri degli input)
+e `prova=false`. Il token del sito ha soltanto **Actions: write** su questo repo: lancia i run, non
+scrive codice. Il workflow scrive l'articolo su file e lancia `pipeline/main.ts`. A mano si lancia
+uguale (`prova` è accesa di default), per esempio con `articolo.json` dall'artifact di un run:
+
+```
+gh workflow run video-social.yml -f articolo="$(cat articolo.json)" -f prova=true
+```
+
+Un video alla volta: GitHub tiene un solo run in attesa, e un terzo lancio mentre uno gira e uno
+aspetta annulla quello in attesa senza avviso.
 
 Il workflow gira nell'environment `produzione`: lì stanno i segreti, e AWS si raggiunge via OIDC
-con un ruolo che può solo leggere e scrivere `video/*` e lo storico nel bucket delle immagini.
+con un ruolo che può solo leggere e scrivere `video/*.mp4` e lo storico nel bucket delle immagini.
 Nessuna chiave fissa, nessun ID di account nel repo.
 
 ## Cosa fa la pipeline

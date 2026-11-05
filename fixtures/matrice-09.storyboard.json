@@ -1,0 +1,92 @@
+{
+ "slug": "matrice-09",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "rischio",
+    "sopra": "Senza",
+    "titolo": "Niente",
+    "dispositivo": "smartphone"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "rischio",
+    "sopra": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri",
+    "dispositivo": "smartphone"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "rischio",
+    "sopra": "Senza",
+    "titolo": "Niente"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "rischio",
+    "sopra": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "telefono",
+    "etichetta": "Dall'app",
+    "titolo": "Solo con SPID",
+    "opzioni": [
+     "Entra con SPID",
+     "Entra con CIE"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "telefono",
+    "etichetta": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri",
+    "opzioni": [
+     "Amministrazione Comune s",
+     "Comune sportello accesso"
+    ],
+    "esclusa": "Comune sportello accesso"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "telefono",
+    "etichetta": "Accesso credenziali verifica Min",
+    "titolo": "Credenziali verifica Min",
+    "opzioni": [
+     "Amministrazione Comune s",
+     "Comune sportello accesso",
+     "Sportello accesso creden"
+    ]
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

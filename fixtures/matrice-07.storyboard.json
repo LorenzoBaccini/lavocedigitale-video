@@ -1,0 +1,106 @@
+{
+ "slug": "matrice-07",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "numero",
+    "etichetta": "Costo",
+    "numero": "5"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "numero",
+    "etichetta": "Verifica Ministero documento ide",
+    "numero": "1.234,56",
+    "unita": "Ministero documento identità ric",
+    "nota": "Documento identità richiesta prenota"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "confronto",
+    "etichetta": "Prima e dopo",
+    "a": {
+     "titolo": "Prima",
+     "valore": "5"
+    },
+    "b": {
+     "titolo": "Dopo",
+     "valore": "8"
+    }
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "confronto",
+    "etichetta": "Identità richiesta prenotazionee",
+    "a": {
+     "titolo": "Richiesta prenotazione p",
+     "valore": "1.234,56"
+    },
+    "b": {
+     "titolo": "Prenotazione portale agg",
+     "valore": "9.999,99"
+    }
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "citazione",
+    "testo": "Si cambia.",
+    "fonte": "Comune"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "citazione",
+    "testo": "Portale aggiornamento sicurezza impostazioni dispositivo Amministrazione Comune sportello accesso credenzialie",
+    "fonte": "Aggiornamento sicurezza impostaz"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "checklist",
+    "etichetta": "Amministrazione Comune sportello",
+    "voci": [
+     {
+      "grande": "Amministrazione Co",
+      "piccolo": "Comune sportello accesso credenzia"
+     },
+     {
+      "grande": "Comune sportello a",
+      "piccolo": "Sportello accesso credenziali veri"
+     },
+     {
+      "grande": "Sportello accessoe",
+      "piccolo": "Accesso credenziali verifica Minis"
+     }
+    ],
+    "oggetto": "nessuno"
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

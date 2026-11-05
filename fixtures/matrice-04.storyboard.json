@@ -1,0 +1,130 @@
+{
+ "slug": "matrice-04",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Comune sportello accesso credenz",
+    "titolo": "Sportello accesso creden",
+    "evidenza": "Accesso credenzi",
+    "conferma": "Credenziali verifica Ministe",
+    "indica": "Verifica Ministero documento",
+    "oggetto": "portatile",
+    "schermata": "sito",
+    "menu": [
+     "Comune sportello a",
+     "Sportello accessoe",
+     "Accesso credenzial",
+     "Credenziali verifi",
+     "Verifica Ministero"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Nel menu",
+    "titolo": "Apri",
+    "oggetto": "portatile",
+    "schermata": "app"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri",
+    "evidenza": "Credenziali veri",
+    "conferma": "Verifica Ministero documento",
+    "indica": "Ministero documento identità",
+    "oggetto": "portatile",
+    "schermata": "app",
+    "menu": [
+     "Sportello accessoe",
+     "Accesso credenzial",
+     "Credenziali verifi",
+     "Verifica Ministero",
+     "Ministero document"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Nel menu",
+    "titolo": "Apri",
+    "oggetto": "smartphone",
+    "schermata": "sistema"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Amministrazione Comune sportello",
+    "titolo": "Comune sportello accesso",
+    "evidenza": "Sportello access",
+    "conferma": "Accesso credenziali verifica",
+    "indica": "Credenziali verifica Ministe",
+    "oggetto": "smartphone",
+    "schermata": "sistema",
+    "menu": [
+     "Amministrazione Co",
+     "Comune sportello a",
+     "Sportello accessoe",
+     "Accesso credenzial",
+     "Credenziali verifi"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Nel menu",
+    "titolo": "Apri",
+    "oggetto": "smartphone",
+    "schermata": "sito"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Comune sportello accesso credenz",
+    "titolo": "Sportello accesso creden",
+    "evidenza": "Accesso credenzi",
+    "conferma": "Credenziali verifica Ministe",
+    "indica": "Verifica Ministero documento",
+    "oggetto": "smartphone",
+    "schermata": "sito",
+    "menu": [
+     "Comune sportello a",
+     "Sportello accessoe",
+     "Accesso credenzial",
+     "Credenziali verifi",
+     "Verifica Ministero"
+    ]
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

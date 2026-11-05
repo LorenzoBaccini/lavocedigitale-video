@@ -1,0 +1,84 @@
+{
+ "slug": "matrice-06",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri",
+    "evidenza": "Credenziali veri",
+    "conferma": "Verifica Ministero documento",
+    "indica": "Identità richiesta prenotazi",
+    "oggetto": "carta"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Nel menu",
+    "titolo": "Apri",
+    "oggetto": "nessuno"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "oggetto",
+    "etichetta": "Richiesta prenotazione portale a",
+    "titolo": "Prenotazione portale agg",
+    "evidenza": "Portale aggiorna",
+    "conferma": "Aggiornamento sicurezza impo",
+    "oggetto": "nessuno"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "data",
+    "etichetta": "Scadenza",
+    "data": "2026-03-02"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "data",
+    "etichetta": "Comune sportello accesso credenz",
+    "data": "2026-12-31",
+    "barrato": "Sportello accesso credenzi",
+    "timbro": "Accesso credenzi"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "teaser",
+    "testo": "Cosa cambia"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "teaser",
+    "testo": "Credenziali verifica Ministero documento"
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

@@ -1,0 +1,140 @@
+{
+ "slug": "matrice-08",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "checklist",
+    "etichetta": "Serve",
+    "voci": [
+     {
+      "grande": "Voce",
+      "piccolo": "breve"
+     },
+     {
+      "grande": "Voce",
+      "piccolo": "breve"
+     }
+    ],
+    "oggetto": "portatile"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "checklist",
+    "etichetta": "Sportello accesso credenziali ve",
+    "voci": [
+     {
+      "grande": "Amministrazione Co",
+      "piccolo": "Comune sportello accesso credenzia"
+     },
+     {
+      "grande": "Comune sportello a",
+      "piccolo": "Sportello accesso credenziali veri"
+     },
+     {
+      "grande": "Sportello accessoe",
+      "piccolo": "Accesso credenziali verifica Minis"
+     }
+    ],
+    "oggetto": "chiavetta"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "checklist",
+    "etichetta": "Accesso credenziali verifica Min",
+    "voci": [
+     {
+      "grande": "Amministrazione Co",
+      "piccolo": "Comune sportello accesso credenzia"
+     },
+     {
+      "grande": "Comune sportello a",
+      "piccolo": "Sportello accesso credenziali veri"
+     }
+    ],
+    "oggetto": "smartphone"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "checklist",
+    "etichetta": "Serve",
+    "voci": [
+     {
+      "grande": "Voce",
+      "piccolo": "breve"
+     },
+     {
+      "grande": "Voce",
+      "piccolo": "breve"
+     },
+     {
+      "grande": "Voce",
+      "piccolo": "breve"
+     }
+    ],
+    "oggetto": "router"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "checklist",
+    "etichetta": "Verifica Ministero documento ide",
+    "voci": [
+     {
+      "grande": "Amministrazione Co",
+      "piccolo": "Comune sportello accesso credenzia"
+     },
+     {
+      "grande": "Comune sportello a",
+      "piccolo": "Sportello accesso credenziali veri"
+     },
+     {
+      "grande": "Sportello accessoe",
+      "piccolo": "Accesso credenziali verifica Minis"
+     }
+    ],
+    "oggetto": "carta"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "rischio",
+    "sopra": "Senza",
+    "titolo": "Niente",
+    "dispositivo": "portatile"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "rischio",
+    "sopra": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri",
+    "dispositivo": "portatile"
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

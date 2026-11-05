@@ -12,6 +12,13 @@
   vista che i testi al limite entrino nello schermo. Non hanno voce: per gli still si costruiscono props con un timing
   finto (per esempio 3 s a clip e inviluppo piatto) che riusa i wav di `audio/fixture`.
   `pipeline/controlla-impaginazione.ts` accetta direttamente lo storyboard e fa lo stesso: devono uscire puliti.
+- `matrice-NN.storyboard.json` (generate da `python3 fixtures/matrice.py`, non a mano): ogni tipo di scena per ogni
+  dispositivo e schermata ammessi, con i testi corti e con quelli al limite dei `LIMITI` (titoli su due righe,
+  etichette, sopratitoli, notifiche, menu, opzioni e note al massimo). Le ganci stanno in `matrice-01` e `-02`, le
+  sole da provare con `--ogni-apertura` (l'apertura cambia solo il gancio). Hanno scene dello stesso tipo di fila: sono
+  valide come storyboard ma la pipeline le scarterebbe. Il controllo esaustivo:
+  `controlla-impaginazione.ts fixtures/matrice-NN.storyboard.json out/matrice --passo=5 --secondi=4` (un fotogramma
+  ogni 5, frasi da 4 s), deve uscire pulito per tutte.
 - `rischio-portatile.storyboard.json`: tre `rischio` sul portatile (con e senza `dispositivo`) con sopratitolo e
   titolo cortissimi, medi e al limite, più un allarme sul portatile. Riproduce un caso reale di video scartato (schermo a
   cavallo del sopratitolo). Va provata con `--passo=15`: deve uscire pulita in ogni fotogramma.

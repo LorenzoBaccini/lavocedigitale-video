@@ -5,6 +5,7 @@ import { fase } from "../regia";
 import { Pennarello } from "../Segno";
 import type { Punto } from "../tratto";
 import { casuale, lunghezza, percorso } from "../tratto";
+import { postoNota } from "./nota";
 
 /** Mezza altezza di una nota di due righe. */
 const NOTA_MEZZA = 46;
@@ -26,7 +27,8 @@ export function freccia(x0: number, y0: number, x1: number, y1: number, seme: nu
  * Una nota a mano a destra di un punto: la freccia a pennarello dal testo al punto `(x, y)`, poi la scritta in Inter maiuscolo
  * da `sinistra` al margine. Comincia al frame `da`.
  */
-export const NotaAccanto: React.FC<{ nome: string; testo: string; x: number; y: number; sinistra: number; da: number; f: number; seme: number }> = ({ nome, testo, x, y, sinistra, da, f, seme }) => {
+export const NotaAccanto: React.FC<{ nome: string; testo: string; x: number; y: number; sinistra: number; da: number; f: number; seme: number }> = ({ nome, testo, x, y, sinistra: voluta, da, f, seme }) => {
+  const { sinistra, corpo } = postoNota(testo, voluta);
   // mai nella fascia del sottotitolo
   const yNota = Math.min(y, FONDO_UTILE - RESPIRO - NOTA_MEZZA);
   const tratto = freccia(sinistra - 14, yNota - 4, x + 14, y, seme);
@@ -38,7 +40,7 @@ export const NotaAccanto: React.FC<{ nome: string; testo: string; x: number; y: 
       </svg>
       <div
         data-impaginazione={nome}
-        style={{ position: "absolute", left: sinistra, width: LARGHEZZA - MARGINE - sinistra, top: yNota, transform: `translateY(-50%) translateX(${(1 - entrata) * -10}px)`, fontFamily: SANS, fontWeight: 650, fontSize: 36, lineHeight: 1.18, letterSpacing: "0.04em", textTransform: "uppercase", color: "#FAFAF7", textShadow: "0 2px 12px rgba(0,0,0,0.65)", opacity: entrata }}
+        style={{ position: "absolute", left: sinistra, width: LARGHEZZA - MARGINE - sinistra, top: yNota, transform: `translateY(-50%) translateX(${(1 - entrata) * -10}px)`, fontFamily: SANS, fontWeight: 650, fontSize: corpo, lineHeight: 1.18, letterSpacing: "0.04em", textTransform: "uppercase", color: "#FAFAF7", textShadow: "0 2px 12px rgba(0,0,0,0.65)", opacity: entrata }}
       >
         {testo}
       </div>

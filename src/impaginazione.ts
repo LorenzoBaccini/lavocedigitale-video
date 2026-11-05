@@ -12,6 +12,9 @@ export const FONDO_SCENA = 560;
 export const FONDO_UTILE = ALTEZZA - FONDO_SCENA;
 // i serif hanno discendenti oltre la riga: un testo appoggiato su FONDO_SCENA si alza di tanto per non toccare il sottotitolo
 export const RESPIRO = 18;
+// le parole del titolo entrano salendo (fino a 22 px) e la chiave con un piccolo colpo di scala: un titolo animato
+// appoggiato in basso parte da qui, o nei primi frame scende sul sottotitolo
+export const FONDO_TITOLO = FONDO_SCENA + RESPIRO + 24;
 
 export interface Rettangolo {
   x: number;

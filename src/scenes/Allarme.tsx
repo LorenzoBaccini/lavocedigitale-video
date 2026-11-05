@@ -18,7 +18,7 @@ import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { cerchiatura, sottolineatura } from "../editoriale/tratto";
 import type { Punto } from "../editoriale/tratto";
-import { FONDO_SCENA, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";
+import { FONDO_TITOLO, MARGINE, TITOLO_TOP } from "../impaginazione";
 import { C, SANS, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
@@ -109,7 +109,7 @@ export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
         <SegnoInQuadro key={i} punti={punti} colore={C.amber} spessore={8} progresso={(f - piano.sottolinea - i * PER_RIGA) / PER_RIGA} />
       ))}
       <Titolo nome="sopra" f={f} righe={sopra} style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE }} />
-      <Titolo nome="titolo" f={f} righe={titolo} style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE }} />
+      <Titolo nome="titolo" f={f} righe={titolo} style={{ position: "absolute", bottom: FONDO_TITOLO, left: MARGINE, right: MARGINE }} />
     </>
   );
 };

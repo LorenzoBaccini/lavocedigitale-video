@@ -16,7 +16,7 @@ import { Velo } from "../editoriale/set/Velo";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { altezzaRighe } from "../editoriale/titoli";
-import { ALTEZZA, FONDO_SCENA, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";
+import { ALTEZZA, FONDO_TITOLO, MARGINE, TITOLO_TOP } from "../impaginazione";
 import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
@@ -47,7 +47,7 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const mossa = avvicina(camera(telefono, fase(f, 0, durata)), 0.88 ** piano.stacchi.filter((s) => f >= s).length);
   // lo schermo sta fra il sopratitolo e il titolo in ogni fotogramma, non solo in quelli misurati
   const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: corpo(props.sopra, 72, 22) }]) + STACCO;
-  const basso = ALTEZZA - FONDO_SCENA - RESPIRO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12) }]) - STACCO;
+  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12) }]) - STACCO;
   const bordi = telefono ? BORDI_TELEFONO : BORDI_SCHERMO;
   const cam = fraLeQuote(mossa, bordi.alti, bordi.bassi, alto, basso);
   const luce = 1 - 0.4 * liscio(fase(f, piano.ombra, piano.ombra + 20));
@@ -68,7 +68,7 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
       <Velo alto={0.55} basso={0.68} />
       <Ingombro nome={telefono ? "telefono" : "schermo"} angoli={telefono ? angoliSchermoTelefono(cam) : angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />
       <Titolo nome="sopra" f={f} righe={sopra} style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE }} />
-      <Titolo nome="titolo" f={f} righe={titolo} style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE }} />
+      <Titolo nome="titolo" f={f} righe={titolo} style={{ position: "absolute", bottom: FONDO_TITOLO, left: MARGINE, right: MARGINE }} />
     </>
   );
 };

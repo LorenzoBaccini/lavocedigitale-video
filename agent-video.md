@@ -74,6 +74,7 @@ Il campo `tipo` sceglie la scena; i campi con `?` sono facoltativi. `oggetto` è
 - `numero` al massimo 8 caratteri, e `valore` di ciascun lato del `confronto` 8; `teaser.testo` 40; `citazione.testo` 110;
 - `mittente` e `azione` al massimo 28 caratteri; `menu` da 1 a 5 voci di al massimo 18 caratteri;
 - `opzioni` da 2 a 3, ciascuna di al massimo 24 caratteri; `pezzi` da 2 a 3, `nota` al massimo 24;
+- in `indica` e nelle `nota` dei pezzi nessuna parola oltre 15 lettere: sono note a mano in una colonna stretta e vanno a capo solo fra le parole;
 - `dispositivo` è `portatile` o `smartphone`; `schermata` è `sistema`, `sito` o `app`;
 - `data` e `orologio` devono essere giorni che esistono (2026-02-30 viene scartata);
 - senza `notifica` l'allarme usa la frase parlata, tagliata a 3 righe con «…»: se la frase è lunga scrivi la `notifica`.

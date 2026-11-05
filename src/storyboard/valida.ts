@@ -58,6 +58,14 @@ function elenco(o: Dict, campo: string, percorso: string, limiti: { min: number;
   });
 }
 
+/** Le note a mano vanno a capo solo fra le parole: una parola troppo lunga non sta nella colonna. */
+function parole(o: Dict, campo: string, percorso: string, errori: string[]): void {
+  const v = o[campo];
+  if (typeof v !== "string") return;
+  const lunga = v.split(/\s+/).find((p) => p.length > LIMITI.parolaNota);
+  if (lunga) errori.push(`${percorso}.${campo}: «${lunga}» ha ${lunga.length} lettere, massimo ${LIMITI.parolaNota} per parola`);
+}
+
 function pezzi(o: Dict, percorso: string, errori: string[]): void {
   const v = o.pezzi;
   if (!Array.isArray(v) || v.length < LIMITI.pezzi.min || v.length > LIMITI.pezzi.max) {
@@ -69,6 +77,7 @@ function pezzi(o: Dict, percorso: string, errori: string[]): void {
     if (!èDizionario(pezzo)) return void errori.push(`${p}: oggetto richiesto`);
     if (!PEZZI.includes(pezzo.oggetto as never)) errori.push(`${p}.oggetto: deve essere uno tra ${PEZZI.join(", ")}`);
     testo(pezzo, "nota", p, LIMITI.notaPezzo, errori);
+    parole(pezzo, "nota", p, errori);
   });
   const nomi = v.filter(èDizionario).map((x) => x.oggetto);
   if (new Set(nomi).size !== nomi.length) errori.push(`${percorso}.pezzi: ogni oggetto una volta sola`);
@@ -118,6 +127,7 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "evidenza", p, LIMITI.evidenza, e, true);
     testo(s, "conferma", p, LIMITI.conferma, e, true);
     testo(s, "indica", p, LIMITI.indica, e, true);
+    parole(s, "indica", p, e);
     oggetto(s, p, e);
     if (s.oggetto === "nessuno" && s.indica !== undefined) e.push(`${p}.indica: indica solo con un oggetto`);
     unoTra(s, "schermata", SCHERMATE, p, e);

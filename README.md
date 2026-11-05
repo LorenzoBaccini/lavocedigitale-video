@@ -84,7 +84,7 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    sopra e sotto un oggetto 3D (rischio, telefono) tengono l'oggetto nella fascia in ogni fotogramma con
    `fraLeQuote` (`src/editoriale/set/geometria.ts`); i titoli animati appoggiati in basso partono da
    `FONDO_TITOLO`, che lascia il posto all'entrata delle parole; le note a mano scendono di corpo, e poi
-   si spostano, perché la parola più lunga stia nel margine (`src/editoriale/set/nota.ts`).
+   si spostano, perché la parola più lunga stia nel margine, ma mai oltre 20 px a sinistra del punto indicato (`src/editoriale/set/nota.ts`): per questo `indica` e le note dei pezzi non hanno parole oltre 15 lettere (`LIMITI.parolaNota`).
 4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, una variante visiva per video (musica,
    luce, apertura: `src/editoriale/variante.ts`) diversa dagli ultimi.
 5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su

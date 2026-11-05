@@ -28,7 +28,7 @@ export function freccia(x0: number, y0: number, x1: number, y1: number, seme: nu
  * da `sinistra` al margine. Comincia al frame `da`.
  */
 export const NotaAccanto: React.FC<{ nome: string; testo: string; x: number; y: number; sinistra: number; da: number; f: number; seme: number }> = ({ nome, testo, x, y, sinistra: voluta, da, f, seme }) => {
-  const { sinistra, corpo } = postoNota(testo, voluta);
+  const { sinistra, corpo } = postoNota(testo, voluta, x);
   // mai nella fascia del sottotitolo
   const yNota = Math.min(y, FONDO_UTILE - RESPIRO - NOTA_MEZZA);
   const tratto = freccia(sinistra - 14, yNota - 4, x + 14, y, seme);

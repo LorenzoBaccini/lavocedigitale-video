@@ -86,4 +86,6 @@ export const LIMITI = {
   opzione: 24,
   pezzi: { min: 2, max: 3 },
   notaPezzo: 24,
+  /** la parola piu' lunga di `indica` e delle note dei pezzi: oltre non sta nella colonna della nota (`set/nota.ts`) */
+  parolaNota: 15,
 } as const;

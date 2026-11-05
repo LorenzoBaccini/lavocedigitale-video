@@ -235,3 +235,12 @@ test("documenti: da 2 a 3 pezzi conosciuti, ognuno una volta", () => {
   assert.ok(e2.includes("frasi[4].scena.pezzi[2].nota: 25 caratteri, massimo 24"));
   assert.ok(e2.includes("frasi[4].scena.pezzi: ogni oggetto una volta sola"));
 });
+
+test("indica e le note dei pezzi non hanno parole oltre il limite della colonna della nota", () => {
+  const sb = leggi();
+  const oggetto = sb.frasi.find((f: { scena: { tipo: string; indica?: string } }) => f.scena.tipo === "oggetto" && f.scena.indica !== undefined);
+  oggetto.scena.indica = "Amministrazione";
+  assert.equal(validaStoryboard(sb).ok, true, "15 lettere ci stanno");
+  oggetto.scena.indica = "Riconfigurazioni ora";
+  assert.ok(errori(sb).some((e) => e.endsWith("indica: «Riconfigurazioni» ha 16 lettere, massimo 15 per parola")));
+});

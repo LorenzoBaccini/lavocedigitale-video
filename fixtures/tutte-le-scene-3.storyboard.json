@@ -1,0 +1,18 @@
+{
+  "slug": "tutte-le-scene-3",
+  "orologio": "2026-03-02",
+  "frasi": [
+    { "testo": "Devi rinnovare la tessera sanitaria scaduta?", "chiave": "tessera sanitaria", "scena": { "tipo": "gancio", "titolo": "La tessera è scaduta?!", "evidenza": "Rinnovo online", "sottotitolo": "Si fa dal sito, senza andare in ASL", "oggetto": "portatile", "schermata": "sito" } },
+    { "testo": "L'app della banca segnala un accesso che non hai fatto.", "chiave": "non hai fatto", "scena": { "tipo": "allarme", "sopra": "L'app della banca ti avvisa", "titolo": "Un accesso non tuo!", "mittente": "Avviso dall'app del conto!!", "notifica": "Accesso da un dispositivo sconosciuto: se non sei tu, bloccalo!!", "dispositivo": "smartphone" } },
+    { "testo": "Hai tre metodi, ma il codice via messaggio non vale più.", "chiave": "non vale più", "scena": { "tipo": "telefono", "etichetta": "Per entrare nell'app della banca", "titolo": "Il messaggio non vale!", "opzioni": ["Entra con il codice app", "Entra con l'impronta ok", "Codice via messaggio SMS"], "esclusa": "Codice via messaggio SMS" } },
+    { "testo": "Chi resta senza codice non riesce più a pagare.", "chiave": "non riesce più", "scena": { "tipo": "rischio", "sopra": "Chi resta senza codice nell'app", "titolo": "Non paga più online!", "dispositivo": "smartphone" } },
+    { "testo": "Prepara la tessera, il lettore e la lettera con il PIN.", "chiave": "il lettore", "scena": { "tipo": "documenti", "etichetta": "Sul tavolo, prima di cominciare", "titolo": "Prepara tutto subito!", "pezzi": [
+      { "oggetto": "tessera", "nota": "la tessera ancora valida" },
+      { "oggetto": "lettore", "nota": "il lettore col cavo USB!" },
+      { "oggetto": "pin", "nota": "la lettera con il PIN!!!" }
+    ] } },
+    { "testo": "Sul sito apri Consensi e autorizza la consultazione.", "chiave": "Consensi", "scena": { "tipo": "oggetto", "etichetta": "Sul sito, nella sezione Consensi", "titolo": "Autorizza i medici ora", "evidenza": "Al primo accesso", "conferma": "Puoi cambiarlo quando vuoi!", "indica": "Autorizza la consultazione", "oggetto": "portatile", "schermata": "sito", "menu": ["Il mio profilo ora", "Documenti sanitari", "Prenotazioni varie", "Pagamenti e ticket", "Consensi e privacy"] } },
+    { "testo": "Nell'app, tocca Notifiche e attiva gli avvisi sui referti.", "chiave": "attiva gli avvisi", "scena": { "tipo": "oggetto", "etichetta": "Nell'app, dalla pagina iniziale", "titolo": "Attiva gli avvisi ora", "evidenza": "Sui referti!", "indica": "Avvisi sui nuovi referti!", "oggetto": "smartphone", "schermata": "app", "menu": ["Referti e ricette!", "Prenota una visita", "Notifiche dell'app"] } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link è nel post", "scena": { "tipo": "chiusura" } }
+  ]
+}

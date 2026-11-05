@@ -1,0 +1,17 @@
+{
+  "slug": "tutte-le-scene",
+  "frasi": [
+    { "testo": "Il telefono ti ascolta anche con schermo spento?", "chiave": "con schermo spento", "scena": { "tipo": "gancio", "titolo": "Il telefono ti ascolta?!", "evidenza": "Microfono acceso", "sottotitolo": "Un'app su sei lo accende in segreto.", "oggetto": "smartphone" } },
+    { "testo": "E il permesso glielo hai dato tu.", "chiave": "glielo hai dato tu", "scena": { "tipo": "allarme", "sopra": "E il permesso glielo hai dato tu", "titolo": "Ogni notte, di nascosto!" } },
+    { "testo": "Aggiorna il router di casa entro domenica.", "chiave": "aggiorna il router", "scena": { "tipo": "oggetto", "etichetta": "Controlla il router di casa oggi", "titolo": "Aggiorna il firmware ora", "evidenza": "Entro domenica!!", "conferma": "Così chiudi la falla aperta!", "indica": "Guarda il led che lampeggia!", "oggetto": "router" } },
+    { "testo": "Dal primo dicembre duemilaventisei addio ai pagamenti senza autenticazione.", "chiave": "addio ai pagamenti", "scena": { "tipo": "data", "etichetta": "Dal 1 dicembre 2026 cambia tutto", "data": "2026-12-01", "barrato": "PAGAMENTI SENZA OTP NEL 26", "timbro": "ADDIO PER SEMPRE" } },
+    { "testo": "Prima di pagare verifica il codice monouso e il lucchetto.", "chiave": "verifica il codice", "scena": { "tipo": "checklist", "etichetta": "Prima di pagare online, verifica", "oggetto": "carta", "voci": [
+      { "grande": "Il codice monouso!", "piccolo": "lo trovi solo nell'app della banca" },
+      { "grande": "Il lucchetto verde", "piccolo": "a sinistra dell'indirizzo del sito" },
+      { "grande": "Mai via messaggio!", "piccolo": "nessuna banca ti chiede mai il PIN" }
+    ] } },
+    { "testo": "Chi apre quel link sbagliato perde i suoi soldi in un'ora.", "chiave": "perde i suoi soldi", "scena": { "tipo": "rischio", "sopra": "Chi apre quel link sbagliato poi", "titolo": "Perde i soldi in un'ora!" } },
+    { "testo": "E poi c'è un trucco che conoscono in pochi.", "chiave": "conoscono in pochi", "scena": { "tipo": "teaser", "testo": "E poi c'è un trucco che pochi conoscono." } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link è nel post", "scena": { "tipo": "chiusura" } }
+  ]
+}

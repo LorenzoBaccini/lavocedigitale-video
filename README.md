@@ -1,0 +1,105 @@
+# lavocedigitale-video
+
+Il generatore dei video verticali di [La Voce Digitale](https://lavocedigitale.it): da un articolo
+appena pubblicato a un Reel 9:16 (1080×1920, 30 fps, 25-35 s) per Facebook e X.
+
+Remotion + three.js per le scene, `claude -p` per il copione, ElevenLabs per la voce, Node 22 con
+`--experimental-strip-types` (niente build, niente `typescript` fra le dipendenze).
+
+## Come si prova in locale
+
+```
+npm ci
+npm test                 # test unitari, nessuna chiamata esterna
+npm run studio           # Remotion Studio sulla fixture windows10
+```
+
+Gli still del controllo d'impaginazione su una fixture (servono i suoni, generati una volta):
+
+```
+node --experimental-strip-types suoni/foley.ts
+node --experimental-strip-types pipeline/controlla-impaginazione.ts fixtures/tutte-le-scene.storyboard.json out/still
+```
+
+La pipeline intera vuole le chiavi dei servizi; con `--prova` non scrive su S3 e non posta:
+
+```
+node --experimental-strip-types pipeline/main.ts articolo.json --prova
+```
+
+`articolo.json` è l'articolo come lo manda il sito:
+
+```json
+{ "slug": "…", "titolo": "…", "sottotitolo": "…", "testo": "corpo in testo semplice", "url": "https://lavocedigitale.it/<categoria>/<slug>", "tags": ["…"] }
+```
+
+## Come parte
+
+Il sito, alla prima pubblicazione di un articolo (non le guide), manda un `repository_dispatch`
+`article-published` con l'articolo come `client_payload` (6 proprietà, sotto i 64 KB: il testo è
+già senza HTML e il sito lo accorcia se servisse). Il workflow `.github/workflows/video-social.yml`
+lo scrive su file e lancia `pipeline/main.ts`. A mano: `workflow_dispatch` con l'input `articolo`
+(il JSON, per esempio `articolo.json` dall'artifact di un run) e `prova`.
+
+Il workflow gira nell'environment `produzione`: lì stanno i segreti, e AWS si raggiunge via OIDC
+con un ruolo che può solo leggere e scrivere `video/*` e lo storico nel bucket delle immagini.
+Nessuna chiave fissa, nessun ID di account nel repo.
+
+## Cosa fa la pipeline
+
+0. **Storico** (`pipeline/storico.ts`): `video-storico.json` nel bucket, fuori dal prefisso `video/`
+   che scade dopo 7 giorni. Tiene le sequenze di scene e le varianti degli ultimi 10 video e gli
+   slug degli ultimi 200 pubblicati. Se non si legge, il video salta (in prova si va avanti). Un
+   video già nello storico o ancora su S3 non si rifà.
+1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md` e le sequenze degli
+   ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
+   (`src/storyboard/cifre.ts`: ogni numero deve stare nell'articolo) sono un solo controllo, con un
+   ritentativo. La CLI gira senza strumenti, senza MCP, con modello fissato, con un ambiente ridotto
+   (nessun segreto del job) e in una cartella temporanea; l'articolo sta fra `<articolo>` e
+   `</articolo>`, dichiarato materiale e non istruzioni.
+2. **Voce** (`pipeline/voce-elevenlabs.ts`): una sola chiamata all'endpoint `with-timestamps`;
+   `pipeline/allineamento.ts` ricava le parole e le assegna alle frasi, ffmpeg taglia una clip per
+   frase. Se ElevenLabs fallisce il video salta: nessuna voce di riserva.
+3. **Controllo d'impaginazione** (`pipeline/controlla-impaginazione.ts`): fotogrammi a inizio, metà
+   e fine di ogni frase; `src/impaginazione.ts` segnala testo fuori dai margini, sul logo, sulla zona
+   del sottotitolo o a cavallo di uno schermo 3D. Se c'è un problema il video salta.
+4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, una variante visiva per video (musica,
+   luce, apertura: `src/editoriale/variante.ts`) diversa dagli ultimi.
+5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su
+   `https://lavocedigitale.it/images/video/<slug>.mp4`. Poi lo storico, prima dei post: se non si
+   scrive, non si posta.
+6. **Post**: Reel su Facebook (`pipeline/canali/facebook.ts`), X via Buffer
+   (`pipeline/canali/buffer.ts`) con il testo di `pipeline/post-video.ts` (la domanda del gancio, il
+   link, gli hashtag, nei 280 caratteri di X). Poi il resoconto di solo testo su Telegram privato.
+
+Ogni errore chiude il job con il resoconto su Telegram; se il job cade fuori da node (setup,
+timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta
+(`concurrency: video-social`).
+
+## Rifare in locale un video del runner, senza ripagare
+
+Ogni run carica l'artifact `video-<run id>` (3 giorni): articolo, risposte di Claude, storyboard,
+props, `voce.mp3`, `allineamento.json`, `timing.json` e, in prova, l'mp4.
+
+```
+gh run download <run id> -n video-<run id> -D out/runner
+mkdir -p public/audio/<slug> out/<slug>
+cp out/runner/<slug>/audio/* public/audio/<slug>/
+cp out/runner/<slug>/storyboard.json out/runner/<slug>/props.json out/<slug>/
+node --experimental-strip-types pipeline/voce-elevenlabs.ts out/<slug>/storyboard.json public/audio/<slug> --riusa
+node --experimental-strip-types suoni/foley.ts
+node --experimental-strip-types pipeline/controlla-impaginazione.ts out/<slug>/props.json --passo=15
+node --experimental-strip-types pipeline/render.ts out/<slug>/props.json out/<slug>/<slug>.mp4
+```
+
+`--riusa` rifà clip e timing da `voce.mp3` e `allineamento.json` senza chiamare ElevenLabs.
+
+## Dove sta cosa
+
+- `agent-video.md`: le istruzioni del copione (il prompt dello storyboard).
+- `src/`: la composizione Remotion; `src/editoriale/` il sistema comune (set, carta, segni, piani
+  delle scene), `src/scenes/` le scene.
+- `pipeline/`: dall'articolo al post; `pipeline/canali/` i client di Telegram, Facebook e Buffer.
+- `suoni/`: foley e sottofondo musicale sintetizzati, generati fuori da git.
+- `fixtures/`: storyboard e timing di prova (vedi `fixtures/README.md`).
+- `public/fonts/`: Inter e Lora, SIL Open Font License (`OFL-*.txt`).

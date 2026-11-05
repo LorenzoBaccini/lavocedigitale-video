@@ -1,0 +1,18 @@
+{
+  "slug": "installare-windows-10-usb-dopo-fine-supporto",
+  "orologio": "2025-10-14",
+  "frasi": [
+    { "testo": "Devi reinstallare Windows dieci da zero?", "chiave": "Windows dieci", "scena": { "tipo": "gancio", "titolo": "Windows 10", "evidenza": "da zero?", "sottotitolo": "si può, con un passo in più", "oggetto": "portatile" } },
+    { "testo": "Si può, ma c'è un problema.", "chiave": "problema", "scena": { "tipo": "allarme", "sopra": "Ma c'è", "titolo": "un problema", "notifica": "Aggiornamenti di sicurezza non più disponibili per questo PC", "mittente": "Avviso di sicurezza", "azione": "Apri le impostazioni" } },
+    { "testo": "Dal quattordici ottobre duemilaventicinque niente più aggiornamenti di sicurezza.", "chiave": "aggiornamenti", "scena": { "tipo": "data", "etichetta": "Dal 14 ottobre 2025", "data": "2025-10-14", "barrato": "aggiornamenti di sicurezza" } },
+    { "testo": "Il sistema appena installato nasce senza difese.", "chiave": "senza difese", "scena": { "tipo": "rischio", "sopra": "Appena installato", "titolo": "nasce senza difese" } },
+    { "testo": "Quando crei la chiavetta, scegli la stessa lingua e la stessa edizione del tuo Windows: così si attiva senza codice.", "chiave": "senza codice", "scena": { "tipo": "checklist", "etichetta": "Ti serve", "oggetto": "chiavetta", "voci": [
+      { "grande": "≥ 8 GB", "piccolo": "la chiavetta USB" },
+      { "grande": "stessa lingua", "piccolo": "del tuo Windows" },
+      { "grande": "stessa edizione", "piccolo": "Home o Pro, come ora" }
+    ] } },
+    { "testo": "Poi, da Windows Update, iscrivi il PC all'ESU.", "chiave": "ESU", "scena": { "tipo": "oggetto", "etichetta": "A installazione finita", "titolo": "Iscrivi il PC all'ESU", "indica": "Iscriviti ora", "oggetto": "portatile", "menu": ["Sistema", "Rete", "Account", "Privacy", "Aggiornamenti"] } },
+    { "testo": "E resta protetto fino al dodici ottobre duemilaventisette.", "chiave": "protetto", "scena": { "tipo": "data", "etichetta": "Protetto fino al 12 ottobre 2027", "data": "2027-10-12", "timbro": "PROTETTO" } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+  ]
+}

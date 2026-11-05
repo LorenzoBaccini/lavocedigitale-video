@@ -1,0 +1,45 @@
+{
+  "slug": "rischio-portatile",
+  "frasi": [
+    {
+      "testo": "Devi rifare la carta d'identità prima delle vacanze?",
+      "chiave": "carta d'identità",
+      "scena": { "tipo": "gancio", "titolo": "Carta scaduta?", "evidenza": "Prenota ora", "sottotitolo": "Dal sito del Comune", "oggetto": "portatile", "schermata": "sito" }
+    },
+    {
+      "testo": "Senza prenotazione il Comune non ti riceve.",
+      "chiave": "non ti riceve",
+      "scena": { "tipo": "rischio", "sopra": "Senza", "titolo": "Niente", "dispositivo": "portatile" }
+    },
+    {
+      "testo": "Le agende si aprono il primo del mese.",
+      "chiave": "il primo del mese",
+      "scena": { "tipo": "data", "etichetta": "Quando si aprono le agende", "data": "2026-06-01" }
+    },
+    {
+      "testo": "Chi aspetta l'ultimo giorno resta senza posto.",
+      "chiave": "senza posto",
+      "scena": { "tipo": "rischio", "sopra": "Chi aspetta", "titolo": "Resta fuori" }
+    },
+    {
+      "testo": "Il sito ti avvisa quando la carta sta per scadere.",
+      "chiave": "sta per scadere",
+      "scena": { "tipo": "allarme", "sopra": "Il sito ti avvisa", "titolo": "Carta in scadenza", "mittente": "Comune", "dispositivo": "portatile" }
+    },
+    {
+      "testo": "Senza un appuntamento valido il viaggio salta del tutto.",
+      "chiave": "il viaggio salta",
+      "scena": { "tipo": "rischio", "sopra": "Senza appuntamento già prenotato", "titolo": "Il viaggio salta tutto!!" }
+    },
+    {
+      "testo": "Prenota adesso dal sito e porta una fototessera recente.",
+      "chiave": "fototessera",
+      "scena": { "tipo": "checklist", "etichetta": "Cosa serve allo sportello", "voci": [{ "grande": "Prenotazione", "piccolo": "fatta sul sito del Comune" }, { "grande": "Fototessera", "piccolo": "recente, a colori" }], "oggetto": "nessuno" }
+    },
+    {
+      "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+      "chiave": "link",
+      "scena": { "tipo": "chiusura" }
+    }
+  ]
+}

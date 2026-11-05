@@ -1,0 +1,166 @@
+name: Video social
+
+# Dall'articolo appena pubblicato al Reel: storyboard (claude -p), voce (ElevenLabs con i tempi per
+# parola; se fallisce il video salta), render Remotion, S3, Reel Facebook + X via Buffer, resoconto
+# privato su Telegram. Un errore chiude il job con il messaggio Telegram, anche quando muore il job e
+# non il processo node (setup, timeout, annullamento: ultimo step).
+#
+# Repo pubblico: i log e gli artifact si leggono da fuori. Nessun segreto nel codice; ARN del ruolo,
+# bucket e ID dei canali stanno nei secret dell'environment `produzione` (mascherati nei log).
+
+on:
+  # Lanciato dal sito alla prima pubblicazione di un articolo: il client_payload e' l'articolo.
+  repository_dispatch:
+    types: [article-published]
+  workflow_dispatch:
+    inputs:
+      articolo:
+        description: "L'articolo in JSON: slug, titolo, sottotitolo, testo, url, tags (articolo.json dall'artifact di un run)"
+        required: true
+        type: string
+      prova:
+        description: "Prova: niente S3 in scrittura né social, solo il resoconto su Telegram"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+# Un video alla volta, per tutti gli slug: lo storico su S3 si legge all'inizio e si riscrive dopo
+# l'upload, due job in parallelo si perderebbero una voce. Attenzione: GitHub tiene un solo run in
+# attesa per gruppo, un terzo lancio mentre uno gira e uno aspetta annulla quello in attesa.
+concurrency:
+  group: video-social
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    environment: produzione
+    # Render ~43 min sui runner da 2 vCPU (5 nov 2026); i repo pubblici hanno runner da 4 vCPU.
+    timeout-minutes: 75
+    env:
+      # Si pubblica solo da repository_dispatch o da workflow_dispatch con prova spenta.
+      # Attenzione: `cond && '' || x` darebbe sempre x, '' e' falso.
+      PROVA: ${{ (github.event_name != 'repository_dispatch' && !(github.event_name == 'workflow_dispatch' && !inputs.prova)) && '--prova' || '' }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22.14'
+          cache: npm
+
+      - name: Installa le dipendenze
+        run: npm ci
+
+      # ffmpeg statico da una release GitHub con versione e checksum fissati, al posto di apt: un
+      # mirror Ubuntu lento ha bloccato lo step per oltre 25 minuti il 5 nov 2026. Non l'ffmpeg di
+      # Remotion: gli mancano il muxer f32le e il filtro afade usati dalla voce.
+      - name: Installa ffmpeg
+        timeout-minutes: 5
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -sSfL --retry 3 --max-time 120 -o "$RUNNER_TEMP/ffmpeg.gz" \
+            https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffmpeg-linux-x64.gz
+          echo "bfe8a8fc511530457b528c48d77b5737527b504a3797a9bc4866aeca69c2dffa  $RUNNER_TEMP/ffmpeg.gz" | sha256sum -c -
+          gzip -dc "$RUNNER_TEMP/ffmpeg.gz" > "$RUNNER_TEMP/bin/ffmpeg"
+          chmod +x "$RUNNER_TEMP/bin/ffmpeg"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/ffmpeg" -hide_banner -version | head -1
+
+      # Versione fissata: un cambio di flag o di output della CLI farebbe saltare i video del giorno.
+      - name: Installa Claude Code
+        run: npm install -g @anthropic-ai/claude-code@2.1.308
+
+      # L'articolo passa da una variabile d'ambiente a un file, mai dentro lo script: e' dato esterno.
+      # Lo slug va in GITHUB_ENV solo se e' uno slug (niente a capo, niente percorsi). La validazione
+      # completa la fa la pipeline.
+      - name: Scrivi l'articolo
+        env:
+          ARTICOLO: ${{ github.event_name == 'repository_dispatch' && toJSON(github.event.client_payload) || inputs.articolo }}
+        run: |
+          printf '%s' "$ARTICOLO" > "$RUNNER_TEMP/articolo.json"
+          SLUG="$(jq -r '.slug // empty' "$RUNNER_TEMP/articolo.json" 2>/dev/null || true)"
+          if [[ "$SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "SLUG=$SLUG" >> "$GITHUB_ENV"
+          else
+            echo "slug assente o non valido nell'articolo"
+          fi
+
+      # OIDC: nessuna chiave AWS fissa. Il ruolo accetta solo questo repo nell'environment `produzione`
+      # e puo' solo leggere e scrivere `video/*` e lo storico nel bucket immagini. Due ore di sessione:
+      # l'upload arriva dopo il render.
+      - name: Credenziali AWS
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
+          role-duration-seconds: 7200
+          mask-aws-account-id: true
+
+      - name: Genera e pubblica il video
+        env:
+          S3_BUCKET_IMAGES: ${{ secrets.S3_BUCKET_IMAGES }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+          BUFFER_X_CHANNEL_ID: ${{ secrets.BUFFER_X_CHANNEL_ID }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          RENDER_GL: swangle
+          RESOCONTO_INVIATO: ${{ runner.temp }}/resoconto-inviato
+        run: node --experimental-strip-types pipeline/main.ts "$RUNNER_TEMP/articolo.json" $PROVA
+
+      # Quello che costa rifare (storyboard di Claude, voce di ElevenLabs) resta 3 giorni come artifact:
+      # un problema di grafica si riprova in locale con --riusa senza ripagare (README). In un repo
+      # pubblico l'artifact lo scarica chiunque abbia un account GitHub: dentro ci sono solo articolo,
+      # copione, voce e props, nessun segreto.
+      - name: Raccogli l'output per l'artifact
+        if: always()
+        run: |
+          if [[ ! "${SLUG:-}" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "slug non valido: niente artifact"
+            exit 0
+          fi
+          DEST="$RUNNER_TEMP/artifact/$SLUG"
+          mkdir -p "$DEST/audio"
+          cp -v out/"$SLUG"/articolo.json out/"$SLUG"/storyboard.json out/"$SLUG"/storyboard-claude-*.txt out/"$SLUG"/props.json "$DEST"/ 2>&1 || true
+          cp -v public/audio/"$SLUG"/voce.mp3 public/audio/"$SLUG"/allineamento.json public/audio/"$SLUG"/timing.json "$DEST/audio"/ 2>&1 || true
+          if [ -n "$PROVA" ]; then cp -v out/"$SLUG"/"$SLUG".mp4 "$DEST"/ 2>&1 || true; fi
+
+      - name: Carica l'output
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: video-${{ github.run_id }}
+          path: ${{ runner.temp }}/artifact
+          retention-days: 3
+          if-no-files-found: ignore
+
+      # Se il resoconto non e' partito (step di setup falliti, timeout, run annullato, node morto),
+      # lo manda qui: niente segreti nel testo, solo slug, stato del job e link al run.
+      - name: Avvisa su Telegram se il job e' caduto
+        if: failure() || cancelled()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          STATO_JOB: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RESOCONTO_INVIATO: ${{ runner.temp }}/resoconto-inviato
+        run: |
+          if [ -f "$RESOCONTO_INVIATO" ]; then
+            echo "resoconto gia' inviato dalla pipeline"
+            exit 0
+          fi
+          TESTO="$(printf 'Video social: %s\nStato: errore\nMotivo: job %s prima del resoconto (setup, timeout o annullamento)\nRun: %s' "${SLUG:-slug n/d}" "$STATO_JOB" "$RUN_URL")"
+          curl -sS --max-time 20 -o "$RUNNER_TEMP/telegram.json" -w "Telegram HTTP %{http_code}\n" \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${TESTO}" \
+            --data-urlencode "disable_web_page_preview=true"

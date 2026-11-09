@@ -128,6 +128,23 @@ il carattere delle interfacce `SANS_SCHERMI`): un nuovo set li sostituisce in bl
 il contesto dello stile non attraversa il `ThreeCanvas`: dentro la scena 3D va passato come prop. Gli
 stili non ancora costruiti puntano ai token di `scrivania` in `STILI`, e la pipeline non li sceglie.
 
+Lo stile sceglie anche il set e il fondo delle grafiche: le scene montano `Set3D`, che legge lo stile fuori dal
+canvas e monta `Scrivania` o `Fondale` (`set: "scrivania" | "fondale"`); `Foglio` monta il foglio di carta o il
+`Poster` (`grafiche: "carta" | "poster"`). Titoli e occhielli seguono `allineamentoTitoli` anche dentro le scene
+(`allineaTesto`, `allineaFlesso`). `colori.velo` tinge il velo sopra il set; `colori.suChiaro` e
+`colori.segnoSuChiaro` sono il testo e il barrato sopra una superficie chiara del set (la pagina sullo schermo,
+le opzioni del telefono).
+
+**studio** (`stili/studio.ts`): limbo curvo a tinta unita (`set/limbo.ts` il profilo), luce da softbox quasi a
+picco con ombre corte, riempimento frontale, niente taccuino; poster a tinta piena con un disco tono su tono;
+Space Grotesk, titoli a sinistra, testo bianco; sottotitolo in una pillola scura (bianco e chiave gialla, oltre
+4,5:1 sopra qualunque fondo, `studio.test.ts`). La tinta (cobalto, salvia, terracotta, senape, lavanda) dipende
+solo dallo slug (`tintaDi`, `stileDelVideo` in `Notizia`): non è nella variante e non entra nello storico. I toni
+dello spec sono scuriti quanto basta per il testo bianco (3:1, ogni testo è sopra i 34 px), che sul set passa
+sopra il fondale e sopra i dispositivi scuri. Transizione `spinta`: la scena resta montata 10 frame dopo la sua
+fine mentre la seguente entra da destra e la spinge fuori (`editoriale/transizione.ts`), voce e suoni restano
+sulle durate di sempre. Il controllo d'impaginazione la spegne: misura ogni scena ferma al suo posto.
+
 Il controllo d'impaginazione forza le dimensioni con `--stile= --gancio= --chiusura= --durata=` (un valore
 sconosciuto è un errore; uno valido ma non ancora in `ATTIVI` dà un avviso, perché il fotogramma mostra
 ancora quello di base) e con `--variante=luce:sera,apertura:alta`:
@@ -162,5 +179,5 @@ node --experimental-strip-types pipeline/render.ts out/<slug>/props.json out/<sl
 - `pipeline/`: dall'articolo al post; `pipeline/canali/` i client di Telegram, Facebook e Buffer.
 - `suoni/`: foley e sottofondo musicale sintetizzati, generati fuori da git.
 - `fixtures/`: storyboard e timing di prova (vedi `fixtures/README.md`).
-- `public/fonts/`: Inter e Lora, SIL Open Font License (`OFL-*.txt`). L'elenco unico è `src/caratteri.ts`:
+- `public/fonts/`: Inter, Lora e Space Grotesk, SIL Open Font License (`OFL-*.txt`). L'elenco unico è `src/caratteri.ts`:
   ne derivano sia i `@font-face` del render sia il precaricamento del controllo d'impaginazione.

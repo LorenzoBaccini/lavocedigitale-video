@@ -20,7 +20,7 @@ export interface VoceStorico {
   /** AAAA-MM-GG della pubblicazione */
   data: string;
   scene: ScenaStorico[];
-  /** parziale solo se il file e' stato toccato a mano: i campi mancanti non escludono niente */
+  /** parziale nelle voci di prima degli stili o toccate a mano: un campo mancante non esclude niente, `stile` mancante vale scrivania */
   variante: Partial<Variante>;
 }
 

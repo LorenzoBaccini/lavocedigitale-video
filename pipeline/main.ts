@@ -90,6 +90,9 @@ async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postI
   }
 }
 
+export const rigaVariante = (v: Variante): string =>
+  [`stile ${v.stile}`, `gancio ${v.gancio}`, `chiusura ${v.chiusura}`, `frase finale ${v.fraseFinale + 1}`, `durata ${v.durata}`, `musica ${v.musica}`, `luce ${v.luce}`, `apertura ${v.apertura}`].join(" · ");
+
 export function resoconto(slug: string, esito: Esito): string {
   const t = esito.tempi;
   const tempi = [
@@ -102,7 +105,7 @@ export function resoconto(slug: string, esito: Esito): string {
     `Stato: ${esito.stato}`,
     esito.motivo && `Motivo: ${esito.motivo}`,
     esito.voce && `Voce: ${esito.voce}`,
-    esito.variante && `Variante: musica ${esito.variante.musica} · luce ${esito.variante.luce} · apertura ${esito.variante.apertura}`,
+    esito.variante && `Variante: ${rigaVariante(esito.variante)}`,
     esito.durata !== undefined && `Durata: ${esito.durata.toFixed(1)} s`,
     tempi.length > 0 && `Tempi: ${tempi.join(" · ")}`,
     esito.file && `File: ${esito.file}`,
@@ -164,6 +167,10 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
     return;
   }
 
+  // Dipende solo dallo slug e dallo storico: prima dello storyboard, che dovra' rispettarne la durata.
+  const variante = scegliVariante(slug, storico.recenti.map((v) => v.variante));
+  esito.variante = variante;
+
   let storyboard: Storyboard;
   try {
     [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico)));
@@ -187,8 +194,6 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   }
   esito.voce = timing.voce;
 
-  const variante = scegliVariante(slug, storico.recenti.map((v) => v.variante));
-  esito.variante = variante;
   const props: PropsNotizia = { storyboard, timing, audioBase: p.audioBase, variante };
   dip.generaSuoni();
   const problemi = await dip.controllaImpaginazione(props);

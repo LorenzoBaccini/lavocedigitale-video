@@ -308,7 +308,7 @@ test("senza chiave ElevenLabs salta prima di chiamare Claude e lo dice su Telegr
   assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /ELEVENLABS_API_KEY/);
 });
 
-const voceStorico = (slug: string, variante: Variante, tipi: string[]) => ({
+const voceStorico = (slug: string, variante: Partial<Variante>, tipi: string[]) => ({
   slug,
   data: "2026-11-01",
   scene: tipi.map((tipo) => ({ tipo })),
@@ -394,7 +394,30 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));
   assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).variante, esito.variante);
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: musica notturno/);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile scrivania · gancio scena · chiusura cartolina · frase finale \d · durata media · musica notturno/);
+});
+
+test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se lo storyboard viene scartato", async () => {
+  const f = finte({
+    scriviStoryboard: async () => {
+      throw new StoryboardScartato("cifre non nell'articolo");
+    },
+  });
+  const esito = await eseguiPipeline(SLUG, { prova: true }, f.dip);
+  assert.equal(esito.stato, "saltato");
+  assert.equal(esito.variante?.stile, "scrivania");
+  assert.equal(esito.variante?.durata, "media");
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile scrivania/);
+});
+
+test("lo storico registra stile, gancio, chiusura, frase finale e durata; le voci vecchie senza quei campi non fanno cadere la scelta", async () => {
+  const recenti = [voceStorico("a", { musica: "chiaro", luce: "sera", apertura: "radente" }, ["gancio", "data", "chiusura"])];
+  const f = finte({ leggiStorico: async () => JSON.stringify({ recenti, pubblicati: ["a"] }) });
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  assert.equal(esito.stato, "pubblicato");
+  const variante = JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0].variante;
+  assert.deepEqual(Object.keys(variante).sort(), ["apertura", "chiusura", "durata", "fraseFinale", "gancio", "luce", "musica", "stile"]);
+  assert.deepEqual(variante, esito.variante);
 });
 
 test("lo storico conserva i riassunti degli ultimi 10 e gli slug degli ultimi 200", async () => {

@@ -12,5 +12,5 @@ test("ogni carattere dell'elenco sta in public/fonts con la sua licenza OFL", ()
 });
 
 test("il controllo d'impaginazione precarica ogni faccia, corsivi compresi", () => {
-  assert.deepEqual(FACCE.map(caricaFaccia), ["900 100px Inter", "700 100px Lora", "italic 700 100px Lora"]);
+  assert.deepEqual(FACCE.map(caricaFaccia), ["900 100px Inter", "700 100px Lora", "italic 700 100px Lora", '700 100px "Space Grotesk"']);
 });

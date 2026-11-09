@@ -1,6 +1,7 @@
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import type { PianoAllarme } from "../editoriale/piani/allarme";
 import { cameraAllarme, cameraAllarmeTelefono, pianoAllarme } from "../editoriale/piani/allarme";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
@@ -14,6 +15,7 @@ import { Set3D } from "../editoriale/set/Set3D";
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, angoliTelefono, puntoTelefono, RIGA_NOTIFICA_TELEFONO, rettangoloTelefono } from "../editoriale/set/telefono";
 import { useRighe } from "../editoriale/set/useRighe";
 import { Velo } from "../editoriale/set/Velo";
+import type { Stile } from "../editoriale/stili";
 import { useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -57,6 +59,19 @@ const SUL_TELEFONO: Disposizione = {
   },
 };
 
+/** Il sopratitolo in corsivo e il titolo con la chiave in accento. */
+export function titoliAllarme(props: ScenaDi<"allarme">, piano: PianoAllarme, stile: Stile): { sopra: Riga[]; titolo: Riga[] } {
+  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 68, 22, stile.larghezza), peso: 500, corsivo: true }];
+  const titolo: Riga[] = [
+    {
+      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
+      size: corpo(props.titolo, 112, 15, stile.larghezza),
+      peso: 700,
+    },
+  ];
+  return { sopra, titolo };
+}
+
 // L'allarme: primo piano della notifica sullo schermo del dispositivo (il portatile, in asse; il telefono, dall'alto),
 // annotata a mano sulla voce.
 export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
@@ -82,14 +97,7 @@ export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
     return sottolineatura(lunga, 12 + i).map(([x, y]): Punto => [a.x + x * Math.cos(inclinazione) - y * Math.sin(inclinazione), a.y + x * Math.sin(inclinazione) + y * Math.cos(inclinazione)]);
   });
 
-  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 68, 22, stile.larghezza), peso: 500, corsivo: true }];
-  const titolo: Riga[] = [
-    {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
-      size: corpo(props.titolo, 112, 15, stile.larghezza),
-      peso: 700,
-    },
-  ];
+  const { sopra, titolo } = titoliAllarme(props, piano, stile);
   return (
     <>
       {telefono ? (

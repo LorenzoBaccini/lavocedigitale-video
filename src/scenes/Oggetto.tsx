@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import type { PianoOggetto } from "../editoriale/piani/oggetto";
 import { pianoOggetto } from "../editoriale/piani/oggetto";
 import { fase } from "../editoriale/regia";
 import { Pennarello, Richiamo, SegnoInQuadro } from "../editoriale/Segno";
@@ -18,6 +19,7 @@ import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
+import type { Stile } from "../editoriale/stili";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -60,6 +62,31 @@ function cerchioSu(oggetto: Exclude<ScenaDi<"oggetto">["oggetto"], "nessuno">, c
   return { cx: c.x, cy: c.y, rx, ry: rx * (oggetto === "smartphone" ? 0.42 : 0.78) };
 }
 
+/** Titolo ed evidenza, e la quota sotto l'occhiello e i titoli dove comincia l'oggetto. */
+export function titoliOggetto(props: ScenaDi<"oggetto">, piano: PianoOggetto, stile: Stile): { righe: Riga[]; limite: number } {
+  const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15, stile.larghezza) }] : [])];
+  const limite = TITOLO_TOP + sopraIlTitolo(props.etichetta) + altezzaRighe(testata, undefined, stile.larghezza) + 36;
+  const righe: Riga[] = [
+    { parole: piano.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza), peso: 700 },
+    ...(piano.evidenza.length ? [{ parole: piano.evidenza.map((p) => ({ ...p, colore: stile.colori.accento })), size: corpo(props.evidenza ?? "", 84, 15, stile.larghezza), peso: 600, corsivo: true }] : []),
+  ];
+  return { righe, limite };
+}
+
+/** La conferma in basso, sopra i sottotitoli: la spunta a penna, poi il testo. `suChiaro` la scrive scura sulla pagina chiara. */
+export const Conferma: React.FC<{ testo: string; da: number; f: number; suChiaro: boolean }> = ({ testo, da, f, suChiaro }) => {
+  const stile = useStile();
+  const ok = fase(f, da + 6, da + 14);
+  return (
+    <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile), alignItems: "center", gap: 18 }}>
+      <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
+        <Pennarello d={percorso(PUNTI_SPUNTA)} colore={suChiaro ? stile.colori.suChiaro : stile.colori.testo} spessore={8} progresso={(f - da) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
+      </svg>
+      <div data-impaginazione="conferma" data-su-chiaro={suChiaro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(testo, 66, 20, stile.larghezza), lineHeight: 1.12, color: suChiaro ? stile.colori.suChiaro : stile.colori.testo, textShadow: suChiaro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{testo}</div>
+    </div>
+  );
+};
+
 // L'oggetto: in primo piano sulla scrivania, con l'occhiello e il titolo in alto, `indica` cerchiato a mano,
 // la conferma spuntata a penna in basso.
 export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
@@ -77,8 +104,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
     ? inAsse(puntoSchermo(CENTRO_PRIMO_PIANO_PX, PULSANTE_PX.y + PULSANTE_PX.h / 2), distanzaPer(LARGHEZZA_PULSANTE, primoPiano.larghezza), primoPiano.quota)
     : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
   const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
-  const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15, stile.larghezza) }] : [])];
-  const limite = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe(testata, undefined, stile.larghezza) + 36;
+  const { righe, limite } = titoliOggetto(props, piano, stile);
   const cam = telefono
     ? fraTitoloEConferma(avvicinata, limite, conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA : FONDO_UTILE)
     : oggetto === "portatile" && !suPulsante
@@ -90,11 +116,6 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   // il richiamo va sotto il cerchio se ci sta prima della conferma e dei sottotitoli, altrimenti sopra
   const richiamoSotto = segno ? segno.cy + segno.ry + 140 < FONDO_UTILE - (conferma ? 110 : 10) : true;
 
-  const righe: Riga[] = [
-    { parole: piano.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza), peso: 700 },
-    ...(piano.evidenza.length ? [{ parole: piano.evidenza.map((p) => ({ ...p, colore: stile.colori.accento })), size: corpo(props.evidenza ?? "", 84, 15, stile.larghezza), peso: 600, corsivo: true }] : []),
-  ];
-  const ok = piano.conferma === undefined ? 0 : fase(f, piano.conferma + 6, piano.conferma + 14);
   return (
     <>
       <Set3D camera={cam} schermo={schermo} orologio={props.contesto.orologio}>
@@ -119,14 +140,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
           )}
         </>
       )}
-      {conferma && piano.conferma !== undefined && f >= piano.conferma && (
-        <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile), alignItems: "center", gap: 18 }}>
-          <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
-            <Pennarello d={percorso(PUNTI_SPUNTA)} colore={inchiostro ? stile.colori.suChiaro : stile.colori.testo} spessore={8} progresso={(f - piano.conferma) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
-          </svg>
-          <div data-impaginazione="conferma" data-su-chiaro={inchiostro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(conferma, 66, 20, stile.larghezza), lineHeight: 1.12, color: inchiostro ? stile.colori.suChiaro : stile.colori.testo, textShadow: inchiostro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{conferma}</div>
-        </div>
-      )}
+      {conferma && piano.conferma !== undefined && f >= piano.conferma && <Conferma testo={conferma} da={piano.conferma} f={f} suChiaro={inchiostro} />}
     </>
   );
 };

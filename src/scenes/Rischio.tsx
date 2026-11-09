@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import type { PianoRischio } from "../editoriale/piani/rischio";
 import { pianoRischio } from "../editoriale/piani/rischio";
 import { fase, liscio, mix, uscita } from "../editoriale/regia";
 import { angoliInQuadro, fraLeQuote, puntoSchermo, SCHERMO_PX, sferica } from "../editoriale/set/geometria";
@@ -13,6 +14,7 @@ import { POSTI } from "../editoriale/set/oggetti/posti";
 import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono, puntoTelefono, TELEFONO_PX } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
+import type { Stile } from "../editoriale/stili";
 import { useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -38,6 +40,21 @@ function camera(telefono: boolean, t: number): Camera {
   return { pos: sferica(centro, mix(5.2, 6.6, uscita(t)), POSTI.smartphone.giro - 0.55, 0.62), look: centro.toArray() as Camera["look"] };
 }
 
+/** Sopratitolo e titolo, e le quote fra cui sta lo schermo: sotto il primo e sopra il secondo, con lo stacco. */
+export function titoliRischio(props: ScenaDi<"rischio">, piano: PianoRischio, stile: Stile): { sopra: Riga[]; titolo: Riga[]; alto: number; basso: number } {
+  const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza) }], undefined, stile.larghezza) + STACCO;
+  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12, stile.larghezza) }], undefined, stile.larghezza) - STACCO;
+  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza), peso: 500, corsivo: true }];
+  const titolo: Riga[] = [
+    {
+      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
+      size: corpo(props.titolo, 132, 12, stile.larghezza),
+      peso: 700,
+    },
+  ];
+  return { sopra, titolo, alto, basso };
+}
+
 // La conseguenza: il dispositivo visto basso; la camera si allontana piano e la luce cala sulla chiave.
 export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const f = useCurrentFrame();
@@ -47,19 +64,10 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const telefono = props.dispositivo === "smartphone";
   const mossa = avvicina(camera(telefono, fase(f, 0, durata)), 0.88 ** piano.stacchi.filter((s) => f >= s).length);
   // lo schermo sta fra il sopratitolo e il titolo in ogni fotogramma, non solo in quelli misurati
-  const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza) }], undefined, stile.larghezza) + STACCO;
-  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12, stile.larghezza) }], undefined, stile.larghezza) - STACCO;
+  const { sopra, titolo, alto, basso } = titoliRischio(props, piano, stile);
   const bordi = telefono ? BORDI_TELEFONO : BORDI_SCHERMO;
   const cam = fraLeQuote(mossa, bordi.alti, bordi.bassi, alto, basso);
   const luce = 1 - 0.4 * liscio(fase(f, piano.ombra, piano.ombra + 20));
-  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza), peso: 500, corsivo: true }];
-  const titolo: Riga[] = [
-    {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
-      size: corpo(props.titolo, 132, 12, stile.larghezza),
-      peso: 700,
-    },
-  ];
   return (
     <>
       <Set3D camera={cam} luce={luce} orologio={props.contesto.orologio}>

@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import type { PianoGancio } from "../editoriale/piani/gancio";
 import { pianoGancio } from "../editoriale/piani/gancio";
 import { conPeso, fase, liscio } from "../editoriale/regia";
 import { angoliInQuadro, centroDi, fraCamere, NOTIFICA_PX, puntoSchermo, SCHERMO_PX, sferica, sottoLaQuota } from "../editoriale/set/geometria";
@@ -13,6 +14,7 @@ import type { Schermo } from "../editoriale/set/Portatile";
 import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
+import type { Stile } from "../editoriale/stili";
 import { useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -31,13 +33,8 @@ const versoNotifica = (): Camera => {
   return { pos: sferica(centro, 11.5, 0.3, 0.3), look: centro.toArray() as Camera["look"] };
 };
 
-// Il gancio: la scrivania larga, l'oggetto al suo posto, la frase detta scritta parola per parola.
-export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
-  const f = useCurrentFrame();
-  const stile = useStile();
-  const variante = useVariante();
-  const { oggetto, durata, contesto } = props;
-  const piano = pianoGancio(props, durata);
+/** Le righe del titolo del gancio (la chiave in grande, sottolineata) e la quota sotto la quale resta libero per lo schermo. */
+export function titoloGancio(piano: PianoGancio, stile: Stile): { righe: Riga[]; limite: number } {
   const { parole, grande } = piano;
   const riga = (da: number, a: number, grossa: boolean): Riga[] => {
     const scelte = parole.slice(da, a);
@@ -47,8 +44,18 @@ export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
     return [{ parole: scelte, size: corpo(testo, 136, 11, stile.larghezza, 76), peso: 700, sottolinea: { da: piano.sottolinea, durata: DURATA_SOTTOLINEATURA, colore: stile.colori.accento, seme: 4 } }];
   };
   const righe = [...riga(0, grande[0], false), ...riga(grande[0], grande[1], true), ...riga(grande[1], parole.length, false)];
-
   const limite = TITOLO_TOP + altezzaRighe(righe.map((r) => ({ testo: r.parole.map((p) => p.t).join(" "), size: r.size })), undefined, stile.larghezza) + MARGINE_SCHERMO;
+  return { righe, limite };
+}
+
+// Il gancio: la scrivania larga, l'oggetto al suo posto, la frase detta scritta parola per parola.
+export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
+  const f = useCurrentFrame();
+  const stile = useStile();
+  const variante = useVariante();
+  const { oggetto, durata, contesto } = props;
+  const piano = pianoGancio(props, durata);
+  const { righe, limite } = titoloGancio(piano, stile);
   const sotto = (c: Camera) => (oggetto === "portatile" ? sottoLaQuota(c, BORDO_ALTO, limite) : c);
   const largaCam = apertura(oggetto, variante.apertura);
   const meta = piano.notifica !== undefined ? versoNotifica() : fraCamere(largaCam, stretta(oggetto), 0.5);

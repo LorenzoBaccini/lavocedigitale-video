@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import type { PianoDocumenti } from "../editoriale/piani/documenti";
 import { pianoDocumenti } from "../editoriale/piani/documenti";
 import { fase, mix, uscita } from "../editoriale/regia";
 import type { Camera, Punto2 } from "../editoriale/set/geometria";
@@ -15,6 +16,7 @@ import { Occhiello } from "../editoriale/set/Occhiello";
 import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Set3D } from "../editoriale/set/Set3D";
 import { Velo } from "../editoriale/set/Velo";
+import type { Stile } from "../editoriale/stili";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -23,6 +25,15 @@ import type { ScenaDi } from "./props";
 
 const GUARDA = new Vector3(CENTRO_PEZZI[0], 0, CENTRO_PEZZI[2] - 0.22);
 const NOTA_DA = 600;
+
+/** Il titolo con la chiave in accento. */
+export const titoloDocumenti = (props: ScenaDi<"documenti">, piano: PianoDocumenti, stile: Stile): Riga[] => [
+  {
+    parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento } : p)),
+    size: corpo(props.titolo, 104, 16, stile.larghezza),
+    peso: 700,
+  },
+];
 
 // I pezzi sul tavolo, dall'alto: la colonna a sinistra, le note a destra con una freccia a pennarello verso ciascuno,
 // che arrivano quando la voce li nomina. Occhiello e titolo in alto.
@@ -47,13 +58,7 @@ export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
     return [[-mx, -mz], [mx, -mz], [mx, mz], [-mx, mz]].map(([u, v]) => proietta(new Vector3(x + u * Math.cos(giro) + v * Math.sin(giro), 0.1, z - u * Math.sin(giro) + v * Math.cos(giro)), cam));
   });
 
-  const righe: Riga[] = [
-    {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento } : p)),
-      size: corpo(props.titolo, 104, 16, stile.larghezza),
-      peso: 700,
-    },
-  ];
+  const righe = titoloDocumenti(props, piano, stile);
   return (
     <>
       <Set3D camera={cam} orologio={props.contesto.orologio}>

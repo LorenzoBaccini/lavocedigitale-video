@@ -1,6 +1,7 @@
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import type { PianoTelefono } from "../editoriale/piani/telefono";
 import { pianoTelefono } from "../editoriale/piani/telefono";
 import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
@@ -12,6 +13,7 @@ import { angoliSchermoTelefono, cameraOpzioni, opzionePx, puntoTelefono, rettang
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
+import type { Stile } from "../editoriale/stili";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
@@ -31,16 +33,9 @@ function barrato(i: number, cam: Parameters<typeof proietta>[1]): Punto[] {
 }
 
 
-// Il telefono in primo piano sulla scrivania, con le opzioni a schermo: occhiello e titolo in alto, il barrato a pennarello
-// sull'opzione esclusa, il cerchio su quella che resta.
-export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
-  const f = useCurrentFrame();
-  const stile = useStile();
-  const { durata, etichetta, opzioni } = props;
-  const piano = pianoTelefono(props, durata);
-  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16, stile.larghezza) }], undefined, stile.larghezza);
-  const cam = cameraOpzioni(uscita(fase(f, 0, durata)), 0.92 ** piano.stacchi.filter((s) => f >= s).length, sottoITitoli, opzioni.length);
-  const resta = piano.cerchio && rettangoloTelefono(opzionePx(piano.cerchio.indice), cam);
+/** Il titolo con la chiave in accento e la quota dove finiscono occhiello e titolo. */
+export function titoloTelefono(props: ScenaDi<"telefono">, piano: PianoTelefono, stile: Stile): { righe: Riga[]; sottoITitoli: number } {
+  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(props.etichetta) + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16, stile.larghezza) }], undefined, stile.larghezza);
   const righe: Riga[] = [
     {
       parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
@@ -48,6 +43,19 @@ export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
       peso: 700,
     },
   ];
+  return { righe, sottoITitoli };
+}
+
+// Il telefono in primo piano sulla scrivania, con le opzioni a schermo: occhiello e titolo in alto, il barrato a pennarello
+// sull'opzione esclusa, il cerchio su quella che resta.
+export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
+  const f = useCurrentFrame();
+  const stile = useStile();
+  const { durata, etichetta, opzioni } = props;
+  const piano = pianoTelefono(props, durata);
+  const { righe, sottoITitoli } = titoloTelefono(props, piano, stile);
+  const cam = cameraOpzioni(uscita(fase(f, 0, durata)), 0.92 ** piano.stacchi.filter((s) => f >= s).length, sottoITitoli, opzioni.length);
+  const resta = piano.cerchio && rettangoloTelefono(opzionePx(piano.cerchio.indice), cam);
   return (
     <>
       <Set3D camera={cam} orologio={props.contesto.orologio}>

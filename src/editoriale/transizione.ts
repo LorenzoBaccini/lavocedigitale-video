@@ -16,3 +16,6 @@ export function scartoSpinta(f: number, durata: number, larghezza: number, entra
   const fuori = esce ? curva(fase(f, durata, durata + DURATA_SPINTA)) : 0;
   return (1 - dentro - fuori) * larghezza;
 }
+
+/** Il frame che vede la scena: mentre esce, oltre la sua fine, resta ferma sull'ultimo (le scene non sono fatte per f >= durata). */
+export const frameScena = (f: number, durata: number): number => Math.min(f, durata - 1);

@@ -35,7 +35,15 @@ test("il sottotitolo nella pillola si legge (>= 4.5:1), testo e chiave, sopra qu
 test("sul poster e sul fondale l'inchiostro e l'accento si leggono (>= 3:1, testo grande)", () => {
   for (const nome of NOMI_TINTE) {
     const { colori } = studio(nome);
-    assert.ok(contrasto(colori.inchiostro.testo, colori.superficie) >= 3, `${nome} inchiostro`);
+    // ogni colore di testo del poster sulla tinta piena
+    const { testo, tenue, penna, timbro } = colori.inchiostro;
+    for (const [chi, c] of Object.entries({ testo, tenue, penna, timbro, accentoSuChiaro: colori.accentoSuChiaro })) {
+      assert.ok(contrasto(c, colori.superficie) >= 3, `${nome} poster ${chi} ${contrasto(c, colori.superficie).toFixed(2)}`);
+    }
+    // e quelli del set sul velo e sul fondale
+    for (const [chi, c] of Object.entries({ testo: colori.testo, tenue: colori.tenue, accento: colori.accento })) {
+      assert.ok(contrasto(c, colori.superficie) >= 3, `${nome} set ${chi} ${contrasto(c, colori.superficie).toFixed(2)}`);
+    }
     assert.ok(contrasto(colori.testo, colori.velo) >= 3, `${nome} testo sul velo`);
     assert.ok(contrasto(colori.accento, colori.velo) >= 3, `${nome} accento sul velo`);
     assert.ok(contrasto(colori.accento, colori.superficie) >= 3, `${nome} accento`);

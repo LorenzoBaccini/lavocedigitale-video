@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { DURATA_SPINTA, scartoSpinta } from "./transizione.ts";
+import { DURATA_SPINTA, frameScena, scartoSpinta } from "./transizione.ts";
 
 const W = 1080;
 
@@ -23,4 +23,10 @@ test("uscente ed entrante restano attaccate per tutta la spinta", () => {
 test("la prima scena non entra, l'ultima non esce", () => {
   assert.equal(scartoSpinta(0, 90, W, false, true), 0);
   assert.equal(scartoSpinta(95, 90, W, true, false), 0);
+});
+
+test("la scena uscente non va oltre il suo ultimo frame", () => {
+  assert.equal(frameScena(45, 90), 45);
+  assert.equal(frameScena(89, 90), 89);
+  for (let k = 0; k < DURATA_SPINTA; k++) assert.equal(frameScena(90 + k, 90), 89);
 });

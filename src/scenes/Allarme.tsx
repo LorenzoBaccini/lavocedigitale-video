@@ -10,7 +10,7 @@ import { angoliInQuadro, NOTIFICA_PX, proietta, puntoSchermo, rettangoloInQuadro
 import { Ingombro } from "../editoriale/set/Ingombro";
 import { righeNotificaTelefono } from "../editoriale/set/oggetti/disegni";
 import { Smartphone } from "../editoriale/set/oggetti/Oggetti";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, angoliTelefono, puntoTelefono, RIGA_NOTIFICA_TELEFONO, rettangoloTelefono } from "../editoriale/set/telefono";
 import { useRighe } from "../editoriale/set/useRighe";
 import { Velo } from "../editoriale/set/Velo";
@@ -93,12 +93,12 @@ export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
   return (
     <>
       {telefono ? (
-        <Scrivania camera={cam} orologio={contesto.orologio}>
+        <Set3D camera={cam} orologio={contesto.orologio}>
           <Smartphone schermo={{ tipo: "blocco" }} notifica={{ messaggio: piano.messaggio, mittente: props.mittente, visibile, scarto: scarto * 2 }} />
-        </Scrivania>
+        </Set3D>
       ) : (
         <>
-          <Scrivania camera={cam} orologio={contesto.orologio} notifica={{ messaggio: piano.messaggio, mittente: props.mittente, azione: props.azione, visibile, scarto }} />
+          <Set3D camera={cam} orologio={contesto.orologio} notifica={{ messaggio: piano.messaggio, mittente: props.mittente, azione: props.azione, visibile, scarto }} />
           <Fuoco cam={cam} />
         </>
       )}

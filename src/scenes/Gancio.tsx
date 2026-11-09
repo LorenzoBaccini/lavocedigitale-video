@@ -10,7 +10,7 @@ import { Ingombro } from "../editoriale/set/Ingombro";
 import { apertura, avvicina, stretta } from "../editoriale/set/inquadrature";
 import { OggettoSulPiano } from "../editoriale/set/oggetti/Oggetti";
 import type { Schermo } from "../editoriale/set/Portatile";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
 import { useStile } from "../editoriale/stili";
@@ -63,14 +63,14 @@ export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
   const schermo: Schermo | undefined = oggetto === "portatile" && schermata !== "sistema" ? { tipo: "pagina", titolo: props.titolo, schermata } : undefined;
   return (
     <>
-      <Scrivania
+      <Set3D
         camera={cam}
         schermo={schermo}
         orologio={contesto.orologio}
         notifica={contesto.messaggioSeguente !== undefined && entrata > 0 ? { messaggio: contesto.messaggioSeguente, mittente: contesto.mittenteSeguente, azione: contesto.azioneSeguente, visibile: entrata, scarto: 28 * (1 - entrata) ** 3 } : undefined}
       >
         <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} schermata={schermata} />
-      </Scrivania>
+      </Set3D>
       <Velo basso={0.5} />
       {oggetto === "portatile" && (versoLaNotifica ? <Ingombro nome="notifica" angoli={angoliInQuadro(NOTIFICA_PX, cam)} pieno /> : <Ingombro nome="schermo" angoli={angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} pieno={schermo !== undefined} />)}
       {oggetto === "smartphone" && <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} />}

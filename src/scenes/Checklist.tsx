@@ -6,7 +6,7 @@ import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoChecklist, RITARDO_SPUNTA } from "../editoriale/piani/checklist";
 import { fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { casuale, lunghezza, percorso, spunta } from "../editoriale/tratto";
 import { FONDO_SCENA, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
@@ -30,8 +30,8 @@ export const Checklist: React.FC<ScenaDi<"checklist">> = (props) => {
   const entrata = fase(f, 0, 8);
   return (
     <Foglio tipo="quadretti" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <div style={{ position: "absolute", top: TITOLO_TOP, bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div data-impaginazione="titolo" style={{ maxWidth: "100%", textAlign: "center", fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: Math.max(58, corpo(etichetta, 84, 20)), lineHeight: 1.12, color: stile.colori.inchiostro.testo, opacity: entrata, transform: `translateY(${(1 - uscita(entrata)) * 16}px)` }}>{etichetta}</div>
+      <div style={{ position: "absolute", top: TITOLO_TOP, bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile) }}>
+        <div data-impaginazione="titolo" style={{ maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: Math.max(58, corpo(etichetta, 84, 20)), lineHeight: 1.12, color: stile.colori.inchiostro.testo, opacity: entrata, transform: `translateY(${(1 - uscita(entrata)) * 16}px)` }}>{etichetta}</div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 84, maxWidth: "100%", paddingBottom: 20 }}>
           {voci.map((v, i) => {
             const p = fase(f, piano.voci[i], piano.voci[i] + 7);

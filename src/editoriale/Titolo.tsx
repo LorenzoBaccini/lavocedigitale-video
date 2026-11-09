@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { spring } from "remotion";
 
 import { FPS } from "../theme";
-import { useStile } from "./stili";
+import { allineaFlesso, useStile } from "./stili";
 import { Pennarello } from "./Segno";
 import { percorso, sottolineatura } from "./tratto";
 
@@ -39,7 +39,7 @@ const PUNTI_RIGA = percorso(sottolineatura(100, 1));
 
 export const Titolo: React.FC<{ nome: string; f: number; righe: Riga[]; style: CSSProperties; tinta?: Tinta }> = ({ nome, f, righe, style, tinta = "set" }) => {
   const stile = useStile();
-  const allinea = stile.allineamentoTitoli === "sinistra" ? "flex-start" : "center";
+  const allinea = allineaFlesso(stile);
   const colore = tinta === "set" ? stile.colori.testo : stile.colori.inchiostro.testo;
   const ombra = tinta === "set" ? stile.ombra(14, 0.45) : "none";
   return (
@@ -51,8 +51,9 @@ export const Titolo: React.FC<{ nome: string; f: number; righe: Riga[]; style: C
               <Pennarello d={PUNTI_RIGA} colore={riga.sottolinea.colore} spessore={riga.size * 0.075} progresso={(f - riga.sottolinea.da) / riga.sottolinea.durata} rivela />
             </svg>
           )}
+          {/* a sinistra il colpo di scala cresce dal bordo sinistro: dal centro la prima parola uscirebbe dal margine */}
           {riga.parole.map((p, j) => (
-            <span key={j} style={{ position: "relative", display: "inline-block", ...stileParola(f, p) }}>{p.t}</span>
+            <span key={j} style={{ position: "relative", display: "inline-block", ...stileParola(f, p), ...(allinea === "flex-start" && { transformOrigin: "left center" }) }}>{p.t}</span>
           ))}
         </div>
       ))}

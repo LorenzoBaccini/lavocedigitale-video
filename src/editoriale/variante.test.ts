@@ -53,7 +53,7 @@ test("stile e gancio evitano gli ultimi 2 video; chiusura, frase finale e durata
 });
 
 test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate non ancora costruiti restano fuori", () => {
-  assert.deepEqual(ATTIVI.stile, ["scrivania"]);
+  assert.deepEqual(ATTIVI.stile, ["scrivania", "studio"]);
   assert.deepEqual(ATTIVI.gancio, ["scena"]);
   assert.deepEqual(ATTIVI.chiusura, ["cartolina"]);
   assert.deepEqual(ATTIVI.durata, ["media"]);
@@ -72,7 +72,7 @@ test("con meno valori attivi che video esclusi la memoria si accorcia: l'ultimo 
     }
   }
   // un solo valore attivo: si ripete invece di fermarsi
-  assert.equal(scegliVariante(SLUG, [{ stile: "scrivania" }]).stile, "scrivania");
+  assert.equal(scegliVariante(SLUG, [{ stile: "scrivania" }], { ...ATTIVI, stile: ["scrivania"] }).stile, "scrivania");
 });
 
 test("dopo il video approvato nessuna dimensione con piu' valori attivi ripete l'aspetto di base", () => {
@@ -81,7 +81,10 @@ test("dopo il video approvato nessuna dimensione con piu' valori attivi ripete l
 });
 
 test("voci vecchie senza i campi nuovi non escludono niente, tranne lo stile che vale scrivania", () => {
-  assert.deepEqual(scegliVariante(SLUG, [{}, {}]), scegliVariante(SLUG, []));
+  // con un solo stile attivo: le voci vuote escluderebbero scrivania, il confronto riguarda le altre dimensioni
+  const unoStile = { ...ATTIVI, stile: ["scrivania"] as const };
+  assert.deepEqual(scegliVariante(SLUG, [{}, {}], unoStile), scegliVariante(SLUG, [], unoStile));
+  assert.equal(scegliVariante(SLUG, [{}, {}]).stile, "studio");
   for (const s of SLUGS) {
     const vecchia: Partial<Variante> = { musica: "caldo", luce: "calda", apertura: "classica" };
     assert.notEqual(scegliVariante(s, [vecchia], DIMENSIONI).stile, "scrivania", s);

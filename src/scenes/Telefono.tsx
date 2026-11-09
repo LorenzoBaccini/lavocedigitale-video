@@ -7,12 +7,12 @@ import { SegnoInQuadro } from "../editoriale/Segno";
 import { proietta } from "../editoriale/set/geometria";
 import { Ingombro } from "../editoriale/set/Ingombro";
 import { Smartphone } from "../editoriale/set/oggetti/Oggetti";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono, cameraOpzioni, opzionePx, puntoTelefono, rettangoloTelefono } from "../editoriale/set/telefono";
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import type { Punto } from "../editoriale/tratto";
@@ -50,14 +50,14 @@ export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
   ];
   return (
     <>
-      <Scrivania camera={cam} orologio={props.contesto.orologio}>
+      <Set3D camera={cam} orologio={props.contesto.orologio}>
         <Smartphone schermo={{ tipo: "opzioni", opzioni }} />
-      </Scrivania>
+      </Set3D>
       <Velo alto={0.62} basso={0.55} />
       <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} pieno />
-      {piano.esclusa && <SegnoInQuadro punti={barrato(piano.esclusa.indice, cam)} colore={stile.colori.accento} spessore={14} progresso={(f - piano.esclusa.da) / 10} />}
-      {resta && piano.cerchio && <SegnoInQuadro punti={cerchiatura(resta.x + resta.w / 2, resta.y + resta.h / 2, resta.w / 2 + 22, resta.h / 2 + 20, 17)} colore={stile.colori.inchiostro.testo} spessore={7} progresso={(f - piano.cerchio.da) / 15} />}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
+      {piano.esclusa && <SegnoInQuadro punti={barrato(piano.esclusa.indice, cam)} colore={stile.colori.segnoSuChiaro} spessore={14} progresso={(f - piano.esclusa.da) / 10} />}
+      {resta && piano.cerchio && <SegnoInQuadro punti={cerchiatura(resta.x + resta.w / 2, resta.y + resta.h / 2, resta.w / 2 + 22, resta.h / 2 + 20, 17)} colore={stile.colori.suChiaro} spessore={7} progresso={(f - piano.cerchio.da) / 15} />}
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile), gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>

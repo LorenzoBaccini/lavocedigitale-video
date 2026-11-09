@@ -1,5 +1,6 @@
 import { NOMI_TEMI } from "../../suoni/sottofondo.ts";
 import type { NomeTema } from "../../suoni/sottofondo.ts";
+import { impronta } from "./impronta.ts";
 import { NOMI_STILI } from "./stili/tipi.ts";
 import type { NomeStile } from "./stili/tipi.ts";
 
@@ -41,7 +42,7 @@ export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APE
 
 // Solo i valori gia' costruiti: la pipeline non deve pubblicare uno stile, un gancio o una chiusura ancora segnaposto.
 // fraseFinale resta sulla frase di base finche' la pipeline non sostituisce davvero l'ultima frase: lo storico direbbe il falso.
-export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania"], gancio: ["scena"], chiusura: ["cartolina"], fraseFinale: [2], durata: ["media"] };
+export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania", "studio"], gancio: ["scena"], chiusura: ["cartolina"], fraseFinale: [2], durata: ["media"] };
 
 /** Quanti video recenti escludono i loro valori; musica, luce e apertura n-1: in n video di fila passano tutte. */
 export const PROFONDITA: { [K in Dimensione]: number } = {
@@ -54,13 +55,6 @@ export const PROFONDITA: { [K in Dimensione]: number } = {
   fraseFinale: 1,
   durata: 1,
 };
-
-/** FNV-1a a 32 bit: lo stesso slug da' sempre la stessa scelta. */
-function impronta(testo: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < testo.length; i++) h = Math.imul(h ^ testo.charCodeAt(i), 0x01000193) >>> 0;
-  return h;
-}
 
 // I video pubblicati prima degli stili erano tutti scrivania: una voce senza stile lo esclude.
 const valoreStorico = <K extends Dimensione>(v: Partial<Variante>, dim: K): Variante[K] | undefined =>

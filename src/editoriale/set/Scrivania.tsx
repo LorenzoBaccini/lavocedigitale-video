@@ -1,5 +1,4 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
 import { ThreeCanvas } from "@remotion/three";
 import { RepeatWrapping } from "three";
 import { AbsoluteFill, useVideoConfig } from "remotion";
@@ -14,13 +13,7 @@ import type { Luce } from "./luci";
 import { LUCI_SCRIVANIA } from "./luci";
 import type { Notifica, Schermo } from "./Portatile";
 import { Portatile } from "./Portatile";
-
-const Rig: React.FC<Camera> = ({ pos, look }) => {
-  const camera = useThree((s) => s.camera);
-  camera.position.set(...pos);
-  camera.lookAt(...look);
-  return null;
-};
+import { Rig } from "./Rig";
 
 // Una sola luce chiave (finestra in alto a sinistra) con ombre vere, un riempimento debole, la luce dello schermo.
 const Luci: React.FC<{ chiave: number; luce: Luce }> = ({ chiave, luce }) => {

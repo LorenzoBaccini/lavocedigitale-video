@@ -1,8 +1,11 @@
+import { Fragment } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
 
 import { pianoScena } from "./editoriale/piani";
-import { STILI, StileVideo } from "./editoriale/stili";
+import { Spinta } from "./editoriale/Spinta";
+import { stileDelVideo, StileVideo } from "./editoriale/stili";
 import { Sottofondo, Stanza, Suoni } from "./editoriale/Suoni";
+import { DURATA_SPINTA } from "./editoriale/transizione";
 import type { Variante } from "./editoriale/variante";
 import { varianteDi } from "./editoriale/variante";
 import { VarianteVideo } from "./editoriale/VarianteVideo";
@@ -24,7 +27,10 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
   const f = useCurrentFrame();
   const linea = costruisciLinea(timing, FPS);
   const aspetto = varianteDi(variante);
-  const stile = STILI[aspetto.stile];
+  const stile = stileDelVideo(aspetto.stile, storyboard.slug);
+  // il controllo d'impaginazione misura ogni scena ferma al suo posto, non a meta' di una spinta
+  const spinta = stile.transizione === "spinta" && !misuraImpaginazione;
+  const ultima = storyboard.frasi.length - 1;
   return (
     <VarianteVideo.Provider value={aspetto}>
       <StileVideo.Provider value={stile}>
@@ -34,12 +40,33 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
             {storyboard.frasi.map((frase, i) => {
               const Componente = SCENE[frase.scena.tipo] as React.FC<PropsScena<Scena>> | undefined;
               const props = propsFrase(storyboard, timing, linea, i);
-              return (
-                <Sequence key={i} from={linea.inizi[i]} durationInFrames={linea.durate[i]}>
-                  {Componente ? <Componente {...props} /> : <Tipografica testo={frase.testo} durata={linea.durate[i]} />}
+              const scena = Componente ? <Componente {...props} /> : <Tipografica testo={frase.testo} durata={linea.durate[i]} />;
+              const voce = (
+                <>
                   <Audio src={staticFile(`${audioBase}/${timing.clips[i].file}`)} />
                   <Suoni effetti={pianoScena(props, linea.durate[i]).suoni} />
-                </Sequence>
+                </>
+              );
+              if (!spinta) {
+                return (
+                  <Sequence key={i} from={linea.inizi[i]} durationInFrames={linea.durate[i]}>
+                    {scena}
+                    {voce}
+                  </Sequence>
+                );
+              }
+              // la scena resta montata DURATA_SPINTA frame dopo la sua fine, mentre la seguente la spinge fuori; voce e suoni no
+              return (
+                <Fragment key={i}>
+                  <Sequence from={linea.inizi[i]} durationInFrames={linea.durate[i] + (i < ultima ? DURATA_SPINTA : 0)}>
+                    <Spinta durata={linea.durate[i]} entra={i > 0} esce={i < ultima}>
+                      {scena}
+                    </Spinta>
+                  </Sequence>
+                  <Sequence from={linea.inizi[i]} durationInFrames={linea.durate[i]} layout="none">
+                    {voce}
+                  </Sequence>
+                </Fragment>
               );
             })}
             <Stanza />

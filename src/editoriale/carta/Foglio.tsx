@@ -1,5 +1,6 @@
 import { AbsoluteFill } from "remotion";
 
+import { Poster } from "../poster/Poster";
 import { useStile } from "../stili";
 import type { TipoCarta } from "./stile";
 
@@ -29,17 +30,22 @@ export const BORDO_FOGLIO = 24;
 
 // Un foglio sulla scrivania visto dall'alto: il legno ai lati, l'ombra del foglio, le fibre, la luce dalla finestra in alto a sinistra.
 // `spinta` avvicina di poco il foglio (la camera che scende); il contenuto sta sopra, fermo nella sua impaginazione.
-export const Foglio: React.FC<{ tipo: TipoCarta; spinta?: number; children?: React.ReactNode }> = ({ tipo, spinta = 0, children }) => (
-  <AbsoluteFill style={{ background: useStile().colori.superficie }}>
-    <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(92deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 9px), repeating-linear-gradient(88deg, rgba(255,220,180,0.05) 0 1px, transparent 1px 23px)" }} />
-    <AbsoluteFill style={{ transform: `scale(${1 + spinta})`, transformOrigin: "50% 45%" }}>
-      <div style={{ position: "absolute", left: BORDO_FOGLIO, right: BORDO_FOGLIO, top: -40, bottom: -40, background: COLORE[tipo], boxShadow: "0 0 0 1px rgba(0,0,0,0.08), 6px 10px 28px rgba(0,0,0,0.45)", overflow: "hidden" }}>
-        <AbsoluteFill style={disegno(tipo)} />
-        <AbsoluteFill style={{ backgroundImage: FIBRE, mixBlendMode: "multiply", opacity: tipo === "giornale" ? 0.5 : 0.32 }} />
-        {/* la luce della finestra: piu' chiara in alto a sinistra, cala verso il basso a destra */}
-        <AbsoluteFill style={{ background: "radial-gradient(ellipse 120% 90% at 18% 8%, rgba(255,250,238,0.55) 0%, rgba(255,250,238,0) 55%), linear-gradient(160deg, rgba(0,0,0,0) 45%, rgba(60,40,20,0.16) 100%)" }} />
-      </div>
+// Con lo stile a poster (studio) al posto del foglio c'e' il poster a tinta piena.
+export const Foglio: React.FC<{ tipo: TipoCarta; spinta?: number; children?: React.ReactNode }> = ({ tipo, spinta = 0, children }) => {
+  const stile = useStile();
+  if (stile.grafiche === "poster") return <Poster tipo={tipo} spinta={spinta}>{children}</Poster>;
+  return (
+    <AbsoluteFill style={{ background: stile.colori.superficie }}>
+      <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(92deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 9px), repeating-linear-gradient(88deg, rgba(255,220,180,0.05) 0 1px, transparent 1px 23px)" }} />
+      <AbsoluteFill style={{ transform: `scale(${1 + spinta})`, transformOrigin: "50% 45%" }}>
+        <div style={{ position: "absolute", left: BORDO_FOGLIO, right: BORDO_FOGLIO, top: -40, bottom: -40, background: COLORE[tipo], boxShadow: "0 0 0 1px rgba(0,0,0,0.08), 6px 10px 28px rgba(0,0,0,0.45)", overflow: "hidden" }}>
+          <AbsoluteFill style={disegno(tipo)} />
+          <AbsoluteFill style={{ backgroundImage: FIBRE, mixBlendMode: "multiply", opacity: tipo === "giornale" ? 0.5 : 0.32 }} />
+          {/* la luce della finestra: piu' chiara in alto a sinistra, cala verso il basso a destra */}
+          <AbsoluteFill style={{ background: "radial-gradient(ellipse 120% 90% at 18% 8%, rgba(255,250,238,0.55) 0%, rgba(255,250,238,0) 55%), linear-gradient(160deg, rgba(0,0,0,0) 45%, rgba(60,40,20,0.16) 100%)" }} />
+        </div>
+      </AbsoluteFill>
+      {children}
     </AbsoluteFill>
-    {children}
-  </AbsoluteFill>
-);
+  );
+};

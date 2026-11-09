@@ -10,7 +10,7 @@ import { Ingombro } from "../editoriale/set/Ingombro";
 import { avvicina } from "../editoriale/set/inquadrature";
 import { Smartphone } from "../editoriale/set/oggetti/Oggetti";
 import { POSTI } from "../editoriale/set/oggetti/posti";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono, puntoTelefono, TELEFONO_PX } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
 import { useStile } from "../editoriale/stili";
@@ -62,9 +62,9 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   ];
   return (
     <>
-      <Scrivania camera={cam} luce={luce} orologio={props.contesto.orologio}>
+      <Set3D camera={cam} luce={luce} orologio={props.contesto.orologio}>
         {telefono && <Smartphone schermo={{ tipo: "blocco" }} />}
-      </Scrivania>
+      </Set3D>
       <Velo alto={0.55} basso={0.68} />
       <Ingombro nome={telefono ? "telefono" : "schermo"} angoli={telefono ? angoliSchermoTelefono(cam) : angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />
       <Titolo nome="sopra" f={f} righe={sopra} style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE }} />

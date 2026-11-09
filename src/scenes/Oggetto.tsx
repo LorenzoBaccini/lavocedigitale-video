@@ -13,12 +13,12 @@ import { OggettoSulPiano } from "../editoriale/set/oggetti/Oggetti";
 import type { Schermo } from "../editoriale/set/Portatile";
 import { angoliSchermoTelefono, puntoTelefono, sopraIlTelefono, TELEFONO_PX } from "../editoriale/set/telefono";
 import { POSTI, puntoCaldo } from "../editoriale/set/oggetti/posti";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { altezzaRighe } from "../editoriale/titoli";
@@ -97,20 +97,20 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   const ok = piano.conferma === undefined ? 0 : fase(f, piano.conferma + 6, piano.conferma + 14);
   return (
     <>
-      <Scrivania camera={cam} schermo={schermo} orologio={props.contesto.orologio}>
+      <Set3D camera={cam} schermo={schermo} orologio={props.contesto.orologio}>
         <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} riga={indica} menu={props.menu} schermata={schermata} fuori={0.12 * (1 - fase(f, 0, 3))} />
-      </Scrivania>
+      </Set3D>
       <Velo alto={0.62} basso={inchiostro ? 0.85 : conferma ? 0.7 : 0.5} />
       {oggetto === "portatile" && !inchiostro && <Ingombro nome="schermo" angoli={angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />}
       {chiara && schermo?.tipo === "finestra" && <Ingombro nome="pagina" angoli={angoliInQuadro(FINESTRA_PX, cam)} pieno />}
       {oggetto === "smartphone" && <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} />}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile), gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>
       {segno && piano.indica !== undefined && (
         <>
-          <SegnoInQuadro punti={cerchiatura(segno.cx, segno.cy, segno.rx, segno.ry, 9)} colore={inchiostro ? stile.colori.inchiostro.testo : stile.colori.testo} spessore={7} progresso={(f - piano.indica - 4) / 15} />
+          <SegnoInQuadro punti={cerchiatura(segno.cx, segno.cy, segno.rx, segno.ry, 9)} colore={inchiostro ? stile.colori.suChiaro : stile.colori.testo} spessore={7} progresso={(f - piano.indica - 4) / 15} />
           {telefono && indica && (
             <NotaAccanto nome="indica" testo={indica} x={segno.cx + segno.rx} y={segno.cy} sinistra={Math.max(NOTA_DA, segno.cx + segno.rx + 60)} da={piano.indica - 3} f={f} seme={23} />
           )}
@@ -120,11 +120,11 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
         </>
       )}
       {conferma && piano.conferma !== undefined && f >= piano.conferma && (
-        <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center", alignItems: "center", gap: 18 }}>
+        <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile), alignItems: "center", gap: 18 }}>
           <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
-            <Pennarello d={percorso(PUNTI_SPUNTA)} colore={inchiostro ? stile.colori.inchiostro.testo : stile.colori.testo} spessore={8} progresso={(f - piano.conferma) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
+            <Pennarello d={percorso(PUNTI_SPUNTA)} colore={inchiostro ? stile.colori.suChiaro : stile.colori.testo} spessore={8} progresso={(f - piano.conferma) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
           </svg>
-          <div data-impaginazione="conferma" data-su-chiaro={inchiostro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(conferma, 66, 20), lineHeight: 1.12, color: inchiostro ? stile.colori.inchiostro.testo : stile.colori.testo, textShadow: inchiostro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{conferma}</div>
+          <div data-impaginazione="conferma" data-su-chiaro={inchiostro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(conferma, 66, 20), lineHeight: 1.12, color: inchiostro ? stile.colori.suChiaro : stile.colori.testo, textShadow: inchiostro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{conferma}</div>
         </div>
       )}
     </>

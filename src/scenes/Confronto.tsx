@@ -7,7 +7,7 @@ import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoConfronto } from "../editoriale/piani/confronto";
 import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { cerchiatura } from "../editoriale/tratto";
 import { LARGHEZZA, MARGINE, TITOLO_TOP } from "../impaginazione";
 import type { Confronto as Lato } from "../storyboard/tipi";
@@ -42,7 +42,7 @@ export const Confronto: React.FC<ScenaDi<"confronto">> = (props) => {
   const largo = Math.min(COLONNA / 2 - 6, b.valore.length * corpo(b.valore, 112, 7) * 0.3 + 26);
   return (
     <Foglio tipo="giornale" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center" }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile) }}>
         <Occhiello testo={etichetta} opacita={fase(f, 0, 6)} />
       </div>
       <div style={{ position: "absolute", top: ALTO - 10, height: 340, left: LARGHEZZA / 2 - FILETTO / 2, width: FILETTO, background: stile.colori.inchiostro.testo, opacity: 0.35 * fase(f, piano.a, piano.a + 10) }} />

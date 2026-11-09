@@ -394,7 +394,7 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));
   assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).variante, esito.variante);
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile scrivania · gancio scena · chiusura cartolina · frase finale \d · durata media · musica notturno/);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile studio · gancio scena · chiusura cartolina · frase finale \d · durata media · musica notturno/);
 });
 
 test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se lo storyboard viene scartato", async () => {
@@ -405,9 +405,9 @@ test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se
   });
   const esito = await eseguiPipeline(SLUG, { prova: true }, f.dip);
   assert.equal(esito.stato, "saltato");
-  assert.equal(esito.variante?.stile, "scrivania");
+  assert.equal(esito.variante?.stile, "studio");
   assert.equal(esito.variante?.durata, "media");
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile scrivania/);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile studio/);
 });
 
 test("lo storico registra stile, gancio, chiusura, frase finale e durata; le voci vecchie senza quei campi non fanno cadere la scelta", async () => {

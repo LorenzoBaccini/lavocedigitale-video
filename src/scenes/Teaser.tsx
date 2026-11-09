@@ -5,7 +5,7 @@ import { Foglio } from "../editoriale/carta/Foglio";
 import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoTeaser } from "../editoriale/piani/teaser";
 import { SegnoInQuadro } from "../editoriale/Segno";
-import { useStile } from "../editoriale/stili";
+import { allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
 import { casuale, sottolineatura } from "../editoriale/tratto";
 import { LARGHEZZA, MARGINE, TITOLO_TOP } from "../impaginazione";
@@ -33,18 +33,20 @@ export const Teaser: React.FC<ScenaDi<"teaser">> = (props) => {
   const stile = useStile();
   const { durata, testo } = props;
   const piano = pianoTeaser(props, durata);
+  // le righe coperte seguono il titolo: centrate sotto un titolo centrato, al margine sotto uno a sinistra
+  const xRiga = (w: number) => (allineaTesto(stile) === "left" ? MARGINE : (LARGHEZZA - w) / 2);
   return (
     <Foglio tipo="quadretti" spinta={spintaFoglio(f, durata, piano.stacchi)}>
       <Titolo nome="testo" f={f} tinta="grafica" righe={[{ parole: piano.parole, size: Math.max(60, corpo(testo, 84, 26)), peso: 700 }]} style={{ position: "absolute", top: TITOLO_TOP + 150, left: MARGINE, right: MARGINE }} />
       {RIGHE.map((riga, i) => (
-        <div key={i} style={{ position: "absolute", top: riga.y, left: (LARGHEZZA - riga.w) / 2, width: riga.w, display: "flex", gap: 16 }}>
+        <div key={i} style={{ position: "absolute", top: riga.y, left: xRiga(riga.w), width: riga.w, display: "flex", gap: 16 }}>
           {sagome(riga.w, 41 + i).map((l, j) => (
             <div key={j} style={{ width: l, height: 22, marginTop: 9, borderRadius: 6, background: stile.colori.inchiostro.tenue, opacity: 0.32 }} />
           ))}
         </div>
       ))}
       {RIGHE.map((riga, i) => {
-        const punti = sottolineatura(riga.w + 10, 51 + i).map(([x, y]) => [(LARGHEZZA - riga.w) / 2 - 5 + x, riga.y + 22 + y * 0.6] as [number, number]);
+        const punti = sottolineatura(riga.w + 10, 51 + i).map(([x, y]) => [xRiga(riga.w) - 5 + x, riga.y + 22 + y * 0.6] as [number, number]);
         return <SegnoInQuadro key={`o${i}`} punti={punti} colore={stile.colori.inchiostro.pennarello} spessore={46} progresso={(f - piano.omissis[i]) / PER_RIGA} />;
       })}
     </Foglio>

@@ -15,6 +15,9 @@ export const SCRIVANIA: Stile = {
     accento: AMBRA,
     accentoSuChiaro: AMBRA_STAMPATA,
     superficie: "#4a3324",
+    velo: "#0a0908",
+    suChiaro: INCHIOSTRO,
+    segnoSuChiaro: AMBRA,
     inchiostro: { testo: INCHIOSTRO, tenue: "#5E5A52", penna: "#1F3A8A", timbro: "#A3271F", pennarello: "#191919" },
   },
   caratteri: { titolo: SERIF, testo: SANS },
@@ -30,4 +33,6 @@ export const SCRIVANIA: Stile = {
     sulleGrafiche: "radial-gradient(ellipse at 50% 45%, transparent 62%, rgba(40,25,10,0.22) 100%)",
   },
   transizione: "taglio",
+  set: "scrivania",
+  grafiche: "carta",
 };

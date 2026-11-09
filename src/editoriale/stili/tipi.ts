@@ -4,6 +4,10 @@ export type NomeStile = (typeof NOMI_STILI)[number];
 /** Come si passa da una scena all'altra. */
 export type Transizione = "taglio" | "spinta" | "lampo";
 export type Allineamento = "centro" | "sinistra";
+/** Il set delle scene 3D: la scrivania di rovere o il fondale continuo a tinta unita. */
+export type NomeSet = "scrivania" | "fondale";
+/** Sotto le scene grafiche: un foglio sulla scrivania o un poster a tinta piena. */
+export type Grafiche = "carta" | "poster";
 
 /** Il sottotitolo in una delle due situazioni (sopra il set, sopra le scene grafiche). */
 export interface TrattamentoSottotitolo {
@@ -29,8 +33,14 @@ export interface Stile {
     accento: string;
     /** l'accento sulle scene grafiche chiare, piu' scuro per il contrasto */
     accentoSuChiaro: string;
-    /** il piano attorno alle scene grafiche */
+    /** il piano attorno alle scene grafiche; nel fondale, la sua tinta */
     superficie: string;
+    /** il velo sopra il set che tiene leggibili i titoli */
+    velo: string;
+    /** il testo sopra una superficie chiara del set (la pagina sullo schermo) */
+    suChiaro: string;
+    /** il segno colorato (barrato) sopra una superficie chiara del set */
+    segnoSuChiaro: string;
     /** il testo sulle scene grafiche e i segni a mano sopra */
     inchiostro: { testo: string; tenue: string; penna: string; timbro: string; pennarello: string };
   };
@@ -44,4 +54,6 @@ export interface Stile {
   /** `background` CSS della vignettatura */
   vignetta: { sulSet: string; sulleGrafiche: string };
   transizione: Transizione;
+  set: NomeSet;
+  grafiche: Grafiche;
 }

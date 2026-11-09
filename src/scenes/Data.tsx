@@ -8,7 +8,7 @@ import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoData } from "../editoriale/piani/data";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { conAlfa } from "../editoriale/stili/alfa";
 import { cerchiatura, sottolineatura } from "../editoriale/tratto";
 import { FONDO_UTILE, LARGHEZZA, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";
@@ -39,7 +39,7 @@ export const Data: React.FC<ScenaDi<"data">> = (props) => {
   const colpo = piano.timbro === undefined ? 0 : fase(f, piano.timbro, piano.timbro + 3);
   return (
     <Foglio tipo="agenda" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile), gap: 18 }}>
         <Occhiello testo={etichetta} opacita={fase(f, 0, 6)} />
         <div data-impaginazione="mese" style={{ fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: 76, lineHeight: 1.1, color: stile.colori.inchiostro.testo, textTransform: "capitalize" }}>{`${pagina.mese} ${pagina.anno}`}</div>
       </div>
@@ -66,7 +66,7 @@ export const Data: React.FC<ScenaDi<"data">> = (props) => {
       )}
       {timbro && piano.timbro !== undefined && f >= piano.timbro && (
         <div style={{ position: "absolute", left: MARGINE, right: MARGINE, top: GRIGLIA.y + (fondoGriglia - GRIGLIA.y) * 0.5, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
-          <div data-impaginazione="timbro" style={{ fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: corpo(timbro, 96, 9), letterSpacing: "0.12em", textTransform: "uppercase", color: stile.colori.inchiostro.timbro, border: `6px double ${stile.colori.inchiostro.timbro}`, padding: "6px 26px", borderRadius: 10, mixBlendMode: "multiply", opacity: 0.85 * colpo, transform: `rotate(-7deg) scale(${1.14 - 0.14 * colpo})`, WebkitMaskImage: "radial-gradient(circle at 30% 40%, #000 55%, rgba(0,0,0,0.72) 100%)" }}>{timbro}</div>
+          <div data-impaginazione="timbro" style={{ fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: corpo(timbro, 96, 9), letterSpacing: "0.12em", textTransform: "uppercase", color: stile.colori.inchiostro.timbro, border: `6px double ${stile.colori.inchiostro.timbro}`, padding: "6px 26px", borderRadius: 10, mixBlendMode: stile.grafiche === "carta" ? "multiply" : "normal", opacity: 0.85 * colpo, transform: `rotate(-7deg) scale(${1.14 - 0.14 * colpo})`, WebkitMaskImage: "radial-gradient(circle at 30% 40%, #000 55%, rgba(0,0,0,0.72) 100%)" }}>{timbro}</div>
         </div>
       )}
     </Foglio>

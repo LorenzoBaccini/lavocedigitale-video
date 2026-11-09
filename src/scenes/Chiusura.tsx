@@ -5,7 +5,7 @@ import { Foglio } from "../editoriale/carta/Foglio";
 import { spintaFoglio } from "../editoriale/piani/carta";
 import { INDIRIZZO, pianoChiusura, TESTATA } from "../editoriale/piani/chiusura";
 import { fase, uscita } from "../editoriale/regia";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
 import { MARGINE } from "../impaginazione";
 import { LogoMark } from "../Logo";
@@ -22,7 +22,7 @@ export const Chiusura: React.FC<ScenaDi<"chiusura">> = (props) => {
   const t = fase(f, piano.testata, piano.testata + 10);
   return (
     <Foglio tipo="liscia" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <div style={{ position: "absolute", top: 600, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ position: "absolute", top: 600, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile) }}>
         <div style={{ opacity: t, transform: `translateY(${(1 - uscita(t)) * 14}px)` }}>
           <LogoMark size={300} color={stile.colori.inchiostro.testo} livello={livello} />
         </div>

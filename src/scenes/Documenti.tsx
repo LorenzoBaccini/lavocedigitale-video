@@ -13,9 +13,9 @@ import { CENTRO_PEZZI, MEZZA_LARGHEZZA, MEZZA_PROFONDITA, postiPezzi } from "../
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { Velo } from "../editoriale/set/Velo";
-import { useStile } from "../editoriale/stili";
+import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
@@ -56,15 +56,15 @@ export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
   ];
   return (
     <>
-      <Scrivania camera={cam} orologio={props.contesto.orologio}>
+      <Set3D camera={cam} orologio={props.contesto.orologio}>
         <PezziSulTavolo pezzi={sulTavolo} />
-      </Scrivania>
+      </Set3D>
       <Velo alto={0.62} basso={0.5} />
       {impronte.map((angoli, i) => <Ingombro key={i} nome={pezzi[i].oggetto} angoli={angoli} pieno />)}
       {pezzi.map((p, i) => (
         <NotaAccanto key={p.oggetto} nome={`nota-${i + 1}`} testo={p.nota} x={punti[i].destra.x} y={punti[i].destra.y} sinistra={Math.max(NOTA_DA, punti[i].destra.x + 70)} da={piano.note[i]} f={f} seme={41 + i} />
       ))}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile), gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>

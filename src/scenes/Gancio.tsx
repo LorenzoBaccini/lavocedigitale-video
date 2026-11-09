@@ -13,12 +13,12 @@ import type { Schermo } from "../editoriale/set/Portatile";
 import { Scrivania } from "../editoriale/set/Scrivania";
 import { angoliSchermoTelefono } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
+import { useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { altezzaRighe } from "../editoriale/titoli";
 import { useVariante } from "../editoriale/VarianteVideo";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
-import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
 const DURATA_SOTTOLINEATURA = 9;
@@ -34,6 +34,7 @@ const versoNotifica = (): Camera => {
 // Il gancio: la scrivania larga, l'oggetto al suo posto, la frase detta scritta parola per parola.
 export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
   const f = useCurrentFrame();
+  const stile = useStile();
   const variante = useVariante();
   const { oggetto, durata, contesto } = props;
   const piano = pianoGancio(props, durata);
@@ -42,8 +43,8 @@ export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
     const scelte = parole.slice(da, a);
     if (!scelte.length) return [];
     const testo = scelte.map((p) => p.t).join(" ");
-    if (!grossa) return [{ parole: scelte, size: Math.max(56, corpo(testo, 80, 22)), font: SERIF, peso: 500 }];
-    return [{ parole: scelte, size: Math.max(76, corpo(testo, 136, 11)), font: SERIF, peso: 700, sottolinea: { da: piano.sottolinea, durata: DURATA_SOTTOLINEATURA, colore: C.amber, seme: 4 } }];
+    if (!grossa) return [{ parole: scelte, size: Math.max(56, corpo(testo, 80, 22)), peso: 500 }];
+    return [{ parole: scelte, size: Math.max(76, corpo(testo, 136, 11)), peso: 700, sottolinea: { da: piano.sottolinea, durata: DURATA_SOTTOLINEATURA, colore: stile.colori.accento, seme: 4 } }];
   };
   const righe = [...riga(0, grande[0], false), ...riga(grande[0], grande[1], true), ...riga(grande[1], parole.length, false)];
 

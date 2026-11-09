@@ -15,10 +15,10 @@ import { Occhiello } from "../editoriale/set/Occhiello";
 import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Scrivania } from "../editoriale/set/Scrivania";
 import { Velo } from "../editoriale/set/Velo";
+import { useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
-import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
 const GUARDA = new Vector3(CENTRO_PEZZI[0], 0, CENTRO_PEZZI[2] - 0.22);
@@ -28,6 +28,7 @@ const NOTA_DA = 600;
 // che arrivano quando la voce li nomina. Occhiello e titolo in alto.
 export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
   const f = useCurrentFrame();
+  const stile = useStile();
   const { durata, etichetta, pezzi } = props;
   const piano = pianoDocumenti(props, durata);
   const base: Camera = { pos: sferica(GUARDA, mix(11.4, 10.8, uscita(fase(f, 0, durata))), 0.07, 1.2), look: GUARDA.toArray() as Camera["look"] };
@@ -48,9 +49,8 @@ export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
 
   const righe: Riga[] = [
     {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: C.amber } : p)),
+      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento } : p)),
       size: corpo(props.titolo, 104, 16),
-      font: SERIF,
       peso: 700,
     },
   ];

@@ -1,8 +1,8 @@
 import { FONDO_UTILE, LARGHEZZA, MARGINE, RESPIRO } from "../../impaginazione";
-import { SANS } from "../../theme";
 import { FRECCIA } from "../piani/documenti";
 import { fase } from "../regia";
 import { Pennarello } from "../Segno";
+import { useStile } from "../stili";
 import type { Punto } from "../tratto";
 import { casuale, lunghezza, percorso } from "../tratto";
 import { postoNota } from "./nota";
@@ -28,6 +28,7 @@ export function freccia(x0: number, y0: number, x1: number, y1: number, seme: nu
  * da `sinistra` al margine. Comincia al frame `da`.
  */
 export const NotaAccanto: React.FC<{ nome: string; testo: string; x: number; y: number; sinistra: number; da: number; f: number; seme: number }> = ({ nome, testo, x, y, sinistra: voluta, da, f, seme }) => {
+  const stile = useStile();
   const { sinistra, corpo } = postoNota(testo, voluta, x);
   // mai nella fascia del sottotitolo
   const yNota = Math.min(y, FONDO_UTILE - RESPIRO - NOTA_MEZZA);
@@ -36,11 +37,11 @@ export const NotaAccanto: React.FC<{ nome: string; testo: string; x: number; y: 
   return (
     <>
       <svg width={LARGHEZZA} height={1920} style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
-        <Pennarello d={percorso(tratto)} colore="#FAFAF7" spessore={6} progresso={(f - da) / FRECCIA} lunghezza={lunghezza(tratto)} />
+        <Pennarello d={percorso(tratto)} colore={stile.colori.testo} spessore={6} progresso={(f - da) / FRECCIA} lunghezza={lunghezza(tratto)} />
       </svg>
       <div
         data-impaginazione={nome}
-        style={{ position: "absolute", left: sinistra, width: LARGHEZZA - MARGINE - sinistra, top: yNota, transform: `translateY(-50%) translateX(${(1 - entrata) * -10}px)`, fontFamily: SANS, fontWeight: 650, fontSize: corpo, lineHeight: 1.18, letterSpacing: "0.04em", textTransform: "uppercase", color: "#FAFAF7", textShadow: "0 2px 12px rgba(0,0,0,0.65)", opacity: entrata }}
+        style={{ position: "absolute", left: sinistra, width: LARGHEZZA - MARGINE - sinistra, top: yNota, transform: `translateY(-50%) translateX(${(1 - entrata) * -10}px)`, fontFamily: stile.caratteri.testo, fontWeight: 650, fontSize: corpo, lineHeight: 1.18, letterSpacing: "0.04em", textTransform: "uppercase", color: stile.colori.testo, textShadow: stile.ombra(12, 0.65), opacity: entrata }}
       >
         {testo}
       </div>

@@ -4,7 +4,8 @@ import { FINESTRA_PX, NOTIFICA_PX, NOTIFICA_SCALA, OROLOGIO_PX, PULSANTE_PX, SCH
 
 // Texture dipinte su canvas per il set: scrivania, desktop, notifica, finestra, tastiera, usura dell'alluminio.
 export type Ctx = CanvasRenderingContext2D;
-const SANS = "Inter, system-ui, sans-serif";
+/** il carattere delle interfacce disegnate sugli schermi, indipendente dallo stile del video */
+export const SANS_SCHERMI = "Inter, system-ui, sans-serif";
 
 // rumore a valori su griglia, interpolato: base per venature e macchie
 export const rumore = (seme: number, celle: number) => {
@@ -103,7 +104,7 @@ export const tastiera = (ctx: Ctx) => {
   ];
   const fuga = 8, x0 = 14;
   let y = 14;
-  ctx.font = `500 15px ${SANS}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = `500 15px ${SANS_SCHERMI}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (const fila of file) {
     const lato = (W - 2 * x0 - fuga * (fila.n - 1)) / fila.n;
     for (let i = 0; i < fila.n; i++) {
@@ -162,7 +163,7 @@ const cartella = (ctx: Ctx, x: number, y: number, nome: string) => {
   ctx.fillStyle = "#9aa7b5"; ctx.beginPath(); ctx.roundRect(x + 30, y + 14, 44, 12, 3); ctx.fill();
   ctx.fillStyle = "#b9c4d0"; ctx.beginPath(); ctx.roundRect(x + 30, y + 22, 84, 62, 5); ctx.fill();
   ctx.fillStyle = "rgba(0,0,0,0.12)"; ctx.fillRect(x + 30, y + 22, 84, 4);
-  ctx.font = `500 25px ${SANS}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  ctx.font = `500 25px ${SANS_SCHERMI}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
   ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillText(nome, x + 73, y + 99);
   ctx.fillStyle = "#f2f2f2"; ctx.fillText(nome, x + 72, y + 97);
 };
@@ -181,7 +182,7 @@ const barra = (ctx: Ctx, orologio?: string) => {
   icona(ctx, 28, y + 22, (c) => { for (const r of [0, 12, 24]) { c.beginPath(); c.moveTo(0, r + 2); c.lineTo(30, r + 2); c.stroke(); } });
   ctx.fillStyle = "rgba(255,255,255,0.08)"; ctx.beginPath(); ctx.roundRect(84, y + 14, 330, 44, 22); ctx.fill();
   icona(ctx, 106, y + 24, (c) => { c.beginPath(); c.arc(10, 10, 9, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.moveTo(17, 17); c.lineTo(25, 25); c.stroke(); });
-  ctx.fillStyle = "#a9adb3"; ctx.font = `400 24px ${SANS}`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("Cerca", 146, y + 37);
+  ctx.fillStyle = "#a9adb3"; ctx.font = `400 24px ${SANS_SCHERMI}`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("Cerca", 146, y + 37);
   icona(ctx, 452, y + 18, (c) => { c.fillStyle = "#b9c4d0"; c.beginPath(); c.roundRect(0, 8, 36, 26, 3); c.fill(); c.fillStyle = "#9aa7b5"; c.fillRect(0, 4, 16, 6); });
   icona(ctx, 520, y + 18, (c) => { c.strokeStyle = "#8fb3d9"; c.beginPath(); c.arc(18, 18, 16, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.ellipse(18, 18, 7, 16, 0, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.moveTo(2, 18); c.lineTo(34, 18); c.stroke(); });
   icona(ctx, 588, y + 22, (c) => { c.beginPath(); c.roundRect(0, 0, 38, 28, 3); c.stroke(); c.beginPath(); c.moveTo(1, 2); c.lineTo(19, 16); c.lineTo(37, 2); c.stroke(); });
@@ -193,8 +194,8 @@ const barra = (ctx: Ctx, orologio?: string) => {
   icona(ctx, 2110, y + 22, (c) => { for (const r of [6, 13, 20]) { c.beginPath(); c.arc(14, 28, r, -2.4, -0.74); c.stroke(); } });
   icona(ctx, 2160, y + 24, (c) => { c.beginPath(); c.moveTo(0, 8); c.lineTo(7, 8); c.lineTo(15, 1); c.lineTo(15, 23); c.lineTo(7, 16); c.lineTo(0, 16); c.closePath(); c.stroke(); c.beginPath(); c.arc(16, 12, 9, -0.8, 0.8); c.stroke(); });
   icona(ctx, 2210, y + 26, (c) => { c.beginPath(); c.roundRect(0, 0, 34, 18, 3); c.stroke(); c.fillStyle = "#d6d8dc"; c.fillRect(3, 3, 17, 12); c.fillRect(35, 5, 3, 8); });
-  ctx.fillStyle = "#e6e7ea"; ctx.font = `500 22px ${SANS}`; ctx.textAlign = "center"; ctx.fillText("ITA", 2290, y + 37);
-  ctx.textAlign = "right"; ctx.font = `500 23px ${SANS}`;
+  ctx.fillStyle = "#e6e7ea"; ctx.font = `500 22px ${SANS_SCHERMI}`; ctx.textAlign = "center"; ctx.fillText("ITA", 2290, y + 37);
+  ctx.textAlign = "right"; ctx.font = `500 23px ${SANS_SCHERMI}`;
   const destra = OROLOGIO_PX.x + OROLOGIO_PX.w - 8;
   // senza la data del copione l'orologio mostra solo l'ora: mai una data inventata
   if (orologio) {
@@ -288,17 +289,17 @@ export const notifica = (messaggio: string, mittente = MITTENTE_NEUTRO, azione?:
   ctx.stroke();
   ctx.restore();
   ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
-  ctx.fillStyle = "#a7abb1"; ctx.font = `500 25px ${SANS}`; scriviEntro(ctx, mittente, 70, 52, w - 190, 20);
+  ctx.fillStyle = "#a7abb1"; ctx.font = `500 25px ${SANS_SCHERMI}`; scriviEntro(ctx, mittente, 70, 52, w - 190, 20);
   ctx.textAlign = "right"; ctx.fillText("ora", w - 66, 52);
   ctx.fillText("×", w - 28, 53);
   ctx.textAlign = "left";
-  ctx.fillStyle = "#f3f4f6"; ctx.font = `650 ${CORPO_NOTIFICA}px ${SANS}`;
+  ctx.fillStyle = "#f3f4f6"; ctx.font = `650 ${CORPO_NOTIFICA}px ${SANS_SCHERMI}`;
   righeNotifica(ctx, messaggio).forEach((riga, i) => scriviEntro(ctx, riga, 30, RIGA_NOTIFICA.prima + i * RIGA_NOTIFICA.passo, w - 64));
-  if (azione) { ctx.fillStyle = "#8fb3d9"; ctx.font = `500 25px ${SANS}`; scriviEntro(ctx, azione, 30, h - 30, w - 64, 20); }
+  if (azione) { ctx.fillStyle = "#8fb3d9"; ctx.font = `500 25px ${SANS_SCHERMI}`; scriviEntro(ctx, azione, 30, h - 30, w - 64, 20); }
 };
 
 export const righeNotifica = (ctx: Ctx, messaggio: string) => {
-  ctx.font = `650 ${CORPO_NOTIFICA}px ${SANS}`;
+  ctx.font = `650 ${CORPO_NOTIFICA}px ${SANS_SCHERMI}`;
   return aCapo(ctx, messaggio, NOTIFICA_PX.w - 64, 3);
 };
 
@@ -324,7 +325,7 @@ function colonna(ctx: Ctx, x: number, y: number, menu: string[] | undefined, col
     const scelta = i === voci.length - 1;
     if (scelta) { ctx.fillStyle = colori.scelta; ctx.beginPath(); ctx.roundRect(x + 14, vy - 30, 300, 60, 10); ctx.fill(); }
     if (voce) {
-      ctx.fillStyle = scelta ? colori.testoScelta : colori.testo; ctx.font = `${scelta ? 600 : 400} 28px ${SANS}`;
+      ctx.fillStyle = scelta ? colori.testoScelta : colori.testo; ctx.font = `${scelta ? 600 : 400} 28px ${SANS_SCHERMI}`;
       scriviEntro(ctx, voce, x + 40, vy, 260, 22);
     } else {
       ctx.fillStyle = colori.neutra; ctx.beginPath(); ctx.roundRect(x + 40, vy - 8, [170, 120, 150, 110, 190][i % 5], 16, 8); ctx.fill();
@@ -341,7 +342,7 @@ const barraBrowser = (ctx: Ctx, x: number, y: number, w: number, titolo: string)
   ctx.fillStyle = "#d9dde2"; ctx.beginPath(); ctx.roundRect(x, y, w, 120, [14, 14, 0, 0]); ctx.fill();
   ctx.fillStyle = "#f6f4f0"; ctx.beginPath(); ctx.roundRect(x + 24, y + 12, 420, 48, [12, 12, 0, 0]); ctx.fill();
   ctx.fillRect(x, y + 58, w, 62);
-  ctx.fillStyle = "#3a3f46"; ctx.font = `500 24px ${SANS}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.fillStyle = "#3a3f46"; ctx.font = `500 24px ${SANS_SCHERMI}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
   scriviEntro(ctx, titolo, x + 48, y + 37, 360, 18);
   ctx.textAlign = "right"; ctx.fillStyle = "#6b7078"; ctx.fillText("—     ▢     ×", x + w - 28, y + 34); ctx.textAlign = "left";
   ctx.fillStyle = "#e6e8eb"; ctx.beginPath(); ctx.roundRect(x + 24, y + 68, w - 48, 44, 22); ctx.fill();
@@ -364,7 +365,7 @@ export const finestra = ({ titolo, pulsante, menu, tipo, orologio }: Finestra) =
   ctx.textAlign = "left"; ctx.textBaseline = "middle";
   if (tipo !== "sito") {
     if (tipo === "app") { ctx.fillStyle = "#2c3e55"; ctx.beginPath(); ctx.roundRect(x, y, w, 64, [14, 14, 0, 0]); ctx.fill(); }
-    ctx.fillStyle = chiara ? "#eef1f5" : "#c9ccd1"; ctx.font = `500 26px ${SANS}`;
+    ctx.fillStyle = chiara ? "#eef1f5" : "#c9ccd1"; ctx.font = `500 26px ${SANS_SCHERMI}`;
     if (tipo === "sistema") ctx.fillText("Impostazioni", x + 30, y + 34);
     else { ctx.beginPath(); ctx.roundRect(x + 30, y + 18, 28, 28, 7); ctx.fill(); }
     ctx.textAlign = "right"; ctx.fillStyle = chiara ? "#c4ccd6" : "#8a8e95"; ctx.fillText("—     ▢     ×", x + w - 28, y + 34); ctx.textAlign = "left";
@@ -374,13 +375,13 @@ export const finestra = ({ titolo, pulsante, menu, tipo, orologio }: Finestra) =
     : { testo: "#d9dbe0", scelta: "#2e3137", testoScelta: "#d9dbe0", neutra: "#3a3d43" });
   const px = TITOLO_FINESTRA_PX.x;
   const alto = y + testa + 76;
-  ctx.fillStyle = chiara ? "#1f2328" : "#f1f2f4"; ctx.font = `650 52px ${SANS}`;
+  ctx.fillStyle = chiara ? "#1f2328" : "#f1f2f4"; ctx.font = `650 52px ${SANS_SCHERMI}`;
   aCapo(ctx, titolo, TITOLO_FINESTRA_PX.w, 2).forEach((riga, i) => scriviEntro(ctx, riga, px, alto + i * 64, TITOLO_FINESTRA_PX.w));
   ctx.fillStyle = chiara ? "#d6d3cc" : "#3a3d43";
   for (const [ry, rw] of [[190, 520], [236, 440], [282, 480]]) { ctx.beginPath(); ctx.roundRect(px, alto + ry, rw, 16, 8); ctx.fill(); }
   const b = PULSANTE_PX;
   ctx.fillStyle = "#2f6fd1"; ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 12); ctx.fill();
-  ctx.fillStyle = "#ffffff"; ctx.font = `600 ${chiara ? 40 : 34}px ${SANS}`; ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff"; ctx.font = `600 ${chiara ? 40 : 34}px ${SANS_SCHERMI}`; ctx.textAlign = "center";
   scriviEntro(ctx, pulsante, b.x + b.w / 2, b.y + b.h / 2 + 2, b.w - 40);
   ctx.textAlign = "left";
 };
@@ -401,7 +402,7 @@ export const pagina = (titolo: string, tipo: Exclude<TipoFinestra, "sistema">, o
   ctx.fillStyle = "#e9edf2"; ctx.beginPath(); ctx.roundRect(80, alto + 45, 60, 60, 14); ctx.fill();
   ctx.fillStyle = "rgba(233,237,242,0.55)";
   for (const [x0, l] of [[1500, 160], [1700, 140], [1880, 180], [2100, 150]]) { ctx.beginPath(); ctx.roundRect(x0, alto + 68, l, 16, 8); ctx.fill(); }
-  ctx.fillStyle = "#1f2328"; ctx.font = `700 120px ${SANS}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#1f2328"; ctx.font = `700 120px ${SANS_SCHERMI}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
   aCapo(ctx, titolo, w - 320, 2).forEach((riga, i) => scriviEntro(ctx, riga, 160, alto + 400 + i * 140, w - 320));
   ctx.fillStyle = "#c9c5bd";
   for (const [ry, rw] of [[620, 1300], [670, 1100]]) { ctx.beginPath(); ctx.roundRect(160, alto + ry, rw, 24, 12); ctx.fill(); }

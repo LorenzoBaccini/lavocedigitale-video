@@ -1,5 +1,6 @@
 import { AbsoluteFill } from "remotion";
 
+import { useStile } from "../stili";
 import type { TipoCarta } from "./stile";
 
 // fibre della carta: rumore fisso, moltiplicato sul colore
@@ -29,7 +30,7 @@ export const BORDO_FOGLIO = 24;
 // Un foglio sulla scrivania visto dall'alto: il legno ai lati, l'ombra del foglio, le fibre, la luce dalla finestra in alto a sinistra.
 // `spinta` avvicina di poco il foglio (la camera che scende); il contenuto sta sopra, fermo nella sua impaginazione.
 export const Foglio: React.FC<{ tipo: TipoCarta; spinta?: number; children?: React.ReactNode }> = ({ tipo, spinta = 0, children }) => (
-  <AbsoluteFill style={{ background: "#4a3324" }}>
+  <AbsoluteFill style={{ background: useStile().colori.superficie }}>
     <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(92deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 9px), repeating-linear-gradient(88deg, rgba(255,220,180,0.05) 0 1px, transparent 1px 23px)" }} />
     <AbsoluteFill style={{ transform: `scale(${1 + spinta})`, transformOrigin: "50% 45%" }}>
       <div style={{ position: "absolute", left: BORDO_FOGLIO, right: BORDO_FOGLIO, top: -40, bottom: -40, background: COLORE[tipo], boxShadow: "0 0 0 1px rgba(0,0,0,0.08), 6px 10px 28px rgba(0,0,0,0.45)", overflow: "hidden" }}>

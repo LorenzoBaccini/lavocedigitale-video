@@ -13,11 +13,11 @@ import { POSTI } from "../editoriale/set/oggetti/posti";
 import { Scrivania } from "../editoriale/set/Scrivania";
 import { angoliSchermoTelefono, puntoTelefono, TELEFONO_PX } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
+import { useStile } from "../editoriale/stili";
 import type { Riga } from "../editoriale/Titolo";
 import { Titolo } from "../editoriale/Titolo";
 import { altezzaRighe } from "../editoriale/titoli";
 import { ALTEZZA, FONDO_TITOLO, MARGINE, TITOLO_TOP } from "../impaginazione";
-import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
 const CENTRO = new Vector3(0.1, 1.35, -0.7);
@@ -41,6 +41,7 @@ function camera(telefono: boolean, t: number): Camera {
 // La conseguenza: il dispositivo visto basso; la camera si allontana piano e la luce cala sulla chiave.
 export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const f = useCurrentFrame();
+  const stile = useStile();
   const { durata } = props;
   const piano = pianoRischio(props, durata);
   const telefono = props.dispositivo === "smartphone";
@@ -51,12 +52,11 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const bordi = telefono ? BORDI_TELEFONO : BORDI_SCHERMO;
   const cam = fraLeQuote(mossa, bordi.alti, bordi.bassi, alto, basso);
   const luce = 1 - 0.4 * liscio(fase(f, piano.ombra, piano.ombra + 20));
-  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22), font: SERIF, peso: 500, corsivo: true }];
+  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22), peso: 500, corsivo: true }];
   const titolo: Riga[] = [
     {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: C.amber, colpo: true } : p)),
+      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
       size: corpo(props.titolo, 132, 12),
-      font: SERIF,
       peso: 700,
     },
   ];

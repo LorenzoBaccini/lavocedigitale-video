@@ -125,8 +125,7 @@ titoli, grana, vignettatura, transizione. Scene, Overlay, Foglio, occhielli e no
 `useStile()`; nessuna scena scrive un colore o un carattere. Restano fuori dallo stile i materiali del
 set 3D (`set/luci.ts`, `Portatile.tsx`, oggetti) e i disegni degli schermi (`set/disegni.ts`, che usano
 il carattere delle interfacce `SANS_SCHERMI`): un nuovo set li sostituisce in blocco. Come la variante,
-il contesto dello stile non attraversa il `ThreeCanvas`: dentro la scena 3D va passato come prop. Gli
-stili non ancora costruiti puntano ai token di `scrivania` in `STILI`, e la pipeline non li sceglie.
+il contesto dello stile non attraversa il `ThreeCanvas`: dentro la scena 3D va passato come prop.
 
 I tre set condividono il guscio `set/Palco.tsx` (fondo, canvas con le ombre, camera); ognuno ci mette dentro
 luci, piano e dispositivi. Lo stile sceglie anche il set e il fondo delle grafiche: le scene montano `Set3D`, che legge lo stile fuori dal
@@ -169,6 +168,48 @@ Titoli centrati. Transizione `lampo`: sul primo frame di ogni scena tranne la pr
 in 6 frame si spegne virando al ciano (`lampo` in `editoriale/transizione.ts`, `Lampo.tsx`): un solo `div`, niente
 scene doppie. Il controllo d'impaginazione lo spegne come la spinta.
 
+**schermo** (`stili/schermo.ts`): niente 3D. Lo stile ha `set: "schermo"` e in `Notizia` le sei scene che negli altri
+stili montano `Set3D` (gancio, allarme, oggetto, rischio, telefono, documenti) sono sostituite dalle loro rese a tutto
+quadro in `editoriale/schermo/` (`SCENE_SCHERMO`); le scene grafiche restano quelle comuni. `Set3D` lancia un errore se
+lo stile è schermo: un `ThreeCanvas` montato per sbaglio non passa inosservato, e `schermo.test.ts` controlla che i
+file della cartella non importino il 3D e che ogni scena con `<Set3D` abbia la sua resa. Le rese riusano i piani
+(`piani/`, tempi, testi e suoni identici) e i titoli delle scene del set (`titoloGancio`, `titoliAllarme`,
+`titoliRischio`, `titoliOggetto`, `titoloTelefono`, `titoloDocumenti`, `Conferma`, esportati dai loro file): cambia
+solo cosa sta sotto i titoli.
+
+Sotto i titoli c'è lo schermo, da bordo a bordo: `Schermata` mostra un disegno (in pixel suoi) dentro un riquadro del
+fotogramma, inquadrato da una `Ripresa` (il punto del disegno da mettere al centro e la scala; `schermo/vista.ts`,
+puro e provato). La vista non mostra mai oltre il bordo del disegno del portatile; il telefono, che ha i bordi a
+tinta unita, la camera lo inquadra libera e il fondo del riquadro ne continua il colore. I disegni sono quelli delle
+texture del set (`set/disegni.ts`, `set/oggetti/disegni.ts`; la scelta dello schermo del portatile ora sta in
+`set/schermata.ts`, condivisa con `Portatile`), dipinti su un canvas 2D (`Disegno`, una volta per contenuto, quando
+i font sono pronti; il telefono a 2× perché a tutto quadro è ingrandito). La camera scorre e zooma fra due riprese
+(`fraRiprese`: punto in linea retta, scala in proporzione) e gli stacchi in asse la stringono come sul set. Il
+riquadro intero è l'ingombro pieno per il controllo d'impaginazione: i titoli stanno sopra e sotto, mai sopra lo
+schermo. Per questo le quote dei titoli con la parola del colpo, a sinistra, contano anche la riserva del colpo
+(`larghezzaRiga` in `Titolo.tsx`): senza, il titolo andava su due righe e finiva sopra lo schermo.
+
+Scena per scena: nel gancio lo schermo (pagina, desktop, telefono bloccato o l'oggetto) quasi fermo, poi sulla chiave
+la camera stringe sul titolo della pagina o sul punto caldo; prima di un allarme la notifica scende al suo posto
+(`NotificaSchermo`) e la camera va da lei. Nell'allarme la notifica in primo piano fra sopratitolo e titolo, con il
+cerchio bianco e la sottolineatura nel blu chiaro (cadono sulla notifica scura). Nell'oggetto su `indica` il
+puntatore (`Puntatore`, `schermo/tocco.ts`: viaggio di 14 frame, tocco sul frame d'arrivo, onda dell'accento di 16)
+va al pulsante, alla riga evidenziata del telefono (lì col dito, un cerchio grigio) o al punto caldo dell'oggetto,
+mentre la camera stringe; sugli oggetti senza schermo il richiamo di `indica` sta sotto il riquadro, la conferma
+spuntata in basso come sul set. Chiavetta, router e carta sono schede illustrate piatte (`Illustrazioni.tsx`, gli
+stessi colori e dettagli degli oggetti 3D). Nel rischio la camera si allontana e sulla chiave lo schermo si spegne
+del 40 %. Nel telefono le opzioni stanno sempre intere fra i titoli e i sottotitoli, barrato e cerchio come sul set.
+Nei documenti i pezzi sono schede piatte in colonna sul grigio (tessera, documento e lettera del PIN dai disegni
+del set, il lettore illustrato), ognuno il suo ingombro, le note a destra come sul set.
+
+Grafiche: `Scheda` (`grafiche: "scheda"`), una scheda d'interfaccia bianca dagli angoli tondi sul grigio chiaro
+`#eceef2`, fra il logo e i sottotitoli. Inter per titoli e testi, testo `#15181d`, tenue `#555d6b`, accento blu di
+sistema `#0a63d6` (scurito per stare a 4,5:1 anche sul grigio), timbro e barrato rossi. Sottotitolo scuro in una
+pillola bianca opaca, chiave blu (`schermo.test.ts`: testo e chiave oltre 4,5:1, ogni colore di testo oltre 3:1 su
+scheda e grigio). Niente ombre sui testi, niente vignettatura, grana leggera. Titoli a sinistra come lo studio, ma la
+transizione è lo `scorrimento`: la stessa spinta di 10 frame in verticale (`Spinta` con `verticale`), la scena nuova
+sale da sotto come in un feed; il controllo d'impaginazione la spegne come le altre.
+
 Il controllo d'impaginazione forza le dimensioni con `--stile= --gancio= --chiusura= --durata=` (un valore
 sconosciuto è un errore; uno valido ma non ancora in `ATTIVI` dà un avviso, perché il fotogramma mostra
 ancora quello di base) e con `--variante=luce:sera,apertura:alta`:
@@ -199,7 +240,7 @@ node --experimental-strip-types pipeline/render.ts out/<slug>/props.json out/<sl
 
 - `agent-video.md`: le istruzioni del copione (il prompt dello storyboard).
 - `src/`: la composizione Remotion; `src/editoriale/` il sistema comune (set, carta, segni, piani
-  delle scene), `src/scenes/` le scene.
+  delle scene, `schermo/` le scene del set rese a tutto quadro), `src/scenes/` le scene.
 - `pipeline/`: dall'articolo al post; `pipeline/canali/` i client di Telegram, Facebook e Buffer.
 - `suoni/`: foley e sottofondo musicale sintetizzati, generati fuori da git.
 - `fixtures/`: storyboard e timing di prova (vedi `fixtures/README.md`).

@@ -77,7 +77,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
     ? inAsse(puntoSchermo(CENTRO_PRIMO_PIANO_PX, PULSANTE_PX.y + PULSANTE_PX.h / 2), distanzaPer(LARGHEZZA_PULSANTE, primoPiano.larghezza), primoPiano.quota)
     : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
   const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
-  const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15) }] : [])];
+  const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15, stile.larghezza) }] : [])];
   const limite = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe(testata) + 36;
   const cam = telefono
     ? fraTitoloEConferma(avvicinata, limite, conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA : FONDO_UTILE)
@@ -91,8 +91,8 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   const richiamoSotto = segno ? segno.cy + segno.ry + 140 < FONDO_UTILE - (conferma ? 110 : 10) : true;
 
   const righe: Riga[] = [
-    { parole: piano.titolo, size: corpo(props.titolo, 100, 18), peso: 700 },
-    ...(piano.evidenza.length ? [{ parole: piano.evidenza.map((p) => ({ ...p, colore: stile.colori.accento })), size: corpo(props.evidenza ?? "", 84, 15), peso: 600, corsivo: true }] : []),
+    { parole: piano.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza), peso: 700 },
+    ...(piano.evidenza.length ? [{ parole: piano.evidenza.map((p) => ({ ...p, colore: stile.colori.accento })), size: corpo(props.evidenza ?? "", 84, 15, stile.larghezza), peso: 600, corsivo: true }] : []),
   ];
   const ok = piano.conferma === undefined ? 0 : fase(f, piano.conferma + 6, piano.conferma + 14);
   return (
@@ -124,7 +124,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
           <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
             <Pennarello d={percorso(PUNTI_SPUNTA)} colore={inchiostro ? stile.colori.suChiaro : stile.colori.testo} spessore={8} progresso={(f - piano.conferma) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
           </svg>
-          <div data-impaginazione="conferma" data-su-chiaro={inchiostro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(conferma, 66, 20), lineHeight: 1.12, color: inchiostro ? stile.colori.suChiaro : stile.colori.testo, textShadow: inchiostro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{conferma}</div>
+          <div data-impaginazione="conferma" data-su-chiaro={inchiostro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(conferma, 66, 20, stile.larghezza), lineHeight: 1.12, color: inchiostro ? stile.colori.suChiaro : stile.colori.testo, textShadow: inchiostro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{conferma}</div>
         </div>
       )}
     </>

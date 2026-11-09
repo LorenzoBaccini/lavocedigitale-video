@@ -82,11 +82,11 @@ export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
     return sottolineatura(lunga, 12 + i).map(([x, y]): Punto => [a.x + x * Math.cos(inclinazione) - y * Math.sin(inclinazione), a.y + x * Math.sin(inclinazione) + y * Math.cos(inclinazione)]);
   });
 
-  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 68, 22), peso: 500, corsivo: true }];
+  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 68, 22, stile.larghezza), peso: 500, corsivo: true }];
   const titolo: Riga[] = [
     {
       parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
-      size: corpo(props.titolo, 112, 15),
+      size: corpo(props.titolo, 112, 15, stile.larghezza),
       peso: 700,
     },
   ];

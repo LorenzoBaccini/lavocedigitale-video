@@ -50,7 +50,7 @@ export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
   const righe: Riga[] = [
     {
       parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento } : p)),
-      size: corpo(props.titolo, 104, 16),
+      size: corpo(props.titolo, 104, 16, stile.larghezza),
       peso: 700,
     },
   ];

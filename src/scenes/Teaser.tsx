@@ -37,7 +37,7 @@ export const Teaser: React.FC<ScenaDi<"teaser">> = (props) => {
   const xRiga = (w: number) => (allineaTesto(stile) === "left" ? MARGINE : (LARGHEZZA - w) / 2);
   return (
     <Foglio tipo="quadretti" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <Titolo nome="testo" f={f} tinta="grafica" righe={[{ parole: piano.parole, size: Math.max(60, corpo(testo, 84, 26)), peso: 700 }]} style={{ position: "absolute", top: TITOLO_TOP + 150, left: MARGINE, right: MARGINE }} />
+      <Titolo nome="testo" f={f} tinta="grafica" righe={[{ parole: piano.parole, size: Math.max(60, corpo(testo, 84, 26, stile.larghezza)), peso: 700 }]} style={{ position: "absolute", top: TITOLO_TOP + 150, left: MARGINE, right: MARGINE }} />
       {RIGHE.map((riga, i) => (
         <div key={i} style={{ position: "absolute", top: riga.y, left: xRiga(riga.w), width: riga.w, display: "flex", gap: 16 }}>
           {sagome(riga.w, 41 + i).map((l, j) => (

@@ -6,7 +6,7 @@ import { avvisiNonAttivi, momentiDi, varianteDaArgomenti } from "./controlla-imp
 
 test("un valore valido ma non ancora attivo si controlla con un avviso: il fotogramma mostra quello di base", () => {
   assert.deepEqual(avvisiNonAttivi(VARIANTE_BASE), []);
-  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "notte", durata: "corta" }), ["stile notte non ancora attivo: si vede scrivania", "durata corta non ancora attivo: si vede media"]);
+  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "schermo", durata: "corta" }), ["stile schermo non ancora attivo: si vede scrivania", "durata corta non ancora attivo: si vede media"]);
 });
 
 test("--variante sovrascrive solo i campi dati, sulla variante delle props", () => {

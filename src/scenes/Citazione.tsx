@@ -30,7 +30,7 @@ export const Citazione: React.FC<ScenaDi<"citazione">> = (props) => {
   const stile = useStile();
   const { durata, testo, fonte } = props;
   const piano = pianoCitazione(props, durata);
-  const size = Math.max(50, corpo(testo, 66, 70));
+  const size = Math.max(50, corpo(testo, 66, 70, stile.larghezza));
   const righe = Math.ceil((testo.length * size * 0.44) / (RITAGLIO.w - 120));
   const alto = righe * size * 1.12;
   // sul poster niente ritaglio di giornale: la frase sta sulla tinta

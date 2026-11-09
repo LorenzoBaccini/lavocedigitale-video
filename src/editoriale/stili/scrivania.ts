@@ -21,7 +21,9 @@ export const SCRIVANIA: Stile = {
     inchiostro: { testo: INCHIOSTRO, tenue: "#5E5A52", penna: "#1F3A8A", timbro: "#A3271F", pennarello: "#191919" },
   },
   caratteri: { titolo: SERIF, testo: SANS },
+  larghezza: 1,
   ombra: (sfocatura, opacita, y = 2) => `0 ${y}px ${sfocatura}px rgba(0,0,0,${opacita})`,
+  bagliore: "none",
   sottotitolo: {
     sulSet: { testo: CARTA_CHIARA, chiave: AMBRA, ombra: "0 4px 24px rgba(0,0,0,0.85)" },
     sulleGrafiche: { testo: INCHIOSTRO, chiave: AMBRA_STAMPATA, ombra: "none" },

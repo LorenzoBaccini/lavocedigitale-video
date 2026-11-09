@@ -17,5 +17,16 @@ export function scartoSpinta(f: number, durata: number, larghezza: number, entra
   return (1 - dentro - fuori) * larghezza;
 }
 
-/** Il frame che vede la scena: mentre esce, oltre la sua fine, resta ferma sull'ultimo (le scene non sono fatte per f >= durata). */
+/** Quanti frame dura il lampo dopo uno stacco. */
+export const DURATA_LAMPO = 6;
+
+/** L'intensita' del lampo (0..1) al frame `f` del video: piena sul primo frame di ogni scena tranne la prima, si spegne in `DURATA_LAMPO` frame. */
+export function lampo(f: number, inizi: number[]): number {
+  const stacco = inizi.filter((i) => i > 0 && i <= f).at(-1);
+  if (stacco === undefined) return 0;
+  const t = (f - stacco) / DURATA_LAMPO;
+  return t >= 1 ? 0 : (1 - t) ** 2;
+}
+
+/** Il frame che vede la scena:mentre esce, oltre la sua fine, resta ferma sull'ultimo (le scene non sono fatte per f >= durata). */
 export const frameScena = (f: number, durata: number): number => Math.min(f, durata - 1);

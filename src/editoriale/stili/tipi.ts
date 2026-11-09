@@ -4,10 +4,10 @@ export type NomeStile = (typeof NOMI_STILI)[number];
 /** Come si passa da una scena all'altra. */
 export type Transizione = "taglio" | "spinta" | "lampo";
 export type Allineamento = "centro" | "sinistra";
-/** Il set delle scene 3D: la scrivania di rovere o il fondale continuo a tinta unita. */
-export type NomeSet = "scrivania" | "fondale";
-/** Sotto le scene grafiche: un foglio sulla scrivania o un poster a tinta piena. */
-export type Grafiche = "carta" | "poster";
+/** Il set delle scene 3D: la scrivania di rovere, il fondale continuo a tinta unita, il piano scuro di notte. */
+export type NomeSet = "scrivania" | "fondale" | "notturno";
+/** Sotto le scene grafiche: un foglio sulla scrivania, un poster a tinta piena, il nero con la griglia. */
+export type Grafiche = "carta" | "poster" | "griglia";
 
 /** Il sottotitolo in una delle due situazioni (sopra il set, sopra le scene grafiche). */
 export interface TrattamentoSottotitolo {
@@ -16,6 +16,10 @@ export interface TrattamentoSottotitolo {
   chiave: string;
   /** `text-shadow` CSS, "none" per nessuna */
   ombra: string;
+  /** `text-shadow` della sola parola chiave; assente: nessuno */
+  bagliore?: string;
+  /** il carattere; assente: quello del testo dello stile */
+  carattere?: string;
   /** la pillola dietro il testo; assente: il testo sta direttamente sulla scena */
   pillola?: { fondo: string; raggio: number; imbottitura: string };
 }
@@ -45,8 +49,12 @@ export interface Stile {
     inchiostro: { testo: string; tenue: string; penna: string; timbro: string; pennarello: string };
   };
   caratteri: { titolo: string; testo: string };
+  /** quanto sono larghi i caratteri dello stile rispetto a Lora e Inter: `corpo` divide per questo i corpi che calcola */
+  larghezza: number;
   /** `text-shadow` dei testi sopra il set */
   ombra: (sfocatura: number, opacita: number, y?: number) => string;
+  /** `text-shadow` dei testi sulle scene grafiche, "none" per nessuno */
+  bagliore: string;
   sottotitolo: { sulSet: TrattamentoSottotitolo; sulleGrafiche: TrattamentoSottotitolo };
   allineamentoTitoli: Allineamento;
   /** opacita' della grana */

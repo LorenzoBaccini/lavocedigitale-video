@@ -25,7 +25,7 @@ const Colonna: React.FC<{ lato: Lato; p: number; accento: boolean; x: number }> 
     <div style={{ height: TESTA, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
       <div data-impaginazione="voce" style={{ textAlign: "center", fontFamily: stile.caratteri.testo, fontWeight: 600, fontSize: 40, lineHeight: 1.2, color: stile.colori.inchiostro.tenue }}>{lato.titolo}</div>
     </div>
-    <div data-impaginazione="valore" style={{ marginTop: 24, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(lato.valore, 112, 7), lineHeight: 1.1, color: accento ? stile.colori.accentoSuChiaro : stile.colori.inchiostro.testo, whiteSpace: "nowrap", fontVariantNumeric: "lining-nums" }}>{lato.valore}</div>
+    <div data-impaginazione="valore" style={{ marginTop: 24, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(lato.valore, 112, 7, stile.larghezza), lineHeight: 1.1, color: accento ? stile.colori.accentoSuChiaro : stile.colori.inchiostro.testo, whiteSpace: "nowrap", fontVariantNumeric: "lining-nums" }}>{lato.valore}</div>
     </div>
   );
 };
@@ -38,8 +38,8 @@ export const Confronto: React.FC<ScenaDi<"confronto">> = (props) => {
   const piano = pianoConfronto(props, durata);
   const xa = LARGHEZZA / 2 - FILETTO / 2 - 20 - COLONNA;
   const xb = LARGHEZZA / 2 + FILETTO / 2 + 20;
-  const yValore = ALTO + TESTA + 24 + corpo(b.valore, 112, 7) * 0.55;
-  const largo = Math.min(COLONNA / 2 - 6, b.valore.length * corpo(b.valore, 112, 7) * 0.3 + 26);
+  const yValore = ALTO + TESTA + 24 + corpo(b.valore, 112, 7, stile.larghezza) * 0.55;
+  const largo = Math.min(COLONNA / 2 - 6, b.valore.length * corpo(b.valore, 112, 7, stile.larghezza) * 0.3 + 26);
   return (
     <Foglio tipo="giornale" spinta={spintaFoglio(f, durata, piano.stacchi)}>
       <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile) }}>

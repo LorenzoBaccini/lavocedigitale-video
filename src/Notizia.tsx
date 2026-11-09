@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
 
+import { Lampo } from "./editoriale/Lampo";
 import { pianoScena } from "./editoriale/piani";
 import { Spinta } from "./editoriale/Spinta";
 import { stileDelVideo, StileVideo } from "./editoriale/stili";
@@ -28,8 +29,9 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
   const linea = costruisciLinea(timing, FPS);
   const aspetto = varianteDi(variante);
   const stile = stileDelVideo(aspetto.stile, storyboard.slug);
-  // il controllo d'impaginazione misura ogni scena ferma al suo posto, non a meta' di una spinta
+  // il controllo d'impaginazione misura ogni scena ferma al suo posto, non a meta' di una spinta o sotto un lampo
   const spinta = stile.transizione === "spinta" && !misuraImpaginazione;
+  const lampo = stile.transizione === "lampo" && !misuraImpaginazione;
   const ultima = storyboard.frasi.length - 1;
   return (
     <VarianteVideo.Provider value={aspetto}>
@@ -69,6 +71,7 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
                 </Fragment>
               );
             })}
+            {lampo && <Lampo inizi={linea.inizi} />}
             <Stanza />
             <Sottofondo tema={aspetto.musica} timing={timing} linea={linea} />
             <Overlay storyboard={storyboard} timing={timing} linea={linea} />

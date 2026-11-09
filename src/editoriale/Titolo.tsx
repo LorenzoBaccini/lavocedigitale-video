@@ -18,7 +18,7 @@ export type Riga = {
   sottolinea?: { da: number; durata: number; colore: string; seme: number };
 };
 
-/** Dove sta il titolo: sul set (testo chiaro con un'ombra leggera) o su una scena grafica (inchiostro, piatto). */
+/** Dove sta il titolo: sul set (testo chiaro con un'ombra leggera) o su una scena grafica (inchiostro, col bagliore dello stile). */
 export type Tinta = "set" | "grafica";
 
 // le parole entrano due frame prima di essere dette: l'occhio arriva insieme all'orecchio
@@ -48,7 +48,7 @@ export const Titolo: React.FC<{ nome: string; f: number; righe: Riga[]; style: C
   const allinea = allineaFlesso(stile);
   const sinistra = allinea === "flex-start";
   const colore = tinta === "set" ? stile.colori.testo : stile.colori.inchiostro.testo;
-  const ombra = tinta === "set" ? stile.ombra(14, 0.45) : "none";
+  const ombra = tinta === "set" ? stile.ombra(14, 0.45) : stile.bagliore;
   return (
     <div data-impaginazione={nome} style={{ ...style, display: "flex", flexDirection: "column", alignItems: allinea, gap: 4 }}>
       {righe.map((riga, r) => (

@@ -66,7 +66,7 @@ export const Data: React.FC<ScenaDi<"data">> = (props) => {
       )}
       {timbro && piano.timbro !== undefined && f >= piano.timbro && (
         <div style={{ position: "absolute", left: MARGINE, right: MARGINE, top: GRIGLIA.y + (fondoGriglia - GRIGLIA.y) * 0.5, display: "flex", justifyContent: "center", pointerEvents: "none" }}>
-          <div data-impaginazione="timbro" style={{ fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: corpo(timbro, 96, 9), letterSpacing: "0.12em", textTransform: "uppercase", color: stile.colori.inchiostro.timbro, border: `6px double ${stile.colori.inchiostro.timbro}`, padding: "6px 26px", borderRadius: 10, mixBlendMode: stile.grafiche === "carta" ? "multiply" : "normal", opacity: 0.85 * colpo, transform: `rotate(-7deg) scale(${1.14 - 0.14 * colpo})`, WebkitMaskImage: "radial-gradient(circle at 30% 40%, #000 55%, rgba(0,0,0,0.72) 100%)" }}>{timbro}</div>
+          <div data-impaginazione="timbro" style={{ fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: corpo(timbro, 96, 9, stile.larghezza), letterSpacing: "0.12em", textTransform: "uppercase", color: stile.colori.inchiostro.timbro, border: `6px double ${stile.colori.inchiostro.timbro}`, padding: "6px 26px", borderRadius: 10, mixBlendMode: stile.grafiche === "carta" ? "multiply" : "normal", opacity: 0.85 * colpo, transform: `rotate(-7deg) scale(${1.14 - 0.14 * colpo})`, WebkitMaskImage: "radial-gradient(circle at 30% 40%, #000 55%, rgba(0,0,0,0.72) 100%)" }}>{timbro}</div>
         </div>
       )}
     </Foglio>

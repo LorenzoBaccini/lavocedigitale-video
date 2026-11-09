@@ -43,8 +43,8 @@ export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
     const scelte = parole.slice(da, a);
     if (!scelte.length) return [];
     const testo = scelte.map((p) => p.t).join(" ");
-    if (!grossa) return [{ parole: scelte, size: Math.max(56, corpo(testo, 80, 22)), peso: 500 }];
-    return [{ parole: scelte, size: Math.max(76, corpo(testo, 136, 11)), peso: 700, sottolinea: { da: piano.sottolinea, durata: DURATA_SOTTOLINEATURA, colore: stile.colori.accento, seme: 4 } }];
+    if (!grossa) return [{ parole: scelte, size: Math.max(Math.round(56 / stile.larghezza), corpo(testo, 80, 22, stile.larghezza)), peso: 500 }];
+    return [{ parole: scelte, size: Math.max(Math.round(76 / stile.larghezza), corpo(testo, 136, 11, stile.larghezza)), peso: 700, sottolinea: { da: piano.sottolinea, durata: DURATA_SOTTOLINEATURA, colore: stile.colori.accento, seme: 4 } }];
   };
   const righe = [...riga(0, grande[0], false), ...riga(grande[0], grande[1], true), ...riga(grande[1], parole.length, false)];
 

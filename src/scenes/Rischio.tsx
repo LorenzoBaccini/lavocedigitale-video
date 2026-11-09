@@ -47,16 +47,16 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const telefono = props.dispositivo === "smartphone";
   const mossa = avvicina(camera(telefono, fase(f, 0, durata)), 0.88 ** piano.stacchi.filter((s) => f >= s).length);
   // lo schermo sta fra il sopratitolo e il titolo in ogni fotogramma, non solo in quelli misurati
-  const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: corpo(props.sopra, 72, 22) }]) + STACCO;
-  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12) }]) - STACCO;
+  const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza) }]) + STACCO;
+  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12, stile.larghezza) }]) - STACCO;
   const bordi = telefono ? BORDI_TELEFONO : BORDI_SCHERMO;
   const cam = fraLeQuote(mossa, bordi.alti, bordi.bassi, alto, basso);
   const luce = 1 - 0.4 * liscio(fase(f, piano.ombra, piano.ombra + 20));
-  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22), peso: 500, corsivo: true }];
+  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza), peso: 500, corsivo: true }];
   const titolo: Riga[] = [
     {
       parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
-      size: corpo(props.titolo, 132, 12),
+      size: corpo(props.titolo, 132, 12, stile.larghezza),
       peso: 700,
     },
   ];

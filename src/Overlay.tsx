@@ -38,9 +38,9 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
       )}
       {!ridondante && (
         <div data-impaginazione="sottotitolo" style={{ position: "absolute", bottom: SOTTOTITOLO_BASSO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center", opacity: Math.min(1, entrata * 1.5), transform: `scale(${0.92 + 0.08 * entrata})` }}>
-          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "0 18px", fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: 64, lineHeight: 1.15, letterSpacing: -1, color: sotto.testo, textShadow: sotto.ombra, ...(sotto.pillola && { background: sotto.pillola.fondo, borderRadius: sotto.pillola.raggio, padding: sotto.pillola.imbottitura }) }}>
+          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "0 18px", fontFamily: sotto.carattere ?? stile.caratteri.testo, fontWeight: 800, fontSize: 64, lineHeight: 1.15, letterSpacing: -1, color: sotto.testo, textShadow: sotto.ombra, ...(sotto.pillola && { background: sotto.pillola.fondo, borderRadius: sotto.pillola.raggio, padding: sotto.pillola.imbottitura }) }}>
             {blocco.parole.map((p, j) => (
-              <span key={j} style={{ color: p.chiave ? sotto.chiave : undefined }}>{p.t}</span>
+              <span key={j} style={{ color: p.chiave ? sotto.chiave : undefined, textShadow: p.chiave ? sotto.bagliore : undefined }}>{p.t}</span>
             ))}
           </div>
         </div>

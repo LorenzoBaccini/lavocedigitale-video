@@ -128,7 +128,8 @@ il carattere delle interfacce `SANS_SCHERMI`): un nuovo set li sostituisce in bl
 il contesto dello stile non attraversa il `ThreeCanvas`: dentro la scena 3D va passato come prop. Gli
 stili non ancora costruiti puntano ai token di `scrivania` in `STILI`, e la pipeline non li sceglie.
 
-Lo stile sceglie anche il set e il fondo delle grafiche: le scene montano `Set3D`, che legge lo stile fuori dal
+I tre set condividono il guscio `set/Palco.tsx` (fondo, canvas con le ombre, camera); ognuno ci mette dentro
+luci, piano e dispositivi. Lo stile sceglie anche il set e il fondo delle grafiche: le scene montano `Set3D`, che legge lo stile fuori dal
 canvas e monta `Scrivania`, `Fondale` o `Notturno` (`set: "scrivania" | "fondale" | "notturno"`); `Foglio` monta il
 foglio di carta, il `Poster` o la `Griglia` (`grafiche: "carta" | "poster" | "griglia"`). Titoli e occhielli seguono `allineamentoTitoli` anche dentro le scene
 (`allineaTesto`, `allineaFlesso`). `colori.velo` tinge il velo sopra il set; `colori.suChiaro` e
@@ -155,8 +156,10 @@ luce ciano in un angolo diverso per tipo di scena. JetBrains Mono per titoli e t
 hanno il bagliore ciano dello stile (`bagliore`, il `text-shadow` dei titoli sulle grafiche e del contenitore della
 griglia, che i testi ereditano; `none` negli altri stili). Il sottotitolo resta Inter (`carattere` del trattamento):
 si legge in un attimo anche dove il mono sarebbe largo. Il mono è circa il 20 % più largo di Lora e Inter: `larghezza: 1.2`
-nello stile, e `corpo` (in `anim.ts`) divide per questo i corpi che calcola dalla lunghezza del testo, come il
-gancio i suoi corpi minimi; negli altri stili vale 1 e i corpi restano quelli di prima. Senza, il controllo
+nello stile, e `corpo` (in `anim.ts`) divide per questo i corpi che calcola dalla lunghezza del testo e il suo
+`minimo`; `altezzaRighe` (`editoriale/titoli.ts`), che stima le righe dei titoli prima del fotogramma per piazzare
+camera e oggetti, moltiplica per lo stesso fattore la larghezza media del carattere. Negli altri stili vale 1 e
+corpi e stime restano quelli di prima. Senza, il controllo
 d'impaginazione trovava titoli sopra telefono e pagina, numero e valori del confronto oltre i margini. Chiave ciano accesa (`bagliore` del trattamento, solo sulla
 parola chiave) dentro una pillola quasi nera dagli angoli stretti: sopra uno schermo bianco il testo resterebbe
 illeggibile, con la pillola testo e chiave superano 4,5:1 su bianco, nero e fondi (`notte.test.ts`, che prova anche

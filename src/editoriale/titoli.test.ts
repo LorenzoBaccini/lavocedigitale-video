@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { NOTTE } from "./stili/notte.ts";
 import { altezzaRighe, paroleInAccento, paroleTitolo } from "./titoli.ts";
 import type { Voce } from "./voce.ts";
 
@@ -29,4 +30,11 @@ test("l'altezza stimata del titolo conta le righe che vanno a capo", () => {
   // il gancio del fascicolo: la riga piccola dopo la chiave va a capo
   const lunga = altezzaRighe([{ testo: "Devi entrare nel", size: 80 }, { testo: "fascicolo", size: 136 }, { testo: "sanitario dell'Emilia-Romagna?", size: 59 }]);
   assert.ok(lunga > 80 * 1.12 + 136 * 1.12 + 59 * 1.12 * 2 - 1, `${lunga}`);
+});
+
+test("col mono della notte un titolo vicino all'a capo conta una riga in piu'", () => {
+  // 30 caratteri a 56 px: col serif ci stanno in 920 px, col mono (0,6 em) no
+  const riga = [{ testo: "a".repeat(30), size: 56 }];
+  assert.ok(Math.abs(altezzaRighe(riga, 920) - 56 * 1.12) < 1e-9);
+  assert.ok(Math.abs(altezzaRighe(riga, 920, NOTTE.larghezza) - 2 * 56 * 1.12) < 1e-9);
 });

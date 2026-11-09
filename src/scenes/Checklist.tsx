@@ -31,7 +31,7 @@ export const Checklist: React.FC<ScenaDi<"checklist">> = (props) => {
   return (
     <Foglio tipo="quadretti" spinta={spintaFoglio(f, durata, piano.stacchi)}>
       <div style={{ position: "absolute", top: TITOLO_TOP, bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile) }}>
-        <div data-impaginazione="titolo" style={{ maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: Math.max(58, corpo(etichetta, 84, 20, stile.larghezza)), lineHeight: 1.12, color: stile.colori.inchiostro.testo, opacity: entrata, transform: `translateY(${(1 - uscita(entrata)) * 16}px)` }}>{etichetta}</div>
+        <div data-impaginazione="titolo" style={{ maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(etichetta, 84, 20, stile.larghezza, 58), lineHeight: 1.12, color: stile.colori.inchiostro.testo, opacity: entrata, transform: `translateY(${(1 - uscita(entrata)) * 16}px)` }}>{etichetta}</div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 84, maxWidth: "100%", paddingBottom: 20 }}>
           {voci.map((v, i) => {
             const p = fase(f, piano.voci[i], piano.voci[i] + 7);

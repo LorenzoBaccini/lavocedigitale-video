@@ -78,7 +78,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
     : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
   const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
   const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15, stile.larghezza) }] : [])];
-  const limite = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe(testata) + 36;
+  const limite = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe(testata, undefined, stile.larghezza) + 36;
   const cam = telefono
     ? fraTitoloEConferma(avvicinata, limite, conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA : FONDO_UTILE)
     : oggetto === "portatile" && !suPulsante

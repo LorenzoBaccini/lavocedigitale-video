@@ -28,5 +28,5 @@ export function lampo(f: number, inizi: number[]): number {
   return t >= 1 ? 0 : (1 - t) ** 2;
 }
 
-/** Il frame che vede la scena:mentre esce, oltre la sua fine, resta ferma sull'ultimo (le scene non sono fatte per f >= durata). */
+/** Il frame che vede la scena: mentre esce, oltre la sua fine, resta ferma sull'ultimo (le scene non sono fatte per f >= durata). */
 export const frameScena = (f: number, durata: number): number => Math.min(f, durata - 1);

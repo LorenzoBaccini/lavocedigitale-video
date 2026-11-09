@@ -1,9 +1,6 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import { ThreeCanvas } from "@remotion/three";
 import { RepeatWrapping } from "three";
-import { AbsoluteFill, useVideoConfig } from "remotion";
 
-import { FOV } from "../../three/proiezione";
 import { useCanvasTexture } from "../../three/useCanvasTexture";
 import { useVariante } from "../VarianteVideo";
 import { legno, legnoRuvido } from "./disegni";
@@ -12,8 +9,8 @@ import { NORMALE, puntoSchermo, TACCUINO } from "./geometria";
 import type { Luce } from "./luci";
 import { LUCI_SCRIVANIA } from "./luci";
 import type { Notifica, Schermo } from "./Portatile";
+import { Palco } from "./Palco";
 import { Portatile } from "./Portatile";
-import { Rig } from "./Rig";
 
 // Una sola luce chiave (finestra in alto a sinistra) con ombre vere, un riempimento debole, la luce dello schermo.
 const Luci: React.FC<{ chiave: number; luce: Luce }> = ({ chiave, luce }) => {
@@ -107,18 +104,14 @@ export interface PropsScrivania {
 
 // Il set comune delle scene 3D: scrivania, portatile, taccuino, la luce della finestra; l'oggetto della scena si aggiunge come figlio.
 export const Scrivania: React.FC<PropsScrivania> = ({ camera, schermo, notifica, orologio, luce = 1, children }) => {
-  const { width, height } = useVideoConfig();
   const tinta = LUCI_SCRIVANIA[useVariante().luce];
   return (
-    <AbsoluteFill style={{ background: tinta.fondo }}>
-      <ThreeCanvas width={width} height={height} shadows camera={{ fov: FOV, position: camera.pos, near: 0.1, far: 200 }} gl={{ antialias: true }}>
-        <Rig pos={camera.pos} look={camera.look} />
-        <Luci chiave={luce} luce={tinta} />
-        <Piano luce={tinta} />
-        <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
-        <Taccuino />
-        {children}
-      </ThreeCanvas>
-    </AbsoluteFill>
+    <Palco camera={camera} fondo={tinta.fondo}>
+      <Luci chiave={luce} luce={tinta} />
+      <Piano luce={tinta} />
+      <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
+      <Taccuino />
+      {children}
+    </Palco>
   );
 };

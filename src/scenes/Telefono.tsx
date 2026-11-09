@@ -38,7 +38,7 @@ export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
   const stile = useStile();
   const { durata, etichetta, opzioni } = props;
   const piano = pianoTelefono(props, durata);
-  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16, stile.larghezza) }]);
+  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16, stile.larghezza) }], undefined, stile.larghezza);
   const cam = cameraOpzioni(uscita(fase(f, 0, durata)), 0.92 ** piano.stacchi.filter((s) => f >= s).length, sottoITitoli, opzioni.length);
   const resta = piano.cerchio && rettangoloTelefono(opzionePx(piano.cerchio.indice), cam);
   const righe: Riga[] = [

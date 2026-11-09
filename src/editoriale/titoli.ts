@@ -65,10 +65,11 @@ const CARATTERE = 0.52;
 
 /**
  * Altezza stimata di un blocco di righe del `Titolo` largo `larghezza`: ogni riga va a capo quante volte serve.
+ * `carattere` e' la larghezza dei caratteri dello stile (`Stile.larghezza`) rispetto al serif.
  * Serve prima del fotogramma (la camera ne tiene conto); la misura vera la fa il controllo d'impaginazione.
  */
-export function altezzaRighe(righe: { testo: string; size: number }[], larghezza = 920): number {
-  const linee = righe.map((r) => Math.max(1, Math.ceil((r.testo.length * r.size * CARATTERE) / larghezza)) * r.size * 1.12);
+export function altezzaRighe(righe: { testo: string; size: number }[], larghezza = 920, carattere = 1): number {
+  const linee = righe.map((r) => Math.max(1, Math.ceil((r.testo.length * r.size * CARATTERE * carattere) / larghezza)) * r.size * 1.12);
   return linee.reduce((a, b) => a + b, 0) + 4 * Math.max(0, righe.length - 1);
 }
 

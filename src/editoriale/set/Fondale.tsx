@@ -1,13 +1,10 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import { ThreeCanvas } from "@remotion/three";
 import { useMemo } from "react";
 import { BufferGeometry, Float32BufferAttribute } from "three";
-import { AbsoluteFill, useVideoConfig } from "remotion";
 
-import { FOV } from "../../three/proiezione";
 import { profiloLimbo } from "./limbo";
+import { Palco } from "./Palco";
 import { Portatile } from "./Portatile";
-import { Rig } from "./Rig";
 import type { PropsScrivania } from "./Scrivania";
 
 const LARGO = 90;
@@ -67,17 +64,11 @@ const Luci: React.FC<{ chiave: number }> = ({ chiave }) => (
 );
 
 /** Il set dello studio: gli stessi dispositivi della scrivania su un fondale continuo della tinta del video. */
-export const Fondale: React.FC<PropsScrivania & { colore: string }> = ({ camera, schermo, notifica, orologio, luce = 1, colore, children }) => {
-  const { width, height } = useVideoConfig();
-  return (
-    <AbsoluteFill style={{ background: colore }}>
-      <ThreeCanvas width={width} height={height} shadows flat camera={{ fov: FOV, position: camera.pos, near: 0.1, far: 200 }} gl={{ antialias: true }}>
-        <Rig pos={camera.pos} look={camera.look} />
-        <Luci chiave={luce} />
-        <Limbo colore={colore} />
-        <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
-        {children}
-      </ThreeCanvas>
-    </AbsoluteFill>
-  );
-};
+export const Fondale: React.FC<PropsScrivania & { colore: string }> = ({ camera, schermo, notifica, orologio, luce = 1, colore, children }) => (
+  <Palco camera={camera} fondo={colore} flat>
+    <Luci chiave={luce} />
+    <Limbo colore={colore} />
+    <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
+    {children}
+  </Palco>
+);

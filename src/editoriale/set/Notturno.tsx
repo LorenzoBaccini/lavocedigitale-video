@@ -1,12 +1,9 @@
 import { Environment, Lightformer } from "@react-three/drei";
-import { ThreeCanvas } from "@remotion/three";
-import { AbsoluteFill, useVideoConfig } from "remotion";
 
-import { FOV } from "../../three/proiezione";
 import { CIANO, MAGENTA } from "../stili/notte";
 import { NORMALE, puntoSchermo } from "./geometria";
+import { Palco } from "./Palco";
 import { Portatile } from "./Portatile";
-import { Rig } from "./Rig";
 import type { PropsScrivania } from "./Scrivania";
 
 // Quasi buio: due luci di taglio da dietro (ciano a sinistra, magenta a destra), un riempimento debole, lo schermo che illumina.
@@ -48,17 +45,11 @@ const Piano: React.FC = () => (
 );
 
 /** Il set della notte: gli stessi dispositivi della scrivania, senza taccuino, su un piano scuro nel buio. */
-export const Notturno: React.FC<PropsScrivania & { fondo: string }> = ({ camera, schermo, notifica, orologio, luce = 1, fondo, children }) => {
-  const { width, height } = useVideoConfig();
-  return (
-    <AbsoluteFill style={{ background: fondo }}>
-      <ThreeCanvas width={width} height={height} shadows camera={{ fov: FOV, position: camera.pos, near: 0.1, far: 200 }} gl={{ antialias: true }}>
-        <Rig pos={camera.pos} look={camera.look} />
-        <Luci chiave={luce} />
-        <Piano />
-        <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
-        {children}
-      </ThreeCanvas>
-    </AbsoluteFill>
-  );
-};
+export const Notturno: React.FC<PropsScrivania & { fondo: string }> = ({ camera, schermo, notifica, orologio, luce = 1, fondo, children }) => (
+  <Palco camera={camera} fondo={fondo}>
+    <Luci chiave={luce} />
+    <Piano />
+    <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
+    {children}
+  </Palco>
+);

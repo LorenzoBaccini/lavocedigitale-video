@@ -12,7 +12,7 @@ export const Tipografica: React.FC<{ testo: string; durata: number }> = ({ testo
   const stile = useStile();
   return (
     <Foglio tipo="liscia">
-      <div data-impaginazione="testo" style={{ position: "absolute", top: TITOLO_TOP + 120, left: MARGINE, right: MARGINE, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: Math.max(52, corpo(testo, 84, 50, stile.larghezza)), lineHeight: 1.15, color: stile.colori.inchiostro.testo, opacity: fase(f, 0, 8) }}>{testo}</div>
+      <div data-impaginazione="testo" style={{ position: "absolute", top: TITOLO_TOP + 120, left: MARGINE, right: MARGINE, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(testo, 84, 50, stile.larghezza, 52), lineHeight: 1.15, color: stile.colori.inchiostro.testo, opacity: fase(f, 0, 8) }}>{testo}</div>
     </Foglio>
   );
 };

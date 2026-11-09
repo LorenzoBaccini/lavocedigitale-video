@@ -3,12 +3,12 @@ import { AbsoluteFill } from "remotion";
 import type { TipoCarta } from "../carta/stile";
 import { useStile } from "../stili";
 import { conAlfa } from "../stili/alfa";
-import { LUCE_GRIGLIA } from "../stili/notte";
+import { LUCE_GRIGLIA } from "./luce";
 
 /** Il passo della griglia, in pixel. */
 const PASSO = 60;
 
-// la macchia di luce ciano cade in un angolo diverso per ogni tipo di scena
+// la macchia di luce dell'accento cade in un angolo diverso per ogni tipo di scena
 const LUCE: Record<TipoCarta, string> = {
   quadretti: "88% 8%",
   giornale: "8% 92%",
@@ -16,7 +16,7 @@ const LUCE: Record<TipoCarta, string> = {
   liscia: "10% 6%",
 };
 
-/** La scena grafica della notte: nero, griglia sottile, una luce ciano; i testi sopra ereditano il bagliore dello stile. */
+/** La scena grafica a griglia (notte): superficie scura, griglia sottile e una luce dell'accento; i testi sopra ereditano il bagliore dello stile. */
 export const Griglia: React.FC<{ tipo: TipoCarta; spinta?: number; children?: React.ReactNode }> = ({ tipo, spinta = 0, children }) => {
   const { colori, bagliore } = useStile();
   const linea = conAlfa(colori.accento, 0.09);

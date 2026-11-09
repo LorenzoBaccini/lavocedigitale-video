@@ -32,10 +32,10 @@ export const Numero: React.FC<ScenaDi<"numero">> = (props) => {
           style={{ alignSelf: "stretch" }}
         />
         {unita && (
-          <div data-impaginazione="unita" style={{ marginTop: 44, maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: Math.max(48, corpo(unita, 68, 22, stile.larghezza)), lineHeight: 1.15, color: stile.colori.inchiostro.testo, opacity: pu, transform: `translateY(${(1 - uscita(pu)) * 12}px)` }}>{unita}</div>
+          <div data-impaginazione="unita" style={{ marginTop: 44, maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(unita, 68, 22, stile.larghezza, 48), lineHeight: 1.15, color: stile.colori.inchiostro.testo, opacity: pu, transform: `translateY(${(1 - uscita(pu)) * 12}px)` }}>{unita}</div>
         )}
         {nota && (
-          <div data-impaginazione="nota" style={{ marginTop: 26, maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontStyle: "italic", fontWeight: 500, fontSize: Math.max(38, corpo(nota, 48, 30, stile.larghezza)), lineHeight: 1.2, color: stile.colori.inchiostro.tenue, opacity: pn }}>{nota}</div>
+          <div data-impaginazione="nota" style={{ marginTop: 26, maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontStyle: "italic", fontWeight: 500, fontSize: corpo(nota, 48, 30, stile.larghezza, 38), lineHeight: 1.2, color: stile.colori.inchiostro.tenue, opacity: pn }}>{nota}</div>
         )}
       </div>
     </Foglio>

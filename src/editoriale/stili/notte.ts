@@ -11,8 +11,6 @@ export const MAGENTA = "#ff4fd8";
 
 /** La pillola del sottotitolo: tiene il testo leggibile anche sopra uno schermo chiaro del set. */
 export const PILLOLA = { colore: "#05070a", alfa: 0.86 };
-/** La macchia di luce ciano in un angolo della griglia, alla sua opacita' piu' alta: il fondo piu' chiaro su cui cade un testo. */
-export const LUCE_GRIGLIA = 0.14;
 
 const SOTTOTITOLO: TrattamentoSottotitolo = { testo: BIANCO, chiave: CIANO, ombra: "none", bagliore: `0 0 14px ${conAlfa(CIANO, 0.8)}`, carattere: SANS, pillola: { fondo: conAlfa(PILLOLA.colore, PILLOLA.alfa), raggio: 12, imbottitura: "4px 30px 5px" } };
 

@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { contrasto, sovrapponi } from "./colore.ts";
-import { CIANO, LAVAGNA, LUCE_GRIGLIA, NOTTE, PILLOLA } from "./notte.ts";
+import { LUCE_GRIGLIA } from "../griglia/luce.ts";
+import { LAVAGNA, NOTTE, PILLOLA } from "./notte.ts";
 
 const { colori, sottotitolo } = NOTTE;
 
@@ -21,7 +22,7 @@ test("il sottotitolo nella pillola si legge (>= 4.5:1), testo e chiave, anche so
 // ogni testo sul set e sulle grafiche e' sopra i 34 px: testo grande per WCAG, soglia 3:1
 test("sulle grafiche ogni colore di testo si legge (>= 3:1) sul nero e sotto la luce ciano della griglia", () => {
   const { testo, tenue, penna, timbro } = colori.inchiostro;
-  const illuminato = sovrapponi(CIANO, LUCE_GRIGLIA, colori.superficie);
+  const illuminato = sovrapponi(colori.accento, LUCE_GRIGLIA, colori.superficie);
   for (const [chi, c] of Object.entries({ testo, tenue, penna, timbro, accentoSuChiaro: colori.accentoSuChiaro })) {
     for (const sotto of [colori.superficie, illuminato]) {
       assert.ok(contrasto(c, sotto) >= 3, `grafiche ${chi} su ${sotto} ${contrasto(c, sotto).toFixed(2)}`);
@@ -37,7 +38,7 @@ test("sul set testo, tenue e accento si leggono (>= 3:1) sul velo e sul fondo", 
   }
 });
 
-test("sopra lo schermo chiaro del set testo e barrato si vedono (>= 3:1)", () => {
+test("sopra lo schermo chiaro del set il testo si legge (>= 4.5:1) e il barrato si vede (>= 3:1)", () => {
   for (const sotto of ["#ffffff", "#dcdcdc"]) {
     assert.ok(contrasto(colori.suChiaro, sotto) >= 4.5, `testo su ${sotto}`);
     assert.ok(contrasto(colori.segnoSuChiaro, sotto) >= 3, `barrato su ${sotto} ${contrasto(colori.segnoSuChiaro, sotto).toFixed(2)}`);

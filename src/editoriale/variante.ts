@@ -40,7 +40,8 @@ export const VARIANTE_BASE: Variante = { musica: "caldo", luce: "calda", apertur
 export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APERTURE, stile: NOMI_STILI, gancio: GANCI, chiusura: CHIUSURE, fraseFinale: FRASI_FINALI, durata: DURATE };
 
 // Solo i valori gia' costruiti: la pipeline non deve pubblicare uno stile, un gancio o una chiusura ancora segnaposto.
-export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania"], gancio: ["scena"], chiusura: ["cartolina"], durata: ["media"] };
+// fraseFinale resta sulla frase di base finche' la pipeline non sostituisce davvero l'ultima frase: lo storico direbbe il falso.
+export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania"], gancio: ["scena"], chiusura: ["cartolina"], fraseFinale: [2], durata: ["media"] };
 
 /** Quanti video recenti escludono i loro valori; musica, luce e apertura n-1: in n video di fila passano tutte. */
 export const PROFONDITA: { [K in Dimensione]: number } = {
@@ -67,11 +68,13 @@ const valoreStorico = <K extends Dimensione>(v: Partial<Variante>, dim: K): Vari
 
 function scegli<K extends Dimensione>(dim: K, slug: string, recenti: Partial<Variante>[], attivi: Valori): Variante[K] {
   const opzioni = attivi[dim];
-  const usate = new Set(recenti.slice(0, PROFONDITA[dim]).map((v) => valoreStorico(v, dim)));
-  const libere = opzioni.filter((o) => !usate.has(o));
-  // tutti i valori attivi esclusi (succede finche' ce n'e' uno solo): meglio ripetere che fermarsi
-  const fra = libere.length > 0 ? libere : opzioni;
-  return fra[impronta(`${slug}:${dim}`) % fra.length];
+  // con meno valori attivi che video da escludere si accorcia la memoria, un video alla volta: l'ultimo resta escluso finche' si puo'
+  for (let profondita = PROFONDITA[dim]; profondita > 0; profondita--) {
+    const usate = new Set(recenti.slice(0, profondita).map((v) => valoreStorico(v, dim)));
+    const libere = opzioni.filter((o) => !usate.has(o));
+    if (libere.length > 0) return libere[impronta(`${slug}:${dim}`) % libere.length];
+  }
+  return opzioni[impronta(`${slug}:${dim}`) % opzioni.length];
 }
 
 const NOMI_DIMENSIONI = Object.keys(DIMENSIONI) as Dimensione[];

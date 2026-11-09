@@ -57,10 +57,22 @@ test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate 
   assert.deepEqual(ATTIVI.gancio, ["scena"]);
   assert.deepEqual(ATTIVI.chiusura, ["cartolina"]);
   assert.deepEqual(ATTIVI.durata, ["media"]);
+  assert.deepEqual(ATTIVI.fraseFinale, [2]);
   for (const s of SLUGS) {
     const v = scegliVariante(s, [{ stile: "scrivania", gancio: "scena", chiusura: "cartolina", durata: "media" }]);
     for (const k of Object.keys(ATTIVI) as (keyof Variante)[]) assert.ok(ATTIVI[k].includes(v[k] as never), `${s} ${k}`);
   }
+});
+
+test("con meno valori attivi che video esclusi la memoria si accorcia: l'ultimo valore non si ripete mai", () => {
+  const due = { ...ATTIVI, stile: ["scrivania", "studio"] as const };
+  for (const s of SLUGS) {
+    for (const [ultimo, penultimo] of [["studio", "scrivania"], ["scrivania", "studio"], ["studio", "studio"]] as const) {
+      assert.notEqual(scegliVariante(s, [{ stile: ultimo }, { stile: penultimo }], due).stile, ultimo, `${s} ${ultimo}`);
+    }
+  }
+  // un solo valore attivo: si ripete invece di fermarsi
+  assert.equal(scegliVariante(SLUG, [{ stile: "scrivania" }]).stile, "scrivania");
 });
 
 test("dopo il video approvato nessuna dimensione con piu' valori attivi ripete l'aspetto di base", () => {

@@ -2,7 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { VARIANTE_BASE } from "../src/editoriale/variante.ts";
-import { momentiDi, varianteDaArgomenti } from "./controlla-impaginazione.ts";
+import { avvisiNonAttivi, momentiDi, varianteDaArgomenti } from "./controlla-impaginazione.ts";
+
+test("un valore valido ma non ancora attivo si controlla con un avviso: il fotogramma mostra quello di base", () => {
+  assert.deepEqual(avvisiNonAttivi(VARIANTE_BASE), []);
+  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "studio", durata: "corta" }), ["stile studio non ancora attivo: si vede scrivania", "durata corta non ancora attivo: si vede media"]);
+});
 
 test("--variante sovrascrive solo i campi dati, sulla variante delle props", () => {
   assert.deepEqual(varianteDaArgomenti([], undefined), VARIANTE_BASE);

@@ -6,7 +6,7 @@ import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 
 import type { Variante } from "../src/editoriale/variante.ts";
-import { APERTURE, DIMENSIONI, varianteDi } from "../src/editoriale/variante.ts";
+import { APERTURE, ATTIVI, DIMENSIONI, VARIANTE_BASE, varianteDi } from "../src/editoriale/variante.ts";
 import type { Misura } from "../src/impaginazione.ts";
 import { PREFISSO_MISURA, problemiImpaginazione, ZONE } from "../src/impaginazione.ts";
 import { costruisciLinea } from "../src/linea.ts";
@@ -96,6 +96,11 @@ export function varianteDaArgomenti(argomenti: string[], base: Variante | undefi
   return varianteDi({ ...base, ...campi });
 }
 
+/** I valori forzati ma non ancora costruiti: il fotogramma mostra quello di base, un controllo pulito non vale per loro. */
+export function avvisiNonAttivi(v: Variante): string[] {
+  return FORZABILI.filter((k) => !ATTIVI[k].includes(v[k] as never)).map((k) => `${k} ${v[k]} non ancora attivo: si vede ${VARIANTE_BASE[k]}`);
+}
+
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
 //        [--variante=musica:chiaro,luce:sera,apertura:alta] [--stile=…] [--gancio=…] [--chiusura=…] [--durata=…]
 //        [--ogni-apertura] [--passo=N] [--secondi=N]
@@ -107,6 +112,7 @@ if (èPrincipale(import.meta.url)) {
   if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--stile=…] [--ogni-apertura]");
   const props = propsDa(file, Number(argomenti.find((a) => a.startsWith("--secondi="))?.slice("--secondi=".length)) || undefined);
   const variante = varianteDaArgomenti(argomenti, props.variante);
+  for (const avviso of avvisiNonAttivi(variante)) console.warn(`attenzione: ${avviso}`);
   const aperture = argomenti.includes("--ogni-apertura") ? APERTURE : [variante.apertura];
   const passo = Number(argomenti.find((a) => a.startsWith("--passo="))?.slice("--passo=".length)) || undefined;
   process.chdir(fileURLToPath(new URL("..", import.meta.url)));

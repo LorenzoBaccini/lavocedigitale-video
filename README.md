@@ -111,8 +111,10 @@ video di fila passano tutte). Nello storico una voce senza `stile` vale `scrivan
 prima degli stili lo erano. Per le altre dimensioni nuove un valore assente non esclude niente.
 
 La pipeline sceglie solo fra i valori di `ATTIVI`: uno stile, un gancio, una chiusura o una durata si
-aggiungono lì quando sono costruiti e passano il controllo d'impaginazione, non prima. Se tutti i valori
-attivi di una dimensione sono esclusi (succede finché ce n'è uno solo) si ripete. `DIMENSIONI` tiene
+aggiungono lì quando sono costruiti e passano il controllo d'impaginazione, non prima. Se i valori
+attivi sono meno dei video da escludere, la memoria si accorcia un video alla volta (l'ultimo valore resta
+escluso finché ce n'è un altro); con un solo valore attivo si ripete. `fraseFinale` resta sulla frase di
+base finché la pipeline non sostituisce davvero l'ultima frase del copione. `DIMENSIONI` tiene
 invece tutti i valori validi: le props e il controllo d'impaginazione possono forzarne uno qualsiasi.
 `VARIANTE_BASE` è il video approvato (`scrivania`, `scena`, `cartolina`, `media`): lo ha chi non dichiara
 una variante, come le fixture.
@@ -127,7 +129,8 @@ il contesto dello stile non attraversa il `ThreeCanvas`: dentro la scena 3D va p
 stili non ancora costruiti puntano ai token di `scrivania` in `STILI`, e la pipeline non li sceglie.
 
 Il controllo d'impaginazione forza le dimensioni con `--stile= --gancio= --chiusura= --durata=` (un valore
-sconosciuto è un errore) e con `--variante=luce:sera,apertura:alta`:
+sconosciuto è un errore; uno valido ma non ancora in `ATTIVI` dà un avviso, perché il fotogramma mostra
+ancora quello di base) e con `--variante=luce:sera,apertura:alta`:
 
 ```
 node --experimental-strip-types pipeline/controlla-impaginazione.ts fixtures/matrice-03.storyboard.json --passo=5 --secondi=4 --stile=studio
@@ -159,4 +162,5 @@ node --experimental-strip-types pipeline/render.ts out/<slug>/props.json out/<sl
 - `pipeline/`: dall'articolo al post; `pipeline/canali/` i client di Telegram, Facebook e Buffer.
 - `suoni/`: foley e sottofondo musicale sintetizzati, generati fuori da git.
 - `fixtures/`: storyboard e timing di prova (vedi `fixtures/README.md`).
-- `public/fonts/`: Inter e Lora, SIL Open Font License (`OFL-*.txt`).
+- `public/fonts/`: Inter e Lora, SIL Open Font License (`OFL-*.txt`). L'elenco unico è `src/caratteri.ts`:
+  ne derivano sia i `@font-face` del render sia il precaricamento del controllo d'impaginazione.

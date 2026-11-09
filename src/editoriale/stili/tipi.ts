@@ -18,6 +18,7 @@ export interface TrattamentoSottotitolo {
 
 /** L'aspetto di un video al di la' del contenuto: colori, caratteri, sottotitolo, titoli, grana, transizioni. */
 export interface Stile {
+  /** colori in `#rrggbb`: `conAlfa` ne ricava le trasparenze */
   colori: {
     /** dietro le scene */
     fondo: string;

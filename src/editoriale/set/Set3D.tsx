@@ -7,6 +7,8 @@ import { Scrivania } from "./Scrivania";
 /** Il set delle scene 3D scelto dallo stile: lo stile si legge qui, fuori dal canvas, e scende come prop. */
 export const Set3D: React.FC<PropsScrivania> = (props) => {
   const stile = useStile();
+  // lo schermo ha le sue scene a tutto quadro (SCENE_SCHERMO): arrivare qui vorrebbe dire montare il 3D per sbaglio
+  if (stile.set === "schermo") throw new Error("lo stile schermo non monta il set 3D");
   if (stile.set === "fondale") return <Fondale {...props} colore={stile.colori.superficie} />;
   if (stile.set === "notturno") return <Notturno {...props} fondo={stile.colori.fondo} />;
   return <Scrivania {...props} />;

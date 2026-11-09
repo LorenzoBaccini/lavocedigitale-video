@@ -2,6 +2,7 @@ import { AbsoluteFill } from "remotion";
 
 import { Griglia } from "../griglia/Griglia";
 import { Poster } from "../poster/Poster";
+import { Scheda } from "../scheda/Scheda";
 import { useStile } from "../stili";
 import type { TipoCarta } from "./stile";
 
@@ -31,11 +32,13 @@ export const BORDO_FOGLIO = 24;
 
 // Un foglio sulla scrivania visto dall'alto: il legno ai lati, l'ombra del foglio, le fibre, la luce dalla finestra in alto a sinistra.
 // `spinta` avvicina di poco il foglio (la camera che scende); il contenuto sta sopra, fermo nella sua impaginazione.
-// Con lo stile a poster (studio) al posto del foglio c'e' il poster a tinta piena, con la notte il nero a griglia.
+// Con lo stile a poster (studio) al posto del foglio c'e' il poster a tinta piena, con la notte il nero a griglia, con lo
+// schermo una scheda d'interfaccia.
 export const Foglio: React.FC<{ tipo: TipoCarta; spinta?: number; children?: React.ReactNode }> = ({ tipo, spinta = 0, children }) => {
   const stile = useStile();
   if (stile.grafiche === "poster") return <Poster tipo={tipo} spinta={spinta}>{children}</Poster>;
   if (stile.grafiche === "griglia") return <Griglia tipo={tipo} spinta={spinta}>{children}</Griglia>;
+  if (stile.grafiche === "scheda") return <Scheda spinta={spinta}>{children}</Scheda>;
   return (
     <AbsoluteFill style={{ background: stile.colori.superficie }}>
       <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(92deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 9px), repeating-linear-gradient(88deg, rgba(255,220,180,0.05) 0 1px, transparent 1px 23px)" }} />

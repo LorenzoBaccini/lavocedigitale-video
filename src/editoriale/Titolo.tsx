@@ -32,6 +32,10 @@ const COLPO = 0.12;
 // parola, cresciuta, resti nel margine ((W - r)(1 + c) <= W)
 const RISERVA_COLPO = `${(COLPO / (1 + COLPO)) * 100}%`;
 
+/** La larghezza in cui va a capo una riga del titolo: a sinistra, con la parola del colpo, perde la riserva. */
+export const larghezzaRiga = (righe: Riga[], allineamento: "centro" | "sinistra", larghezza = 920): number =>
+  allineamento === "sinistra" && righe.some((r) => r.parole.some((p) => p.colpo)) ? larghezza / (1 + COLPO) : larghezza;
+
 // Entrata con peso: sale di poco, arriva con un assestamento minimo; niente sfocature, niente bagliori.
 const stileParola = (f: number, p: Parola): CSSProperties => {
   const u = f - (p.da - ANTICIPO);

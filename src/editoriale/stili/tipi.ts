@@ -2,12 +2,12 @@ export const NOMI_STILI = ["scrivania", "studio", "notte", "schermo"] as const;
 export type NomeStile = (typeof NOMI_STILI)[number];
 
 /** Come si passa da una scena all'altra. */
-export type Transizione = "taglio" | "spinta" | "lampo";
+export type Transizione = "taglio" | "spinta" | "lampo" | "scorrimento";
 export type Allineamento = "centro" | "sinistra";
-/** Il set delle scene 3D: la scrivania di rovere, il fondale continuo a tinta unita, il piano scuro di notte. */
-export type NomeSet = "scrivania" | "fondale" | "notturno";
-/** Sotto le scene grafiche: un foglio sulla scrivania, un poster a tinta piena, il nero con la griglia. */
-export type Grafiche = "carta" | "poster" | "griglia";
+/** Il set delle scene 3D: la scrivania di rovere, il fondale continuo a tinta unita, il piano scuro di notte; lo schermo non e' 3D. */
+export type NomeSet = "scrivania" | "fondale" | "notturno" | "schermo";
+/** Sotto le scene grafiche: un foglio sulla scrivania, un poster a tinta piena, il nero con la griglia, una scheda d'interfaccia. */
+export type Grafiche = "carta" | "poster" | "griglia" | "scheda";
 
 /** Il sottotitolo in una delle due situazioni (sopra il set, sopra le scene grafiche). */
 export interface TrattamentoSottotitolo {

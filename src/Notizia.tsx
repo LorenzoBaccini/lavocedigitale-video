@@ -3,6 +3,7 @@ import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remo
 
 import { Lampo } from "./editoriale/Lampo";
 import { pianoScena } from "./editoriale/piani";
+import { SCENE_SCHERMO } from "./editoriale/schermo";
 import { Spinta } from "./editoriale/Spinta";
 import { stileDelVideo, StileVideo } from "./editoriale/stili";
 import { Sottofondo, Stanza, Suoni } from "./editoriale/Suoni";
@@ -30,7 +31,8 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
   const aspetto = varianteDi(variante);
   const stile = stileDelVideo(aspetto.stile, storyboard.slug);
   // il controllo d'impaginazione misura ogni scena ferma al suo posto, non a meta' di una spinta o sotto un lampo
-  const spinta = stile.transizione === "spinta" && !misuraImpaginazione;
+  const scorrimento = stile.transizione === "scorrimento";
+  const spinta = (stile.transizione === "spinta" || scorrimento) && !misuraImpaginazione;
   const lampo = stile.transizione === "lampo" && !misuraImpaginazione;
   const ultima = storyboard.frasi.length - 1;
   return (
@@ -40,7 +42,8 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
           <AbsoluteFill style={{ background: stile.colori.fondo }}>
             <style>{fontsCss}</style>
             {storyboard.frasi.map((frase, i) => {
-              const Componente = SCENE[frase.scena.tipo] as React.FC<PropsScena<Scena>> | undefined;
+              // lo stile schermo non monta il set 3D: le scene del set hanno la loro resa a tutto quadro
+              const Componente = ((stile.set === "schermo" ? SCENE_SCHERMO[frase.scena.tipo] : undefined) ?? SCENE[frase.scena.tipo]) as React.FC<PropsScena<Scena>> | undefined;
               const props = propsFrase(storyboard, timing, linea, i);
               const scena = Componente ? <Componente {...props} /> : <Tipografica testo={frase.testo} durata={linea.durate[i]} />;
               const voce = (
@@ -61,7 +64,7 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
               return (
                 <Fragment key={i}>
                   <Sequence from={linea.inizi[i]} durationInFrames={linea.durate[i] + (i < ultima ? DURATA_SPINTA : 0)}>
-                    <Spinta durata={linea.durate[i]} entra={i > 0} esce={i < ultima}>
+                    <Spinta durata={linea.durate[i]} entra={i > 0} esce={i < ultima} verticale={scorrimento}>
                       {scena}
                     </Spinta>
                   </Sequence>

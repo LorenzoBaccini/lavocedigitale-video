@@ -24,7 +24,8 @@
   cavallo del sopratitolo). Va provata con `--passo=15`: deve uscire pulita in ogni fotogramma.
 - Nessuna fixture dichiara `variante`: hanno tutte l'aspetto di base. Le varianti si provano con
   `controlla-impaginazione.ts <fixture> --ogni-apertura` (le tre inquadrature d'apertura del gancio) o
-  `--variante=musica:chiaro,luce:sera,apertura:alta`.
+  `--variante=musica:chiaro,luce:sera,apertura:alta`; stile, gancio, chiusura e durata con
+  `--stile= --gancio= --chiusura= --durata=`.
 - Le fixture `tutte-le-scene-2` e `-3` mettono due `oggetto` di fila: sono valide come storyboard, ma la pipeline
   (`erroriVarieta`) le scarterebbe. Servono a provare le scene, non sono esempi di copione.
 

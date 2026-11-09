@@ -69,6 +69,9 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    che scade dopo 7 giorni. Tiene le sequenze di scene e le varianti degli ultimi 10 video e gli
    slug degli ultimi 200 pubblicati. Se non si legge, il video salta (in prova si va avanti). Un
    video già nello storico o ancora su S3 non si rifà.
+   Subito dopo si sceglie la **variante** (`src/editoriale/variante.ts`): dipende solo dallo slug e
+   dallo storico, quindi viene prima dello storyboard (che dovrà scrivere nella sua durata). Vedi
+   [Varianti e stili](#varianti-e-stili).
 1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md` e le sequenze degli
    ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
    (`src/storyboard/cifre.ts`: ogni numero deve stare nell'articolo) sono un solo controllo, con un
@@ -85,8 +88,7 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    `fraLeQuote` (`src/editoriale/set/geometria.ts`); i titoli animati appoggiati in basso partono da
    `FONDO_TITOLO`, che lascia il posto all'entrata delle parole; le note a mano scendono di corpo, e poi
    si spostano, perché la parola più lunga stia nel margine, ma mai oltre 20 px a sinistra del punto indicato (`src/editoriale/set/nota.ts`): per questo `indica` e le note dei pezzi non hanno parole oltre 15 lettere (`LIMITI.parolaNota`).
-4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, una variante visiva per video (musica,
-   luce, apertura: `src/editoriale/variante.ts`) diversa dagli ultimi.
+4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, con la variante scelta all'inizio.
 5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su
    `https://lavocedigitale.it/images/video/<slug>.mp4`. Poi lo storico, prima dei post: se non si
    scrive, non si posta.
@@ -97,6 +99,39 @@ Nessuna chiave fissa, nessun ID di account nel repo.
 Ogni errore chiude il job con il resoconto su Telegram; se il job cade fuori da node (setup,
 timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta
 (`concurrency: video-social`).
+
+## Varianti e stili
+
+Ogni video ha una variante con otto dimensioni: `musica`, `luce`, `apertura`, `stile`, `gancio`,
+`chiusura`, `fraseFinale`, `durata`. La pipeline la sceglie deterministica dallo slug (FNV-1a), fra i
+valori non usati dagli ultimi video dello storico. Quanti video escludono dipende dalla dimensione
+(`PROFONDITA`): `stile` e `gancio` gli ultimi 2 (non una rotazione fissa, che diventerebbe un ciclo
+riconoscibile), `chiusura`, `fraseFinale` e `durata` l'ultimo, `musica`, `luce` e `apertura` n-1 (in n
+video di fila passano tutte). Nello storico una voce senza `stile` vale `scrivania`: i video pubblicati
+prima degli stili lo erano. Per le altre dimensioni nuove un valore assente non esclude niente.
+
+La pipeline sceglie solo fra i valori di `ATTIVI`: uno stile, un gancio, una chiusura o una durata si
+aggiungono lì quando sono costruiti e passano il controllo d'impaginazione, non prima. Se tutti i valori
+attivi di una dimensione sono esclusi (succede finché ce n'è uno solo) si ripete. `DIMENSIONI` tiene
+invece tutti i valori validi: le props e il controllo d'impaginazione possono forzarne uno qualsiasi.
+`VARIANTE_BASE` è il video approvato (`scrivania`, `scena`, `cartolina`, `media`): lo ha chi non dichiara
+una variante, come le fixture.
+
+Lo stile (`src/editoriale/stili/`) è l'aspetto al di là del contenuto: colori, caratteri, trattamento del
+sottotitolo (sopra il set e sopra le scene grafiche, con una pillola facoltativa), allineamento dei
+titoli, grana, vignettatura, transizione. Scene, Overlay, Foglio, occhielli e note lo leggono con
+`useStile()`; nessuna scena scrive un colore o un carattere. Restano fuori dallo stile i materiali del
+set 3D (`set/luci.ts`, `Portatile.tsx`, oggetti) e i disegni degli schermi (`set/disegni.ts`, che usano
+il carattere delle interfacce `SANS_SCHERMI`): un nuovo set li sostituisce in blocco. Come la variante,
+il contesto dello stile non attraversa il `ThreeCanvas`: dentro la scena 3D va passato come prop. Gli
+stili non ancora costruiti puntano ai token di `scrivania` in `STILI`, e la pipeline non li sceglie.
+
+Il controllo d'impaginazione forza le dimensioni con `--stile= --gancio= --chiusura= --durata=` (un valore
+sconosciuto è un errore) e con `--variante=luce:sera,apertura:alta`:
+
+```
+node --experimental-strip-types pipeline/controlla-impaginazione.ts fixtures/matrice-03.storyboard.json --passo=5 --secondi=4 --stile=studio
+```
 
 ## Rifare in locale un video del runner, senza ripagare
 

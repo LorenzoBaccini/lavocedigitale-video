@@ -12,6 +12,7 @@ export const FACCE: Faccia[] = [
   { famiglia: "Lora", file: "lora-latin.woff2", pesi: "400 700" },
   { famiglia: "Lora", file: "lora-italic-latin.woff2", pesi: "400 700", corsivo: true },
   { famiglia: "Space Grotesk", file: "space-grotesk-latin.woff2", pesi: "300 700" },
+  { famiglia: "JetBrains Mono", file: "jetbrains-mono-latin.woff2", pesi: "100 800" },
 ];
 
 /** La famiglia come la vuole il CSS: fra virgolette se ha spazi. */

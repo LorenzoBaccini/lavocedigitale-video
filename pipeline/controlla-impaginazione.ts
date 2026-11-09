@@ -6,7 +6,7 @@ import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 
 import type { Variante } from "../src/editoriale/variante.ts";
-import { APERTURE, varianteDi } from "../src/editoriale/variante.ts";
+import { APERTURE, DIMENSIONI, varianteDi } from "../src/editoriale/variante.ts";
 import type { Misura } from "../src/impaginazione.ts";
 import { PREFISSO_MISURA, problemiImpaginazione, ZONE } from "../src/impaginazione.ts";
 import { costruisciLinea } from "../src/linea.ts";
@@ -77,22 +77,36 @@ function propsDa(file: string, secondi = 3): PropsNotizia {
   return { storyboard: letto, timing: { voce: "elevenlabs", clips }, audioBase: "audio/fixture" };
 }
 
-/** `--variante=luce:sera,apertura:alta` sovrascrive i campi della variante delle props. */
-export function varianteDaArgomento(argomento: string | undefined, base: Variante | undefined): Variante {
-  const campi = Object.fromEntries((argomento ?? "").split(",").filter(Boolean).map((c) => c.split(":")));
+const FORZABILI = ["stile", "gancio", "chiusura", "durata"] as const;
+
+/**
+ * La variante da controllare: quella delle props, con i campi di `--variante=luce:sera,apertura:alta` (valori sconosciuti
+ * ignorati) e di `--stile= --gancio= --chiusura= --durata=` (un valore sconosciuto e' un errore: si controllerebbe altro).
+ */
+export function varianteDaArgomenti(argomenti: string[], base: Variante | undefined): Variante {
+  const valore = (nome: string) => argomenti.find((a) => a.startsWith(`--${nome}=`))?.slice(nome.length + 3);
+  const campi: Record<string, unknown> = Object.fromEntries((valore("variante") ?? "").split(",").filter(Boolean).map((c) => c.split(":")));
+  if (campi.fraseFinale !== undefined) campi.fraseFinale = Number(campi.fraseFinale);
+  for (const k of FORZABILI) {
+    const v = valore(k);
+    if (v === undefined) continue;
+    if (!DIMENSIONI[k].includes(v as never)) throw new Error(`--${k}=${v}: valori ammessi ${DIMENSIONI[k].join(", ")}`);
+    campi[k] = v;
+  }
   return varianteDi({ ...base, ...campi });
 }
 
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
-//        [--variante=musica:chiaro,luce:sera,apertura:alta] [--ogni-apertura] [--passo=N] [--secondi=N]
+//        [--variante=musica:chiaro,luce:sera,apertura:alta] [--stile=…] [--gancio=…] [--chiusura=…] [--durata=…]
+//        [--ogni-apertura] [--passo=N] [--secondi=N]
 // --secondi: durata delle frasi di uno storyboard senza voce (3 di default).
 // Con --ogni-apertura il controllo gira una volta per ogni inquadratura d'apertura del gancio.
 if (èPrincipale(import.meta.url)) {
   const argomenti = process.argv.slice(2);
   const [file, cartellaStill] = argomenti.filter((a) => !a.startsWith("--")).map((a) => resolve(a));
-  if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--ogni-apertura]");
+  if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--stile=…] [--ogni-apertura]");
   const props = propsDa(file, Number(argomenti.find((a) => a.startsWith("--secondi="))?.slice("--secondi=".length)) || undefined);
-  const variante = varianteDaArgomento(argomenti.find((a) => a.startsWith("--variante="))?.slice("--variante=".length), props.variante);
+  const variante = varianteDaArgomenti(argomenti, props.variante);
   const aperture = argomenti.includes("--ogni-apertura") ? APERTURE : [variante.apertura];
   const passo = Number(argomenti.find((a) => a.startsWith("--passo="))?.slice("--passo=".length)) || undefined;
   process.chdir(fileURLToPath(new URL("..", import.meta.url)));
@@ -101,7 +115,7 @@ if (èPrincipale(import.meta.url)) {
     const v = { ...variante, apertura };
     const trovati = await controllaImpaginazione({ ...props, variante: v }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo);
     problemi.push(...trovati.map((p) => (aperture.length > 1 ? `apertura ${apertura}: ${p}` : p)));
-    console.log(`variante ${v.musica}/${v.luce}/${v.apertura}: ${trovati.length ? `${trovati.length} problemi` : "pulita"}`);
+    console.log(`variante ${v.stile}/${v.gancio}/${v.chiusura}/${v.durata} ${v.musica}/${v.luce}/${v.apertura}: ${trovati.length ? `${trovati.length} problemi` : "pulita"}`);
   }
   console.log(problemi.length ? problemi.join("\n") : "impaginazione pulita");
   if (problemi.length) process.exitCode = 1;

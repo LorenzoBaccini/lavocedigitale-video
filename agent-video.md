@@ -150,3 +150,21 @@ Lo stesso articolo in durata corta: resta solo il punto che blocca chi apre l'ap
   ]
 }
 ```
+
+Articolo: «Google Maps non trova la tua posizione: il punto blu». Durata lunga: oltre ai rimedi sul telefono c'è posto per il caso del computer, un passo in più, con frasi brevi come nelle altre durate.
+
+```json
+{
+  "slug": "google-maps-non-trova-posizione-punto-blu-grigio",
+  "frasi": [
+    { "testo": "Google Maps non trova la tua posizione?", "chiave": "posizione", "scena": { "tipo": "gancio", "titolo": "La tua posizione", "evidenza": "posizione?", "sottotitolo": "il pulsante dice da dove partire", "oggetto": "smartphone", "schermata": "app" } },
+    { "testo": "Se il pulsante in basso è rosso, attiva i Servizi di localizzazione.", "chiave": "localizzazione", "scena": { "tipo": "oggetto", "etichetta": "Pulsante rosso in basso a destra", "titolo": "Attiva la posizione", "indica": "Servizi di localizzazione", "oggetto": "smartphone", "schermata": "sistema" } },
+    { "testo": "Il punto grigio non è sbagliato: è l'ultima posizione in cui sei stato.", "chiave": "punto grigio", "scena": { "tipo": "confronto", "etichetta": "Cosa dice il punto", "a": { "titolo": "Punto blu", "valore": "attuale" }, "b": { "titolo": "Punto grigio", "valore": "vecchia" } } },
+    { "testo": "Se il cerchio è largo, togli modalità aereo e risparmio energetico.", "chiave": "modalità aereo", "scena": { "tipo": "allarme", "sopra": "Se il cerchio è largo", "titolo": "posizione imprecisa", "notifica": "Posizione poco precisa: disattiva la modalità aereo", "mittente": "Posizione", "dispositivo": "smartphone" } },
+    { "testo": "Accendi Wi-Fi e dati: il GPS da solo approssima di venti metri.", "chiave": "venti metri", "scena": { "tipo": "numero", "etichetta": "Il GPS da solo", "numero": "20", "unita": "metri", "nota": "di approssimazione" } },
+    { "testo": "Se il fascio punta male, muovi il telefono formando un otto.", "chiave": "formando un otto", "scena": { "tipo": "citazione", "testo": "muovi il telefono formando un 8, finché il fascio si restringe e punta dove devi", "fonte": "La guida ufficiale" } },
+    { "testo": "Sul computer invece dai prima il permesso della posizione al browser.", "chiave": "browser", "scena": { "tipo": "oggetto", "etichetta": "Sul computer, nel browser", "titolo": "Dai il permesso", "indica": "Consenti posizione", "oggetto": "portatile", "schermata": "sito" } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+  ]
+}
+```

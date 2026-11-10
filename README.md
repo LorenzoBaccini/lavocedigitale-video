@@ -1,7 +1,7 @@
 # lavocedigitale-video
 
 Il generatore dei video verticali di [La Voce Digitale](https://lavocedigitale.it): da un articolo
-appena pubblicato a un Reel 9:16 (1080×1920, 30 fps, 25-35 s) per Facebook e X.
+appena pubblicato a un Reel 9:16 (1080×1920, 30 fps, 15-40 s secondo la durata) per Facebook e X.
 
 Remotion + three.js per le scene, `claude -p` per il copione, ElevenLabs per la voce, Node 22 con
 `--experimental-strip-types` (niente build, niente `typescript` fra le dipendenze).
@@ -139,6 +139,11 @@ foglio di carta, il `Poster` o la `Griglia` (`grafiche: "carta" | "poster" | "gr
 `colori.segnoSuChiaro` sono il testo e il barrato sopra una superficie chiara del set (la pagina sullo schermo,
 le opzioni del telefono).
 
+Gli stili attivi sono quattro: `scrivania`, `studio`, `notte`, `schermo`.
+
+**scrivania** (`stili/scrivania.ts`): il video approvato (con `DETTAGLI_BASE` identico pixel per pixel). Scrivania di rovere con due oggetti di scena (vedi [I dettagli](#i-dettagli)), fogli di carta per
+le grafiche, Lora per i titoli e Inter per i testi, accento ambra, titoli centrati, transizione a taglio netto.
+
 **studio** (`stili/studio.ts`): limbo curvo a tinta unita (`set/limbo.ts` il profilo), luce da softbox quasi a
 picco con ombre corte, riempimento frontale, niente taccuino; poster a tinta piena con un disco tono su tono;
 Space Grotesk, titoli a sinistra, testo bianco; sottotitolo in una pillola scura (bianco e chiave gialla, oltre
@@ -235,7 +240,7 @@ chiede. Per questo la variante si sceglie prima dello storyboard (`pipeline/main
 I numeri stanno in un posto solo, `LIMITI_DURATA` (`src/storyboard/tipi.ts`). Il prompt li scrive da lì
 (`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata, fraseFinale)` li
 applica. `agent-video.md` ha la stessa tabella perché Claude veda le tre durate e le regole di scrittura di ognuna
-(regola 20), e tre esempi (due medie e una corta): `durata.test.ts` controlla che la tabella coincida con
+(regola 20), e quattro esempi (due medie, una corta, una lunga): `durata.test.ts` controlla che la tabella coincida con
 `LIMITI_DURATA` e che ogni esempio passi nella durata che dichiara con ognuna delle tre frasi finali. `media` è la durata
 di prima con il tetto delle parole sceso a 72, perché non si sovrapponga a `lunga` oltre il confine.
 
@@ -459,7 +464,7 @@ cioè quelle vecchie o quelle di un controllo saltato, si ignorano.
 - cambiano solo stile e gancio, perché voce e copione sono già pagati: frase finale e durata restano, e restano anche
   musica, luce, apertura e chiusura;
 - al secondo tentativo cambia lo stile, verso uno mai usato negli ultimi 3 se c'è, altrimenti con la memoria più
-  lunga possibile, e mai uno già provato. Con 4 stili uno libero c'è sempre;
+  lunga possibile, e mai uno già provato: se non ce n'è uno libero la memoria si accorcia;
 - il gancio cambia al terzo tentativo, o già al secondo se il nuovo stile con lo stesso gancio è fra gli ultimi 3. In
   quel caso va verso un gancio mai usato con quello stile;
 - la memoria dei tentativi è `CONFRONTATI` (3), più severa della `PROFONDITA` della variante, che per stile e gancio è

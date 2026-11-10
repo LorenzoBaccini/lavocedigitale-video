@@ -133,8 +133,8 @@ test("la tabella delle durate in agent-video.md e' quella di LIMITI_DURATA, senz
 
 test("ogni esempio di agent-video.md passa la validazione nella durata che dichiara, con ognuna delle tre frasi finali", () => {
   const esempi = [...AGENTE.matchAll(/durata (corta|media|lunga)[^\n]*\n\n```json\n([\s\S]*?)```/gi)];
-  assert.equal(esempi.length, 3);
-  assert.ok(esempi.some((m) => m[1].toLowerCase() === "corta"), "c'e' un esempio corto");
+  assert.equal(esempi.length, 4);
+  for (const d of DURATE) assert.ok(esempi.some((m) => m[1].toLowerCase() === d), `c'e' un esempio ${d}`);
   for (const [, durata, json] of esempi) {
     const sb = JSON.parse(json) as Storyboard;
     assert.deepEqual(valeOvunque(sb, durata.toLowerCase() as NomeDurata), [], durata);

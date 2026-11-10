@@ -1,7 +1,6 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
-import { FONDO_UTILE, MARGINE, TITOLO_TOP } from "../../impaginazione";
-import { titoloDocumenti } from "../../scenes/Documenti";
+import { FONDO_UTILE, MARGINE } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
 import type { Pezzo } from "../../storyboard/tipi";
 import { pianoDocumenti } from "../piani/documenti";
@@ -13,7 +12,8 @@ import { COLONNA_NOTA } from "../set/nota";
 import { NotaAccanto } from "../set/NotaAccanto";
 import { documento, letteraPin, tessera } from "../set/oggetti/disegni";
 import { useStile } from "../stili";
-import { altezzaRighe } from "../titoli";
+import { titoloDocumenti } from "../testate/documenti";
+import { fineTitoloAlto } from "../testate/quote";
 import { Disegno } from "./Disegno";
 import { LettorePiatto } from "./Illustrazioni";
 import { Testata } from "./Testata";
@@ -54,7 +54,7 @@ export const DocumentiSchermo: React.FC<ScenaDi<"documenti">> = (props) => {
   const { durata, etichetta, pezzi } = props;
   const piano = pianoDocumenti(props, durata);
   const righe = titoloDocumenti(props, piano, stile);
-  const alto = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe([{ testo: props.titolo, size: righe[0].size }], undefined, stile.larghezza) + STACCO;
+  const alto = fineTitoloAlto(props.titolo, righe, stile, sopraIlTitolo(etichetta)) + STACCO;
   const fino = FONDO_UTILE - STACCO;
   const proporzioni = pezzi.map((p) => PEZZO[p.oggetto].h / PEZZO[p.oggetto].w);
   const larghezza = Math.min(LARGHEZZA_MASSIMA, (fino - alto - FRA_SCHEDE * (pezzi.length - 1)) / proporzioni.reduce((a, b) => a + b, 0));

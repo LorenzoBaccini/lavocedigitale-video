@@ -1,4 +1,4 @@
-import { TITOLO_TOP, MARGINE } from "../../impaginazione";
+import { MARGINE, TITOLO_TOP } from "../../impaginazione";
 import { SPAZIO_OCCHIELLO } from "../set/misureOcchiello";
 import { Occhiello } from "../set/Occhiello";
 import { allineaFlesso, useStile } from "../stili";

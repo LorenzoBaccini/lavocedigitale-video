@@ -1,8 +1,7 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
-import { ALTEZZA, FONDO_TITOLO, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
+import { FONDO_TITOLO, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
-import { titoliAllarme } from "../../scenes/Allarme";
 import { NOTIFICA_IN_QUADRO, NOTIFICA_TELEFONO_IN_QUADRO, pianoAllarme } from "../piani/allarme";
 import { fase, mix, uscita } from "../regia";
 import { SegnoInQuadro } from "../Segno";
@@ -12,13 +11,13 @@ import { notificaTelefono, righeNotificaTelefono } from "../set/oggetti/disegni"
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, RIGA_NOTIFICA_TELEFONO } from "../set/telefono";
 import { useRighe } from "../set/useRighe";
 import { useStile } from "../stili";
-import { larghezzaRiga, Titolo } from "../Titolo";
-import { altezzaRighe } from "../titoli";
-import { cerchiatura } from "../tratto";
+import { titoliAllarme } from "../testate/allarme";
+import { fineTitoloAlto, inizioTitoloBasso } from "../testate/quote";
+import { Titolo } from "../Titolo";
+import { cerchiatura, trattoFra } from "../tratto";
 import { contenutoPortatile, contenutoTelefono, vistaDi } from "./contenuto";
 import { NotificaSchermo } from "./NotificaSchermo";
 import { Schermata } from "./Schermata";
-import { trattoFra } from "./segni";
 import { punto, rettangolo } from "./vista";
 
 const PER_RIGA = 9;
@@ -46,10 +45,10 @@ export const AllarmeSchermo: React.FC<ScenaDi<"allarme">> = (props) => {
   const righe = useRighe(d.font, piano.messaggio, d.dividi);
   const c = telefono ? contenutoTelefono({ tipo: "blocco" }) : contenutoPortatile({ tipo: "desktop" }, contesto.orologio);
 
-  const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: sopra[0].size }], undefined, stile.larghezza) + STACCO;
-  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: titolo[0].size }], larghezzaRiga(titolo, stile.allineamentoTitoli), stile.larghezza) - STACCO;
+  const alto = fineTitoloAlto(props.sopra, sopra, stile) + STACCO;
+  const basso = inizioTitoloBasso(props.titolo, titolo, stile) - STACCO;
   const quadro = { x: 0, y: alto, w: LARGHEZZA, h: basso - alto };
-  const misura = telefono ? NOTIFICA_TELEFONO_IN_QUADRO : { larghezza: NOTIFICA_IN_QUADRO.larghezza, spinta: NOTIFICA_IN_QUADRO.spinta };
+  const misura = telefono ? NOTIFICA_TELEFONO_IN_QUADRO : NOTIFICA_IN_QUADRO;
   const larghezza = mix(misura.larghezza, misura.spinta, uscita(fase(f, 0, durata))) * 1.08 ** piano.stacchi.filter((s) => f >= s).length;
   const v = vistaDi(c, quadro, { u: d.r.x + d.r.w / 2, v: d.r.y + d.r.h / 2, scala: larghezza / d.r.w });
 

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 
 import { contrasto, sovrapponi } from "./colore.ts";
 import { NOTTE } from "./notte.ts";
@@ -57,12 +57,36 @@ test("lo schermo ha la sua resa: niente set 3D, schede, Inter, scorrimento; non 
 
 const sorgente = (percorso: string) => readFileSync(new URL(percorso, import.meta.url), "utf8");
 
-test("nessuna scena dello schermo monta il 3D, e ogni scena che usa il set ha la sua resa a tutto quadro", () => {
+// gli import che portano codice (non `import type`), relativi risolti sul file, gli altri come nome del pacchetto
+function importi(file: URL): { file: URL[]; pacchetti: string[] } {
+  const testo = readFileSync(file, "utf8");
+  const nomi = [...testo.matchAll(/^(?:import|export)\s+(?!type\b)(?:[^;]*?\s+from\s+)?"([^"]+)"/gm)].map((m) => m[1]);
+  const risolvi = (nome: string) =>
+    ["", ".ts", ".tsx", "/index.ts", "/index.tsx"].map((estensione) => new URL(nome.replace(/\.tsx?$/, "") + estensione, file)).find((u) => existsSync(u) && statSync(u).isFile());
+  return { file: nomi.filter((n) => n.startsWith(".")).map((n) => risolvi(n)!).filter(Boolean), pacchetti: nomi.filter((n) => !n.startsWith(".")) };
+}
+
+// three (la matematica dei vettori) resta raggiungibile: lo usano i piani delle scene, comuni a tutti gli stili
+test("le scene dello schermo non raggiungono il 3D nemmeno di riflesso: niente canvas, niente drei, niente set", () => {
   const cartella = new URL("../schermo/", import.meta.url);
-  for (const file of readdirSync(cartella).filter((f) => /\.tsx?$/.test(f))) {
-    const testo = readFileSync(new URL(file, cartella), "utf8");
-    assert.doesNotMatch(testo, /from "(@remotion\/three|@react-three\/[^"]+|three)"|set\/(Set3D|Palco|Portatile|Scrivania|oggetti\/Oggetti|oggetti\/Pezzi)"/, file);
+  const daVedere = readdirSync(cartella).filter((f) => /\.tsx?$/.test(f) && !f.endsWith(".test.ts")).map((f) => new URL(f, cartella));
+  const visti = new Set<string>();
+  while (daVedere.length) {
+    const file = daVedere.pop()!;
+    if (visti.has(file.href)) continue;
+    visti.add(file.href);
+    const { file: altri, pacchetti } = importi(file);
+    for (const p of pacchetti) assert.doesNotMatch(p, /^@remotion\/three$|^@react-three\//, `${file.pathname} importa ${p}`);
+    daVedere.push(...altri);
   }
+  const raggiunti = [...visti].map((h) => new URL(h).pathname);
+  assert.ok(raggiunti.some((p) => p.endsWith("/piani/allarme.ts")), "il grafo deve arrivare fino ai piani");
+  for (const p of raggiunti) {
+    assert.doesNotMatch(p, /\/src\/scenes\/|\/set\/(Set3D|Palco|Rig|Portatile|Scrivania|Fondale|Notturno|Velo)\.tsx$|\/set\/oggetti\/(Oggetti|Pezzi)\.tsx$/, p);
+  }
+});
+
+test("ogni scena che usa il set ha la sua resa a tutto quadro", () => {
   const sulSet = readdirSync(new URL("../../scenes/", import.meta.url))
     .filter((f) => f.endsWith(".tsx") && sorgente(`../../scenes/${f}`).includes("<Set3D"))
     .map((f) => f.replace(".tsx", "").toLowerCase())

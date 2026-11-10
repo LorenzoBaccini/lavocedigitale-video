@@ -1,24 +1,26 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
-import { ALTEZZA, FONDO_SCENA, FONDO_UTILE, LARGHEZZA, RESPIRO } from "../../impaginazione";
-import { Conferma, titoliOggetto } from "../../scenes/Oggetto";
+import { ALTEZZA, FONDO_UTILE, LARGHEZZA, RESPIRO } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
 import { pianoOggetto } from "../piani/oggetto";
 import { conPeso, fase, mix } from "../regia";
 import { Richiamo } from "../Segno";
-import type { Schermo } from "../set/schermata";
 import { FINESTRA_PX } from "../set/geometria";
+import type { Schermo } from "../set/schermata";
 import { useStile } from "../stili";
+import { titoliOggetto } from "../testate/oggetto";
+import { ConfermaSchermo } from "./ConfermaSchermo";
 import type { Contenuto } from "./contenuto";
 import { contenutoOggetto, contenutoPortatile, contenutoTelefono, scalaInsieme, vistaDi } from "./contenuto";
-import { VIAGGIO } from "./tocco";
 import { Puntatore } from "./Puntatore";
 import { Schermata } from "./Schermata";
 import { Testata } from "./Testata";
+import { VIAGGIO } from "./tocco";
 import type { Ripresa } from "./vista";
 import { fraRiprese, punto, stringi } from "./vista";
 
-const ALTEZZA_CONFERMA = 100;
+/** Quanto occupa l'avviso della conferma, per tenerci sopra il punto inquadrato. */
+const ALTEZZA_CONFERMA = 130;
 const STACCO = 30;
 /** Lo spazio sotto lo schermo per il richiamo di `indica` sugli oggetti senza schermo (due righe). */
 const SPAZIO_RICHIAMO = 120;
@@ -43,10 +45,11 @@ export const OggettoSchermo: React.FC<ScenaDi<"oggetto">> = (props) => {
   const c = contenutoDi(props, f);
   const tocca = piano.indica !== undefined && c.caldo !== undefined;
   const richiamo = tocca && c.tipo === "oggetto" && indica !== undefined;
-  const sottoConferma = conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA - STACCO : ALTEZZA;
-  const basso = richiamo ? Math.min(sottoConferma, FONDO_UTILE) - SPAZIO_RICHIAMO : sottoConferma;
+  // la conferma e' un avviso dentro lo schermo, in basso: lo schermo non si accorcia per lei
+  const basso = richiamo ? FONDO_UTILE - SPAZIO_RICHIAMO : ALTEZZA;
+  const fondoConferma = richiamo ? basso - STACCO : FONDO_UTILE - RESPIRO;
   const quadro = { x: 0, y: limite, w: LARGHEZZA, h: basso - limite };
-  const utile = Math.min(basso, FONDO_UTILE) - STACCO;
+  const utile = (conferma ? fondoConferma - ALTEZZA_CONFERMA : Math.min(basso, FONDO_UTILE)) - STACCO;
   const base = scalaInsieme(c, quadro, utile - limite);
 
   const caldo = c.caldo;
@@ -76,7 +79,7 @@ export const OggettoSchermo: React.FC<ScenaDi<"oggetto">> = (props) => {
         <Richiamo nome="indica" testo={indica!} x={sulCaldo.x} daY={Math.min(sulCaldo.y + 14, basso - 10)} aY={basso + 4} progresso={(f - piano.indica! - 10) / 10} />
       )}
       <Testata f={f} etichetta={etichetta} righe={righe} />
-      {conferma && piano.conferma !== undefined && f >= piano.conferma && <Conferma testo={conferma} da={piano.conferma} f={f} suChiaro={false} />}
+      {conferma && piano.conferma !== undefined && f >= piano.conferma && <ConfermaSchermo testo={conferma} da={piano.conferma} f={f} fondo={fondoConferma} />}
     </AbsoluteFill>
   );
 };

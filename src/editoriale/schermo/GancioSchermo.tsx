@@ -2,12 +2,12 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { ALTEZZA, FONDO_UTILE, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
-import { titoloGancio } from "../../scenes/Gancio";
 import { pianoGancio } from "../piani/gancio";
 import { conPeso, fase, liscio } from "../regia";
 import { notifica } from "../set/disegni";
 import { NOTIFICA_PX } from "../set/geometria";
 import { useStile } from "../stili";
+import { titoloGancio } from "../testate/gancio";
 import { Titolo } from "../Titolo";
 import type { NomeApertura } from "../variante";
 import { useVariante } from "../VarianteVideo";

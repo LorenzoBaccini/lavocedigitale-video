@@ -2,7 +2,6 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
-import type { PianoOggetto } from "../editoriale/piani/oggetto";
 import { pianoOggetto } from "../editoriale/piani/oggetto";
 import { fase } from "../editoriale/regia";
 import { Pennarello, Richiamo, SegnoInQuadro } from "../editoriale/Segno";
@@ -17,13 +16,11 @@ import { POSTI, puntoCaldo } from "../editoriale/set/oggetti/posti";
 import { Set3D } from "../editoriale/set/Set3D";
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
-import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
+import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
-import type { Stile } from "../editoriale/stili";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
-import type { Riga } from "../editoriale/Titolo";
+import { allineaFlesso, useStile } from "../editoriale/stili";
+import { titoliOggetto } from "../editoriale/testate/oggetto";
 import { Titolo } from "../editoriale/Titolo";
-import { altezzaRighe } from "../editoriale/titoli";
 import { cerchiatura, lunghezza, percorso, spunta } from "../editoriale/tratto";
 import { ALTEZZA, FONDO_SCENA, FONDO_UTILE, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
@@ -60,17 +57,6 @@ function cerchioSu(oggetto: Exclude<ScenaDi<"oggetto">["oggetto"], "nessuno">, c
   const bordo = proietta(caldo.clone().add(new Vector3(POSTI[oggetto].raggio, 0, 0)), cam);
   const rx = Math.max(46, Math.hypot(bordo.x - c.x, bordo.y - c.y));
   return { cx: c.x, cy: c.y, rx, ry: rx * (oggetto === "smartphone" ? 0.42 : 0.78) };
-}
-
-/** Titolo ed evidenza, e la quota sotto l'occhiello e i titoli dove comincia l'oggetto. */
-export function titoliOggetto(props: ScenaDi<"oggetto">, piano: PianoOggetto, stile: Stile): { righe: Riga[]; limite: number } {
-  const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15, stile.larghezza) }] : [])];
-  const limite = TITOLO_TOP + sopraIlTitolo(props.etichetta) + altezzaRighe(testata, undefined, stile.larghezza) + 36;
-  const righe: Riga[] = [
-    { parole: piano.titolo, size: corpo(props.titolo, 100, 18, stile.larghezza), peso: 700 },
-    ...(piano.evidenza.length ? [{ parole: piano.evidenza.map((p) => ({ ...p, colore: stile.colori.accento })), size: corpo(props.evidenza ?? "", 84, 15, stile.larghezza), peso: 600, corsivo: true }] : []),
-  ];
-  return { righe, limite };
 }
 
 /** La conferma in basso, sopra i sottotitoli: la spunta a penna, poi il testo. `suChiaro` la scrive scura sulla pagina chiara. */

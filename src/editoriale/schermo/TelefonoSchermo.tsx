@@ -1,20 +1,18 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
-import { ALTEZZA, FONDO_UTILE, LARGHEZZA, TITOLO_TOP } from "../../impaginazione";
+import { ALTEZZA, FONDO_UTILE, LARGHEZZA } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
-import { titoloTelefono } from "../../scenes/Telefono";
 import { pianoTelefono } from "../piani/telefono";
 import { fase, mix, uscita } from "../regia";
 import { SegnoInQuadro } from "../Segno";
+import { sopraIlTitolo } from "../set/misureOcchiello";
 import { opzionePx, TELEFONO_PX } from "../set/telefono";
 import { useStile } from "../stili";
-import { cerchiatura } from "../tratto";
-import { sopraIlTitolo } from "../set/misureOcchiello";
-import { altezzaRighe } from "../titoli";
-import { larghezzaRiga } from "../Titolo";
+import { fineTitoloAlto } from "../testate/quote";
+import { titoloTelefono } from "../testate/telefono";
+import { cerchiatura, trattoFra } from "../tratto";
 import { contenutoTelefono, vistaDi } from "./contenuto";
 import { Schermata } from "./Schermata";
-import { trattoFra } from "./segni";
 import { Testata } from "./Testata";
 import { punto, rettangolo } from "./vista";
 
@@ -28,7 +26,7 @@ export const TelefonoSchermo: React.FC<ScenaDi<"telefono">> = (props) => {
   const { durata, etichetta, opzioni } = props;
   const piano = pianoTelefono(props, durata);
   const { righe } = titoloTelefono(props, piano, stile);
-  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe([{ testo: props.titolo, size: righe[0].size }], larghezzaRiga(righe, stile.allineamentoTitoli), stile.larghezza);
+  const sottoITitoli = fineTitoloAlto(props.titolo, righe, stile, sopraIlTitolo(etichetta));
   const c = contenutoTelefono({ tipo: "opzioni", opzioni });
   const alto = sottoITitoli + STACCO;
   const quadro = { x: 0, y: alto, w: LARGHEZZA, h: ALTEZZA - alto };

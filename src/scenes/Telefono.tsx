@@ -1,7 +1,5 @@
 import { useCurrentFrame } from "remotion";
 
-import { corpo } from "../anim";
-import type { PianoTelefono } from "../editoriale/piani/telefono";
 import { pianoTelefono } from "../editoriale/piani/telefono";
 import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
@@ -11,15 +9,13 @@ import { Smartphone } from "../editoriale/set/oggetti/Oggetti";
 import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono, cameraOpzioni, opzionePx, puntoTelefono, rettangoloTelefono } from "../editoriale/set/telefono";
 import { Occhiello } from "../editoriale/set/Occhiello";
-import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
+import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
-import type { Stile } from "../editoriale/stili";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
-import type { Riga } from "../editoriale/Titolo";
+import { allineaFlesso, useStile } from "../editoriale/stili";
+import { titoloTelefono } from "../editoriale/testate/telefono";
 import { Titolo } from "../editoriale/Titolo";
 import type { Punto } from "../editoriale/tratto";
-import { cerchiatura, sottolineatura } from "../editoriale/tratto";
-import { altezzaRighe } from "../editoriale/titoli";
+import { cerchiatura, trattoFra } from "../editoriale/tratto";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
@@ -28,23 +24,9 @@ function barrato(i: number, cam: Parameters<typeof proietta>[1]): Punto[] {
   const b = opzionePx(i);
   const a = proietta(puntoTelefono(b.x + 18, b.y + b.h * 0.62), cam);
   const z = proietta(puntoTelefono(b.x + b.w - 18, b.y + b.h * 0.4), cam);
-  const ang = Math.atan2(z.y - a.y, z.x - a.x);
-  return sottolineatura(Math.hypot(z.x - a.x, z.y - a.y), 31).map(([x, y]): Punto => [a.x + x * Math.cos(ang) - y * Math.sin(ang), a.y + x * Math.sin(ang) + y * Math.cos(ang)]);
+  return trattoFra(a, z, 31);
 }
 
-
-/** Il titolo con la chiave in accento e la quota dove finiscono occhiello e titolo. */
-export function titoloTelefono(props: ScenaDi<"telefono">, piano: PianoTelefono, stile: Stile): { righe: Riga[]; sottoITitoli: number } {
-  const sottoITitoli = TITOLO_TOP + sopraIlTitolo(props.etichetta) + altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 104, 16, stile.larghezza) }], undefined, stile.larghezza);
-  const righe: Riga[] = [
-    {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
-      size: corpo(props.titolo, 104, 16, stile.larghezza),
-      peso: 700,
-    },
-  ];
-  return { righe, sottoITitoli };
-}
 
 // Il telefono in primo piano sulla scrivania, con le opzioni a schermo: occhiello e titolo in alto, il barrato a pennarello
 // sull'opzione esclusa, il cerchio su quella che resta.

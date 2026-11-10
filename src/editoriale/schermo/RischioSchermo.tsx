@@ -1,13 +1,13 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
-import { ALTEZZA, FONDO_TITOLO, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
+import { FONDO_TITOLO, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
-import { titoliRischio } from "../../scenes/Rischio";
 import { pianoRischio } from "../piani/rischio";
 import { fase, liscio, mix, uscita } from "../regia";
 import { useStile } from "../stili";
-import { larghezzaRiga, Titolo } from "../Titolo";
-import { altezzaRighe } from "../titoli";
+import { inizioTitoloBasso } from "../testate/quote";
+import { titoliRischio } from "../testate/rischio";
+import { Titolo } from "../Titolo";
 import { contenutoPortatile, contenutoTelefono, scalaInsieme, vistaDi } from "./contenuto";
 import { Schermata } from "./Schermata";
 
@@ -21,7 +21,8 @@ export const RischioSchermo: React.FC<ScenaDi<"rischio">> = (props) => {
   const { durata } = props;
   const piano = pianoRischio(props, durata);
   const { sopra, titolo, alto } = titoliRischio(props, piano, stile);
-  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: titolo[0].size }], larghezzaRiga(titolo, stile.allineamentoTitoli), stile.larghezza) - STACCO;
+  // quella del set non conta la riserva del colpo: a sinistra il titolo andrebbe su due righe sopra lo schermo
+  const basso = inizioTitoloBasso(props.titolo, titolo, stile) - STACCO;
   const telefono = props.dispositivo === "smartphone";
   const c = telefono ? contenutoTelefono({ tipo: "blocco" }) : contenutoPortatile({ tipo: "desktop" }, props.contesto.orologio);
   const quadro = { x: 0, y: alto, w: LARGHEZZA, h: basso - alto };

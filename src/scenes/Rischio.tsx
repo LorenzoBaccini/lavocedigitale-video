@@ -1,8 +1,6 @@
 import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
-import { corpo } from "../anim";
-import type { PianoRischio } from "../editoriale/piani/rischio";
 import { pianoRischio } from "../editoriale/piani/rischio";
 import { fase, liscio, mix, uscita } from "../editoriale/regia";
 import { angoliInQuadro, fraLeQuote, puntoSchermo, SCHERMO_PX, sferica } from "../editoriale/set/geometria";
@@ -14,12 +12,10 @@ import { POSTI } from "../editoriale/set/oggetti/posti";
 import { Set3D } from "../editoriale/set/Set3D";
 import { angoliSchermoTelefono, puntoTelefono, TELEFONO_PX } from "../editoriale/set/telefono";
 import { Velo } from "../editoriale/set/Velo";
-import type { Stile } from "../editoriale/stili";
 import { useStile } from "../editoriale/stili";
-import type { Riga } from "../editoriale/Titolo";
+import { titoliRischio } from "../editoriale/testate/rischio";
 import { Titolo } from "../editoriale/Titolo";
-import { altezzaRighe } from "../editoriale/titoli";
-import { ALTEZZA, FONDO_TITOLO, MARGINE, TITOLO_TOP } from "../impaginazione";
+import { FONDO_TITOLO, MARGINE, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
 const CENTRO = new Vector3(0.1, 1.35, -0.7);
@@ -31,28 +27,10 @@ const BORDI_TELEFONO = {
   alti: [puntoTelefono(0, 0), puntoTelefono(TELEFONO_PX.w, 0)],
   bassi: [puntoTelefono(0, TELEFONO_PX.h), puntoTelefono(TELEFONO_PX.w, TELEFONO_PX.h)],
 };
-/** Spazio fra un testo e il bordo dello schermo. */
-const STACCO = 30;
-
 function camera(telefono: boolean, t: number): Camera {
   if (!telefono) return { pos: sferica(CENTRO, mix(10.5, 13.5, uscita(t)), -0.62, 0.17), look: CENTRO.toArray() as Camera["look"] };
   const centro = puntoTelefono(TELEFONO_PX.w / 2, TELEFONO_PX.h * 0.45, 0);
   return { pos: sferica(centro, mix(5.2, 6.6, uscita(t)), POSTI.smartphone.giro - 0.55, 0.62), look: centro.toArray() as Camera["look"] };
-}
-
-/** Sopratitolo e titolo, e le quote fra cui sta lo schermo: sotto il primo e sopra il secondo, con lo stacco. */
-export function titoliRischio(props: ScenaDi<"rischio">, piano: PianoRischio, stile: Stile): { sopra: Riga[]; titolo: Riga[]; alto: number; basso: number } {
-  const alto = TITOLO_TOP + altezzaRighe([{ testo: props.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza) }], undefined, stile.larghezza) + STACCO;
-  const basso = ALTEZZA - FONDO_TITOLO - altezzaRighe([{ testo: props.titolo, size: corpo(props.titolo, 132, 12, stile.larghezza) }], undefined, stile.larghezza) - STACCO;
-  const sopra: Riga[] = [{ parole: piano.sopra, size: corpo(props.sopra, 72, 22, stile.larghezza), peso: 500, corsivo: true }];
-  const titolo: Riga[] = [
-    {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: stile.colori.accento, colpo: true } : p)),
-      size: corpo(props.titolo, 132, 12, stile.larghezza),
-      peso: 700,
-    },
-  ];
-  return { sopra, titolo, alto, basso };
 }
 
 // La conseguenza: il dispositivo visto basso; la camera si allontana piano e la luce cala sulla chiave.

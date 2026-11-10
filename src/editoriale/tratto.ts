@@ -63,3 +63,9 @@ export function avanzamento(f: number, da: number, durata: number): number {
   const t = Math.min(1, Math.max(0, (f - da) / durata));
   return 1 - (1 - t) ** 2.2;
 }
+
+/** Una sottolineatura (o un barrato) a pennarello da `a` a `z` nel fotogramma, un poco storta. */
+export function trattoFra(a: { x: number; y: number }, z: { x: number; y: number }, seme: number): Punto[] {
+  const ang = Math.atan2(z.y - a.y, z.x - a.x);
+  return sottolineatura(Math.hypot(z.x - a.x, z.y - a.y), seme).map(([x, y]): Punto => [a.x + x * Math.cos(ang) - y * Math.sin(ang), a.y + x * Math.sin(ang) + y * Math.cos(ang)]);
+}

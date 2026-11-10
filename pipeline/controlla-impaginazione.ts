@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 
+import type { Dettagli } from "../src/editoriale/dettagli.ts";
+import { DETTAGLI_BASE, OGGETTI_SCRIVANIA } from "../src/editoriale/dettagli.ts";
 import type { Valori, Variante } from "../src/editoriale/variante.ts";
 import { APERTURE, ATTIVI, DIMENSIONI, VARIANTE_BASE, varianteDi } from "../src/editoriale/variante.ts";
 import type { Misura } from "../src/impaginazione.ts";
@@ -99,6 +101,20 @@ export function varianteDaArgomenti(argomenti: string[], base: Variante | undefi
 }
 
 /**
+ * I dettagli forzati sopra quelli delle props (il resto viene dallo slug): `--dettagli=base` quelli del video approvato,
+ * `--oggetti=taccuino,tazza,pianta` gli oggetti di scena; tutti e tre controllano in un giro ogni coppia possibile.
+ */
+export function dettagliDaArgomenti(argomenti: string[], base: Partial<Dettagli> | undefined): Partial<Dettagli> | undefined {
+  const valore = (nome: string) => argomenti.find((a) => a.startsWith(`--${nome}=`))?.slice(nome.length + 3);
+  const dettagli = valore("dettagli") === "base" ? { ...base, ...DETTAGLI_BASE } : base;
+  const oggetti = valore("oggetti")?.split(",");
+  if (!oggetti) return dettagli;
+  const sconosciuti = oggetti.filter((o) => !OGGETTI_SCRIVANIA.includes(o as never));
+  if (sconosciuti.length) throw new Error(`--oggetti: ${sconosciuti.join(", ")} sconosciuti, ammessi ${OGGETTI_SCRIVANIA.join(", ")}`);
+  return { ...dettagli, oggetti: oggetti as Dettagli["oggetti"] };
+}
+
+/**
  * I valori forzati ma non ancora costruiti: il fotogramma mostra quello di base, un controllo pulito non vale per loro.
  * `attivi` e' per i test: oggi ogni valore forzabile e' attivo.
  */
@@ -108,7 +124,7 @@ export function avvisiNonAttivi(v: Variante, attivi: Valori = ATTIVI): string[] 
 
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
 //        [--variante=musica:chiaro,luce:sera,apertura:alta] [--stile=…] [--gancio=…] [--chiusura=…] [--durata=…]
-//        [--ogni-apertura] [--passo=N] [--secondi=N] [--scene=gancio]
+//        [--ogni-apertura] [--passo=N] [--secondi=N] [--scene=gancio] [--dettagli=base] [--oggetti=taccuino,tazza,pianta]
 // --secondi: durata delle frasi di uno storyboard senza voce (3 di default). --scene: misura solo le scene di quel tipo.
 // Con --ogni-apertura il controllo gira una volta per ogni inquadratura d'apertura del gancio.
 if (èPrincipale(import.meta.url)) {
@@ -117,6 +133,7 @@ if (èPrincipale(import.meta.url)) {
   if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--stile=…] [--ogni-apertura]");
   const props = propsDa(file, Number(argomenti.find((a) => a.startsWith("--secondi="))?.slice("--secondi=".length)) || undefined);
   const variante = varianteDaArgomenti(argomenti, props.variante);
+  const dettagli = dettagliDaArgomenti(argomenti, props.dettagli);
   for (const avviso of avvisiNonAttivi(variante)) console.warn(`attenzione: ${avviso}`);
   const aperture = argomenti.includes("--ogni-apertura") ? APERTURE : [variante.apertura];
   const passo = Number(argomenti.find((a) => a.startsWith("--passo="))?.slice("--passo=".length)) || undefined;
@@ -125,7 +142,7 @@ if (èPrincipale(import.meta.url)) {
   const problemi: string[] = [];
   for (const apertura of aperture) {
     const v = { ...variante, apertura };
-    const trovati = await controllaImpaginazione({ ...props, variante: v }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo, solo);
+    const trovati = await controllaImpaginazione({ ...props, variante: v, dettagli }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo, solo);
     problemi.push(...trovati.map((p) => (aperture.length > 1 ? `apertura ${apertura}: ${p}` : p)));
     console.log(`variante ${v.stile}/${v.gancio}/${v.chiusura}/${v.durata} ${v.musica}/${v.luce}/${v.apertura}: ${trovati.length ? `${trovati.length} problemi` : "pulita"}`);
   }

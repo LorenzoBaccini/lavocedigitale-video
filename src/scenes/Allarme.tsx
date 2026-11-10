@@ -1,5 +1,6 @@
 import { useCurrentFrame } from "remotion";
 
+import { useDettagli } from "../editoriale/DettagliVideo";
 import { cameraAllarme, cameraAllarmeTelefono, pianoAllarme } from "../editoriale/piani/allarme";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
@@ -60,6 +61,7 @@ const SUL_TELEFONO: Disposizione = {
 export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
   const f = useCurrentFrame();
   const stile = useStile();
+  const dettagli = useDettagli();
   const { durata, contesto } = props;
   const piano = pianoAllarme(props, durata);
   const telefono = piano.dispositivo === "smartphone";
@@ -83,7 +85,7 @@ export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
     <>
       {telefono ? (
         <Set3D camera={cam} orologio={contesto.orologio}>
-          <Smartphone schermo={{ tipo: "blocco" }} notifica={{ messaggio: piano.messaggio, mittente: props.mittente, visibile, scarto: scarto * 2 }} />
+          <Smartphone schermo={{ tipo: "blocco" }} dettagli={dettagli} notifica={{ messaggio: piano.messaggio, mittente: props.mittente, visibile, scarto: scarto * 2 }} />
         </Set3D>
       ) : (
         <>

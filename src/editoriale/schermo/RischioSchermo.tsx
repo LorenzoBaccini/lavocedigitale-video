@@ -2,6 +2,7 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { FONDO_TITOLO, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
+import { useDettagli } from "../DettagliVideo";
 import { pianoRischio } from "../piani/rischio";
 import { fase, liscio, mix, uscita } from "../regia";
 import { useStile } from "../stili";
@@ -17,6 +18,7 @@ const STACCO = 30;
 // schermo si spegne di poco.
 export const RischioSchermo: React.FC<ScenaDi<"rischio">> = (props) => {
   const f = useCurrentFrame();
+  const dettagli = useDettagli();
   const stile = useStile();
   const { durata } = props;
   const piano = pianoRischio(props, durata);
@@ -24,7 +26,7 @@ export const RischioSchermo: React.FC<ScenaDi<"rischio">> = (props) => {
   // quella del set non conta la riserva del colpo: a sinistra il titolo andrebbe su due righe sopra lo schermo
   const basso = inizioTitoloBasso(props.titolo, titolo, stile) - STACCO;
   const telefono = props.dispositivo === "smartphone";
-  const c = telefono ? contenutoTelefono({ tipo: "blocco" }) : contenutoPortatile({ tipo: "desktop" }, props.contesto.orologio);
+  const c = telefono ? contenutoTelefono({ tipo: "blocco" }, dettagli) : contenutoPortatile({ tipo: "desktop" }, { ora: dettagli.ora, data: props.contesto.orologio });
   const quadro = { x: 0, y: alto, w: LARGHEZZA, h: basso - alto };
   const base = scalaInsieme(c, quadro, quadro.h);
   const scala = base * mix(1.3, 1, uscita(fase(f, 0, durata))) * 1.136 ** piano.stacchi.filter((s) => f >= s).length;

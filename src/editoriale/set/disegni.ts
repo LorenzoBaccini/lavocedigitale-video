@@ -173,7 +173,7 @@ const icona = (ctx: Ctx, x: number, y: number, disegno: (ctx: Ctx) => void) => {
   ctx.save(); ctx.translate(x, y); disegno(ctx); ctx.restore();
 };
 
-const barra = (ctx: Ctx, orologio?: string) => {
+const barra = (ctx: Ctx, { ora, data }: Orologio) => {
   const { w, h } = SCHERMO_PX;
   const y = h - 72;
   ctx.fillStyle = "rgba(28,29,32,0.94)"; ctx.fillRect(0, y, w, 72);
@@ -199,10 +199,10 @@ const barra = (ctx: Ctx, orologio?: string) => {
   ctx.textAlign = "right"; ctx.font = `500 23px ${SANS_SCHERMI}`;
   const destra = OROLOGIO_PX.x + OROLOGIO_PX.w - 8;
   // senza la data del copione l'orologio mostra solo l'ora: mai una data inventata
-  if (orologio) {
-    ctx.fillText("10:24", destra, y + 22);
-    ctx.fillText(dataOrologio(orologio), destra, y + 51);
-  } else ctx.fillText("10:24", destra, y + 37);
+  if (data) {
+    ctx.fillText(ora, destra, y + 22);
+    ctx.fillText(dataOrologio(data), destra, y + 51);
+  } else ctx.fillText(ora, destra, y + 37);
 };
 
 const puntatore = (ctx: Ctx, x: number, y: number) => {
@@ -212,8 +212,11 @@ const puntatore = (ctx: Ctx, x: number, y: number) => {
   ctx.restore();
 };
 
+/** L'orologio degli schermi: l'ora del video (dai dettagli) e la data del copione, se c'e'. */
+export type Orologio = { ora: string; data?: string };
+
 /** Il desktop del portatile: sfondo, tre cartelle, puntatore, barra con l'orologio (e la data, se il copione la da'). */
-export const desktop = (orologio?: string) => (ctx: Ctx) => {
+export const desktop = (orologio: Orologio) => (ctx: Ctx) => {
   sfondo(ctx);
   cartella(ctx, 40, 40, "Documenti");
   cartella(ctx, 40, 200, "Foto 2019");
@@ -313,7 +316,7 @@ export interface Finestra {
   /** voci della colonna a sinistra, l'ultima selezionata; senza, righe neutre senza parole */
   menu?: string[];
   tipo: TipoFinestra;
-  orologio?: string;
+  orologio: Orologio;
 }
 
 const RIGHE_NEUTRE = 5;
@@ -413,7 +416,7 @@ export function riquadroTitoloPagina(titolo: string, tipo: Exclude<TipoFinestra,
  * Una pagina web (o un'app) a tutto schermo, per l'inquadratura larga del gancio: si riconosce da lontano dal colore chiaro,
  * dalla barra del browser e dal titolo grande. Nessun marchio, nessun dominio.
  */
-export const pagina = (titolo: string, tipo: Exclude<TipoFinestra, "sistema">, orologio?: string) => (ctx: Ctx) => {
+export const pagina = (titolo: string, tipo: Exclude<TipoFinestra, "sistema">, orologio: Orologio) => (ctx: Ctx) => {
   const { w, h } = SCHERMO_PX;
   desktop(orologio)(ctx);
   const basso = h - 72;

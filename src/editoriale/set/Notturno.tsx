@@ -4,7 +4,7 @@ import { CIANO, MAGENTA } from "../stili/notte";
 import { NORMALE, puntoSchermo } from "./geometria";
 import { Palco } from "./Palco";
 import { Portatile } from "./Portatile";
-import type { PropsScrivania } from "./Scrivania";
+import type { PropsSet } from "./Scrivania";
 
 // Quasi buio: due luci di taglio da dietro (ciano a sinistra, magenta a destra), un riempimento debole, lo schermo che illumina.
 const Luci: React.FC<{ chiave: number }> = ({ chiave }) => {
@@ -45,11 +45,11 @@ const Piano: React.FC = () => (
 );
 
 /** Il set della notte: gli stessi dispositivi della scrivania, senza taccuino, su un piano scuro nel buio. */
-export const Notturno: React.FC<PropsScrivania & { fondo: string }> = ({ camera, schermo, notifica, orologio, luce = 1, fondo, children }) => (
+export const Notturno: React.FC<PropsSet & { fondo: string }> = ({ camera, schermo, notifica, orologio, luce = 1, dettagli, fondo, children }) => (
   <Palco camera={camera} fondo={fondo}>
     <Luci chiave={luce} />
     <Piano />
-    <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
+    <Portatile schermo={schermo} notifica={notifica} orologio={{ ora: dettagli.ora, data: orologio }} />
     {children}
   </Palco>
 );

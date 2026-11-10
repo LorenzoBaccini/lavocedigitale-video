@@ -355,6 +355,79 @@ ancora quello di base) e con `--variante=luce:sera,apertura:alta`:
 node --experimental-strip-types pipeline/controlla-impaginazione.ts fixtures/matrice-03.storyboard.json --passo=5 --secondi=4 --stile=studio
 ```
 
+### I dettagli
+
+Quattro dettagli cambiano da un video all'altro senza essere una dimensione della variante né una voce dello storico.
+Si ricavano ogni volta dallo slug con `dettagliDi(slug, stile)` (`src/editoriale/dettagli.ts`), quindi un video
+rifatto in locale ha gli stessi.
+
+- **L'ora sugli schermi**:
+  - dove compare: nella barra del portatile, nella barra di stato del telefono e nell'orologio grande della schermata
+    di blocco;
+  - la fascia è 07:00-22:59, perché un telefono guardato alle tre di notte stonerebbe;
+  - la data resta quella del copione (`storyboard.orologio`): i disegni ricevono `Orologio = { ora, data? }`.
+- **La finitura del telefono**, cioè il colore della cornice in alluminio (`FINITURE`):
+  - i valori sono grafite (quella di prima), argento, blu e sabbia;
+  - si vede solo nel 3D: nello stile schermo il telefono è a tutto quadro, senza scocca.
+- **Lo sfondo della schermata di blocco**:
+  - ce ne sono quattro per stile, presi dalle prime quattro tinte diverse della sua tavolozza (accento, superficie,
+    timbro, segno su chiaro, penna, tenue) e mescolati a un buio `#10131a`;
+  - due hanno al centro un alone della stessa tinta, che si spegne prima del bordo alto e di quello basso, così a
+    tutto quadro il riquadro attorno al disegno (`fondoTelefono`) combacia;
+  - la quantità di tinta scende finché il testo più debole della schermata, il titolo `#f3f4f6` sul riquadro bianco
+    al 12 %, sta sopra 5:1, anche al centro dell'alone. `dettagli.test.ts` lo prova per ogni stile e per ogni tinta
+    dello studio.
+- **Gli oggetti di scena sulla scrivania**: due fra taccuino, tazza e pianta, e solo nel set scrivania (studio e notte
+  non ne hanno).
+
+Ogni scelta passa da `impronta(slug:chiave)` e poi da un rimescolamento finale (il fmix32 di murmur3). FNV-1a da sola
+mescola poco i bit bassi: con `% 4`, due scelte con chiavi che finiscono con la stessa lettera andavano di pari passo
+(stessa finitura, quindi stesso sfondo). Il test controlla che su 400 slug escano tutte le 48 combinazioni.
+
+Come la variante e lo stile, i dettagli scendono con un contesto (`DettagliVideo`, `useDettagli()`) letto fuori dal
+canvas e poi passati come prop:
+
+- `Set3D` li passa al set, per l'ora del portatile e gli oggetti di scena;
+- le scene 3D li passano a `Smartphone` e a `OggettoSulPiano`;
+- le scene di schermo li passano a `contenutoTelefono` e a `contenutoPortatile`.
+
+Tazza e pianta (`set/OggettiDiScena.tsx`) sono fatte di primitive (cilindri, tori, coni a cinque facce), senza asset
+esterni. Stanno tutte e due a sinistra, lontano dal portatile:
+
+- la tazza davanti, oltre il taccuino;
+- la pianta in fondo, verso il muro.
+
+Così si vedono poco: entrano ai margini di alcune inquadrature (il rischio basso sul portatile, l'apertura radente,
+i ganci sugli oggetti a destra) e non al centro. Le posizioni più in vista non passano il controllo:
+
+- davanti al portatile, nell'inquadratura bassa del rischio, una tazza riempiva mezzo fotogramma sotto il sottotitolo;
+- dietro, accanto allo schermo, nell'apertura la tazza si vedeva bene, ma nei ganci sugli oggetti a destra (chiavetta,
+  telefono, router, carta) la camera la portava in alto, sotto i titoli;
+- la pianta in fondo a sinistra, ma più vicina al portatile, finiva dietro il titolo del gancio sulla chiavetta
+  nell'apertura radente.
+
+Verso il muro, cioè più in alto nel fotogramma, ci sono i titoli, larghi quasi quanto il fotogramma. Per questo tazza
+e pianta dichiarano un ingombro pieno (`IngombriDiScena`) e il controllo
+d'impaginazione segnala ogni testo che ci passa sopra. L'ingombro è la sagoma vera (`set/sagome.ts`), non una scatola:
+
+- la tazza è un cilindro largo quanto corpo e manico;
+- la pianta è il vaso più la punta di ogni foglia (`FOGLIE`, le stesse del modello);
+- l'involucro proiettato viene tagliato al fotogramma;
+- l'ingombro sparisce quando la parte in quadro cade tutta dentro lo schermo del portatile e la sagoma sta oltre il
+  suo piano. Nei primi piani sullo schermo la tazza è lì dietro, nascosta: con una scatola il controllo segnalava
+  titoli sopra un oggetto che non si vede.
+
+Il taccuino non dichiara un ingombro: c'era già e non è mai stato controllato.
+
+**Regressione.** `PropsNotizia.dettagli` è un `Partial<Dettagli>` che si appoggia sopra quelli dello slug.
+
+- `DETTAGLI_BASE` (10:24, grafite, `#1b2230` senza alone, solo il taccuino) è il video approvato. I provini di
+  regressione lo passano: con quello la scrivania resta identica a prima.
+- Il controllo d'impaginazione prende i dettagli dallo slug:
+  - `--dettagli=base` forza quelli di base;
+  - `--oggetti=taccuino,tazza,pianta` forza gli oggetti. Con tutti e tre, un giro solo controlla ogni coppia
+    possibile, perché ogni oggetto ha il suo posto fisso.
+
 ## Rifare in locale un video del runner, senza ripagare
 
 Ogni run carica l'artifact `video-<run id>` (3 giorni): articolo, risposte di Claude, storyboard,

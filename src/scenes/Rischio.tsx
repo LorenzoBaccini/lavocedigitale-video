@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
+import { useDettagli } from "../editoriale/DettagliVideo";
 import { pianoRischio } from "../editoriale/piani/rischio";
 import { fase, liscio, mix, uscita } from "../editoriale/regia";
 import { angoliInQuadro, fraLeQuote, puntoSchermo, SCHERMO_PX, sferica } from "../editoriale/set/geometria";
@@ -36,6 +37,7 @@ function camera(telefono: boolean, t: number): Camera {
 // La conseguenza: il dispositivo visto basso; la camera si allontana piano e la luce cala sulla chiave.
 export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   const f = useCurrentFrame();
+  const dettagli = useDettagli();
   const stile = useStile();
   const { durata } = props;
   const piano = pianoRischio(props, durata);
@@ -49,7 +51,7 @@ export const Rischio: React.FC<ScenaDi<"rischio">> = (props) => {
   return (
     <>
       <Set3D camera={cam} luce={luce} orologio={props.contesto.orologio}>
-        {telefono && <Smartphone schermo={{ tipo: "blocco" }} />}
+        {telefono && <Smartphone schermo={{ tipo: "blocco" }} dettagli={dettagli} />}
       </Set3D>
       <Velo alto={0.55} basso={0.68} />
       <Ingombro nome={telefono ? "telefono" : "schermo"} angoli={telefono ? angoliSchermoTelefono(cam) : angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />

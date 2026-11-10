@@ -5,7 +5,7 @@ import { BufferGeometry, Float32BufferAttribute } from "three";
 import { profiloLimbo } from "./limbo";
 import { Palco } from "./Palco";
 import { Portatile } from "./Portatile";
-import type { PropsScrivania } from "./Scrivania";
+import type { PropsSet } from "./Scrivania";
 
 const LARGO = 90;
 
@@ -64,11 +64,11 @@ const Luci: React.FC<{ chiave: number }> = ({ chiave }) => (
 );
 
 /** Il set dello studio: gli stessi dispositivi della scrivania su un fondale continuo della tinta del video. */
-export const Fondale: React.FC<PropsScrivania & { colore: string }> = ({ camera, schermo, notifica, orologio, luce = 1, colore, children }) => (
+export const Fondale: React.FC<PropsSet & { colore: string }> = ({ camera, schermo, notifica, orologio, luce = 1, dettagli, colore, children }) => (
   <Palco camera={camera} fondo={colore} flat>
     <Luci chiave={luce} />
     <Limbo colore={colore} />
-    <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
+    <Portatile schermo={schermo} notifica={notifica} orologio={{ ora: dettagli.ora, data: orologio }} />
     {children}
   </Palco>
 );

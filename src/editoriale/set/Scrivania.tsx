@@ -1,13 +1,15 @@
 import { Environment, Lightformer } from "@react-three/drei";
 import { RepeatWrapping } from "three";
 
+import type { Dettagli } from "../dettagli";
 import { useCanvasTexture } from "../../three/useCanvasTexture";
 import { useVariante } from "../VarianteVideo";
 import { legno, legnoRuvido } from "./disegni";
 import type { Camera } from "./geometria";
-import { NORMALE, puntoSchermo, TACCUINO } from "./geometria";
+import { NORMALE, puntoSchermo } from "./geometria";
 import type { Luce } from "./luci";
 import { LUCI_SCRIVANIA } from "./luci";
+import { IngombriDiScena, OggettiDiScena } from "./OggettiDiScena";
 import type { Notifica, Schermo } from "./Portatile";
 import { Palco } from "./Palco";
 import { Portatile } from "./Portatile";
@@ -38,35 +40,6 @@ const Luci: React.FC<{ chiave: number; luce: Luce }> = ({ chiave, luce }) => {
     </>
   );
 };
-
-const Taccuino: React.FC = () => (
-  <group position={TACCUINO.posizione} rotation-y={TACCUINO.rotazione}>
-    <mesh position={[0, 0.045, 0]} castShadow receiveShadow>
-      <boxGeometry args={[1.95, 0.08, 2.7]} />
-      <meshStandardMaterial color="#e6dfd1" roughness={0.95} />
-    </mesh>
-    <mesh position={[0.01, 0.092, 0]} castShadow receiveShadow>
-      <boxGeometry args={[2.0, 0.016, 2.74]} />
-      <meshStandardMaterial color="#2e2b28" roughness={0.88} />
-    </mesh>
-    {/* elastico */}
-    <mesh position={[0.82, 0.1, 0]}>
-      <boxGeometry args={[0.05, 0.004, 2.75]} />
-      <meshStandardMaterial color="#1a1918" roughness={0.6} />
-    </mesh>
-    {/* penna appoggiata di traverso */}
-    <group position={[0.15, 0.145, 0.25]} rotation={[0, 0.75, Math.PI / 2]}>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.042, 0.042, 1.75, 20]} />
-        <meshPhysicalMaterial color="#141414" roughness={0.35} metalness={0.1} clearcoat={0.5} />
-      </mesh>
-      <mesh position={[0, -0.95, 0]} castShadow>
-        <coneGeometry args={[0.042, 0.16, 20]} />
-        <meshPhysicalMaterial color="#9a9ea5" roughness={0.3} metalness={0.9} />
-      </mesh>
-    </group>
-  </group>
-);
 
 // La scrivania: rovere tinto con venature, muro caldo e scuro dietro.
 const Piano: React.FC<{ luce: Luce }> = ({ luce }) => {
@@ -102,16 +75,22 @@ export interface PropsScrivania {
   children?: React.ReactNode;
 }
 
-// Il set comune delle scene 3D: scrivania, portatile, taccuino, la luce della finestra; l'oggetto della scena si aggiunge come figlio.
-export const Scrivania: React.FC<PropsScrivania> = ({ camera, schermo, notifica, orologio, luce = 1, children }) => {
+/** Le props del set come le passa Set3D: quelle della scena e i dettagli del video, letti fuori dal canvas. */
+export type PropsSet = PropsScrivania & { dettagli: Dettagli };
+
+// Il set comune delle scene 3D: scrivania, portatile, due oggetti di scena, la luce della finestra; l'oggetto della scena si aggiunge come figlio.
+export const Scrivania: React.FC<PropsSet> = ({ camera, schermo, notifica, orologio, luce = 1, dettagli, children }) => {
   const tinta = LUCI_SCRIVANIA[useVariante().luce];
   return (
-    <Palco camera={camera} fondo={tinta.fondo}>
-      <Luci chiave={luce} luce={tinta} />
-      <Piano luce={tinta} />
-      <Portatile schermo={schermo} notifica={notifica} orologio={orologio} />
-      <Taccuino />
-      {children}
-    </Palco>
+    <>
+      <Palco camera={camera} fondo={tinta.fondo}>
+        <Luci chiave={luce} luce={tinta} />
+        <Piano luce={tinta} />
+        <Portatile schermo={schermo} notifica={notifica} orologio={{ ora: dettagli.ora, data: orologio }} />
+        <OggettiDiScena oggetti={dettagli.oggetti} />
+        {children}
+      </Palco>
+      <IngombriDiScena oggetti={dettagli.oggetti} camera={camera} />
+    </>
   );
 };

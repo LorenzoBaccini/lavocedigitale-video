@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
+import { useDettagli } from "../editoriale/DettagliVideo";
 import { Blocco } from "../editoriale/ganci/Blocco";
 import { allargamento, dettaglioDi, FINE_DETTAGLIO, pianoDettaglio, riquadroDettaglio } from "../editoriale/ganci/dettaglio";
 import { bloccoDiviso, tingiPerBlocco } from "../editoriale/ganci/diviso";
@@ -44,6 +45,7 @@ const GancioSulSet: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGancio, 
   const f = useCurrentFrame();
   const stile = useStile();
   const variante = useVariante();
+  const dettagli = useDettagli();
   const { oggetto, durata, contesto } = props;
   const pianoBase = pianoGancio(props, durata);
   const piano = formato === "dettaglio" ? pianoDettaglio(pianoBase, durata) : pianoBase;
@@ -74,7 +76,7 @@ const GancioSulSet: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGancio, 
         orologio={contesto.orologio}
         notifica={contesto.messaggioSeguente !== undefined && entrata > 0 ? { messaggio: contesto.messaggioSeguente, mittente: contesto.mittenteSeguente, azione: contesto.azioneSeguente, visibile: entrata, scarto: 28 * (1 - entrata) ** 3 } : undefined}
       >
-        <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} schermata={schermata} />
+        <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} dettagli={dettagli} schermata={schermata} />
       </Set3D>
       <Velo basso={0.5} />
       {oggetto === "portatile" && (versoLaNotifica ? <Ingombro nome="notifica" angoli={angoliInQuadro(NOTIFICA_PX, cam)} pieno /> : <Ingombro nome="schermo" angoli={angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} pieno={schermo !== undefined} />)}

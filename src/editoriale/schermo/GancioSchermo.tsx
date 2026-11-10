@@ -2,6 +2,8 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { ALTEZZA, FONDO_UTILE, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
+import type { Dettagli } from "../dettagli";
+import { useDettagli } from "../DettagliVideo";
 import { Blocco } from "../ganci/Blocco";
 import type { Dettaglio } from "../ganci/dettaglio";
 import { allargamento, dettaglioDi, notificaSulloSchermo, pianoDettaglio, riquadroDettaglioSchermo } from "../ganci/dettaglio";
@@ -29,12 +31,12 @@ const LARGHEZZA_DETTAGLIO = 1040;
 /** Da dove parte la camera, per apertura: al centro, in basso a sinistra, in alto a destra (frazioni del disegno). */
 const PARTENZA: Record<NomeApertura, [number, number]> = { classica: [0.5, 0.5], radente: [0.36, 0.6], alta: [0.64, 0.38] };
 
-function contenutoGancio(props: ScenaDi<"gancio">, f: number): Contenuto {
+function contenutoGancio(props: ScenaDi<"gancio">, f: number, d: Dettagli): Contenuto {
   const schermata = props.schermata ?? "sistema";
-  if (props.oggetto === "smartphone") return contenutoTelefono({ tipo: "blocco", titolo: props.titolo });
+  if (props.oggetto === "smartphone") return contenutoTelefono({ tipo: "blocco", titolo: props.titolo }, d);
   if (props.oggetto === "chiavetta" || props.oggetto === "router" || props.oggetto === "carta") return contenutoOggetto(props.oggetto, f);
   const pagina = props.oggetto === "portatile" && schermata !== "sistema";
-  return contenutoPortatile(pagina ? { tipo: "pagina", titolo: props.titolo, schermata } : { tipo: "desktop" }, props.contesto.orologio);
+  return contenutoPortatile(pagina ? { tipo: "pagina", titolo: props.titolo, schermata } : { tipo: "desktop" }, { ora: d.ora, data: props.contesto.orologio });
 }
 
 /** Dove stringe la camera sulla chiave: il titolo della pagina (dal suo inizio), la scheda del telefono, il punto caldo dell'oggetto. */
@@ -80,7 +82,8 @@ const GancioSulloSchermo: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGa
   const { righe, limite } = titoloGancio(piano, stile);
   const blocco = formato === "diviso" ? bloccoDiviso(f, limite) : undefined;
   const quota = blocco ? Math.max(limite, blocco.basso) : limite;
-  const c = contenutoGancio(props, f);
+  const dettagli = useDettagli();
+  const c = contenutoGancio(props, f, dettagli);
   const quadroScena = { x: 0, y: quota, w: LARGHEZZA, h: ALTEZZA - quota };
   const scalaBase = scalaInsieme(c, quadroScena, FONDO_UTILE - quota);
   const conNotifica = notificaSulloSchermo(props, true);

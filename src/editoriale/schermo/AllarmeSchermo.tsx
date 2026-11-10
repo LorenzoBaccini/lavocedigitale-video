@@ -2,6 +2,7 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { FONDO_TITOLO, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
+import { useDettagli } from "../DettagliVideo";
 import { NOTIFICA_IN_QUADRO, NOTIFICA_TELEFONO_IN_QUADRO, pianoAllarme } from "../piani/allarme";
 import { fase, mix, uscita } from "../regia";
 import { SegnoInQuadro } from "../Segno";
@@ -36,6 +37,7 @@ const DISPOSIZIONE = {
 // scende al suo posto, la camera stringe piano, e i segni a mano la annotano sulla voce.
 export const AllarmeSchermo: React.FC<ScenaDi<"allarme">> = (props) => {
   const f = useCurrentFrame();
+  const dettagli = useDettagli();
   const stile = useStile();
   const { durata, contesto } = props;
   const piano = pianoAllarme(props, durata);
@@ -43,7 +45,7 @@ export const AllarmeSchermo: React.FC<ScenaDi<"allarme">> = (props) => {
   const telefono = piano.dispositivo === "smartphone";
   const d = telefono ? DISPOSIZIONE.telefono : DISPOSIZIONE.portatile;
   const righe = useRighe(d.font, piano.messaggio, d.dividi);
-  const c = telefono ? contenutoTelefono({ tipo: "blocco" }) : contenutoPortatile({ tipo: "desktop" }, contesto.orologio);
+  const c = telefono ? contenutoTelefono({ tipo: "blocco" }, dettagli) : contenutoPortatile({ tipo: "desktop" }, { ora: dettagli.ora, data: contesto.orologio });
 
   const alto = fineTitoloAlto(props.sopra, sopra, stile) + STACCO;
   const basso = inizioTitoloBasso(props.titolo, titolo, stile) - STACCO;

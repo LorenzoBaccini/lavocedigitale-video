@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
+import { useDettagli } from "../editoriale/DettagliVideo";
 import { pianoOggetto } from "../editoriale/piani/oggetto";
 import { fase } from "../editoriale/regia";
 import { Pennarello, Richiamo, SegnoInQuadro } from "../editoriale/Segno";
@@ -78,6 +79,7 @@ export const Conferma: React.FC<{ testo: string; da: number; f: number; suChiaro
 export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   const f = useCurrentFrame();
   const stile = useStile();
+  const dettagli = useDettagli();
   const { oggetto, durata, etichetta, indica, conferma } = props;
   const piano = pianoOggetto(props, durata);
   const schermata = props.schermata ?? "sistema";
@@ -105,7 +107,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   return (
     <>
       <Set3D camera={cam} schermo={schermo} orologio={props.contesto.orologio}>
-        <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} riga={indica} menu={props.menu} schermata={schermata} fuori={0.12 * (1 - fase(f, 0, 3))} />
+        <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} dettagli={dettagli} riga={indica} menu={props.menu} schermata={schermata} fuori={0.12 * (1 - fase(f, 0, 3))} />
       </Set3D>
       <Velo alto={0.62} basso={inchiostro ? 0.85 : conferma ? 0.7 : 0.5} />
       {oggetto === "portatile" && !inchiostro && <Ingombro nome="schermo" angoli={angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />}

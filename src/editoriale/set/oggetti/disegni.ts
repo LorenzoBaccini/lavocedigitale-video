@@ -1,3 +1,6 @@
+import type { Dettagli } from "../../dettagli.ts";
+import { ALFA_ALONE } from "../../dettagli.ts";
+import { conAlfa } from "../../stili/alfa.ts";
 import { casuale } from "../../tratto.ts";
 import type { Ctx } from "../disegni.ts";
 import { aCapo, MITTENTE_NEUTRO, scriviEntro } from "../disegni.ts";
@@ -15,28 +18,41 @@ export type SchermoTelefono =
   | { tipo: "elenco"; riga: string; titolo: string; menu?: string[]; app: boolean }
   | { tipo: "opzioni"; opzioni: string[] };
 
-const barraStato = (ctx: Ctx, colore: string) => {
+/** Quello che la schermata del telefono prende dai dettagli del video. */
+export type AspettoTelefono = Pick<Dettagli, "ora" | "sfondo">;
+
+const barraStato = (ctx: Ctx, colore: string, ora: string) => {
   const W = TELEFONO_PX.w;
   ctx.fillStyle = colore; ctx.font = `600 30px ${SANS}`; ctx.textBaseline = "middle";
-  ctx.textAlign = "left"; ctx.fillText("10:24", 52, 60);
+  ctx.textAlign = "left"; ctx.fillText(ora, 52, 60);
   ctx.textAlign = "right"; ctx.fillText("▮▮▮  82%", W - 52, 60);
   ctx.textAlign = "left";
 };
 
 // testata di un'app: fascia scura con un segno geometrico neutro, nessun marchio
-const testataApp = (ctx: Ctx, titolo?: string) => {
+const testataApp = (ctx: Ctx, ora: string, titolo?: string) => {
   const W = TELEFONO_PX.w;
   ctx.fillStyle = "#24364d"; ctx.fillRect(0, 0, W, 250);
-  barraStato(ctx, "#eef1f5");
+  barraStato(ctx, "#eef1f5", ora);
   ctx.fillStyle = "#e9edf2"; ctx.beginPath(); ctx.roundRect(48, 140, 64, 64, 16); ctx.fill();
   if (titolo) { ctx.font = `650 40px ${SANS}`; ctx.fillStyle = "#f4f6f8"; scriviEntro(ctx, titolo, 136, 174, W - 190); }
   else { ctx.fillStyle = "rgba(233,237,242,0.6)"; ctx.beginPath(); ctx.roundRect(136, 164, 260, 20, 10); ctx.fill(); }
 };
 
-const blocco = (ctx: Ctx, titolo?: string) => {
+// l'alone si spegne prima del bordo alto e di quello basso: a tutto quadro attorno al disegno c'e' la tinta unita
+const sfondoBlocco = (ctx: Ctx, { fondo, alone }: AspettoTelefono["sfondo"]) => {
+  const { w: W, h: H } = TELEFONO_PX;
+  ctx.fillStyle = fondo; ctx.fillRect(0, 0, W, H);
+  if (!alone) return;
+  const g = ctx.createRadialGradient(W / 2, H * 0.36, 0, W / 2, H * 0.36, H * 0.34);
+  g.addColorStop(0, conAlfa(alone, ALFA_ALONE)); g.addColorStop(1, conAlfa(alone, 0));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+};
+
+const blocco = (ctx: Ctx, ora: string, titolo?: string) => {
   const { w: W } = TELEFONO_PX;
-  barraStato(ctx, "#e8e8ea");
-  ctx.fillStyle = "#e8e8ea"; ctx.textAlign = "center"; ctx.font = `300 160px ${SANS}`; ctx.fillText("10:24", W / 2, 270);
+  barraStato(ctx, "#e8e8ea", ora);
+  ctx.fillStyle = "#e8e8ea"; ctx.textAlign = "center"; ctx.font = `300 160px ${SANS}`; ctx.fillText(ora, W / 2, 270);
   ctx.textAlign = "left";
   if (!titolo) return;
   ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.beginPath(); ctx.roundRect(40, 620, W - 80, 170, 34); ctx.fill();
@@ -46,11 +62,11 @@ const blocco = (ctx: Ctx, titolo?: string) => {
 
 // L'elenco, sempre scuro (i titoli bianchi ci passano sopra): la riga di `indica` e' la quarta, evidenziata; le altre sono le
 // voci del copione o righe grigie senza parole. Nelle app la testata dell'app al posto di «Impostazioni».
-const elenco = (ctx: Ctx, riga: string, titolo: string, menu: string[] | undefined, app: boolean) => {
+const elenco = (ctx: Ctx, ora: string, riga: string, titolo: string, menu: string[] | undefined, app: boolean) => {
   const W = TELEFONO_PX.w;
-  if (app) testataApp(ctx, titolo);
+  if (app) testataApp(ctx, ora, titolo);
   else {
-    barraStato(ctx, "#e8e8ea");
+    barraStato(ctx, "#e8e8ea", ora);
     ctx.fillStyle = "#f2f3f5"; ctx.font = `700 64px ${SANS}`; ctx.fillText("Impostazioni", 48, 190);
   }
   const altre = [...(menu ?? [])];
@@ -73,9 +89,9 @@ const elenco = (ctx: Ctx, riga: string, titolo: string, menu: string[] | undefin
 };
 
 // I metodi d'accesso: pulsanti grandi, uno sotto l'altro; quello escluso lo barra a mano la scena, non la schermata.
-const opzioni = (ctx: Ctx, voci: string[]) => {
+const opzioni = (ctx: Ctx, ora: string, voci: string[]) => {
   const W = TELEFONO_PX.w;
-  testataApp(ctx);
+  testataApp(ctx, ora);
   ctx.fillStyle = "#cfcbc3";
   for (const [y, l] of [[330, 430], [380, 330]]) { ctx.beginPath(); ctx.roundRect(56, y, l, 22, 11); ctx.fill(); }
   voci.forEach((voce, i) => {
@@ -89,14 +105,17 @@ const opzioni = (ctx: Ctx, voci: string[]) => {
   ctx.fillStyle = "#d9d6cf"; ctx.beginPath(); ctx.roundRect(56, opzionePx(voci.length).y + 30, 360, 18, 9); ctx.fill();
 };
 
-/** La schermata del telefono. */
-export const disegnoTelefono = (s: SchermoTelefono) => (ctx: Ctx) => {
+/** Il colore della schermata dove il disegno finisce: a tutto quadro il riquadro attorno combacia. */
+export const fondoTelefono = (s: SchermoTelefono, a: AspettoTelefono): string => (s.tipo === "opzioni" ? "#f4f2ee" : s.tipo === "blocco" ? a.sfondo.fondo : "#101113");
+
+/** La schermata del telefono, con l'ora e lo sfondo del blocco dai dettagli del video. */
+export const disegnoTelefono = (s: SchermoTelefono, a: AspettoTelefono) => (ctx: Ctx) => {
   const { w: W, h: H } = TELEFONO_PX;
-  const chiara = s.tipo === "opzioni";
-  ctx.fillStyle = chiara ? "#f4f2ee" : s.tipo === "blocco" ? "#1b2230" : "#101113"; ctx.fillRect(0, 0, W, H);
-  if (s.tipo === "blocco") blocco(ctx, s.titolo);
-  else if (s.tipo === "elenco") elenco(ctx, s.riga, s.titolo, s.menu, s.app);
-  else opzioni(ctx, s.opzioni);
+  if (s.tipo === "blocco") sfondoBlocco(ctx, a.sfondo);
+  else { ctx.fillStyle = fondoTelefono(s, a); ctx.fillRect(0, 0, W, H); }
+  if (s.tipo === "blocco") blocco(ctx, a.ora, s.titolo);
+  else if (s.tipo === "elenco") elenco(ctx, a.ora, s.riga, s.titolo, s.menu, s.app);
+  else opzioni(ctx, a.ora, s.opzioni);
 };
 
 export const righeNotificaTelefono = (ctx: Ctx, messaggio: string) => {

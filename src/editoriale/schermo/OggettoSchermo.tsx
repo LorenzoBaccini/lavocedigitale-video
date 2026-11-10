@@ -2,6 +2,8 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { ALTEZZA, FONDO_UTILE, LARGHEZZA, RESPIRO } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
+import type { Dettagli } from "../dettagli";
+import { useDettagli } from "../DettagliVideo";
 import { pianoOggetto } from "../piani/oggetto";
 import { conPeso, fase, mix } from "../regia";
 import { Richiamo } from "../Segno";
@@ -25,13 +27,13 @@ const STACCO = 30;
 /** Lo spazio sotto lo schermo per il richiamo di `indica` sugli oggetti senza schermo (due righe). */
 const SPAZIO_RICHIAMO = 120;
 
-function contenutoDi(props: ScenaDi<"oggetto">, f: number): Contenuto {
+function contenutoDi(props: ScenaDi<"oggetto">, f: number, d: Dettagli): Contenuto {
   const { oggetto, indica, titolo, menu } = props;
   const schermata = props.schermata ?? "sistema";
-  if (oggetto === "smartphone") return contenutoTelefono(indica ? { tipo: "elenco", riga: indica, titolo, menu, app: schermata !== "sistema" } : { tipo: "blocco", titolo });
+  if (oggetto === "smartphone") return contenutoTelefono(indica ? { tipo: "elenco", riga: indica, titolo, menu, app: schermata !== "sistema" } : { tipo: "blocco", titolo }, d);
   if (oggetto === "chiavetta" || oggetto === "router" || oggetto === "carta") return contenutoOggetto(oggetto, f);
   const schermo: Schermo = oggetto === "portatile" && indica ? { tipo: "finestra", titolo, pulsante: indica, menu, schermata } : oggetto === "portatile" && schermata !== "sistema" ? { tipo: "pagina", titolo, schermata } : { tipo: "desktop" };
-  return contenutoPortatile(schermo, props.contesto.orologio);
+  return contenutoPortatile(schermo, { ora: d.ora, data: props.contesto.orologio });
 }
 
 // L'oggetto a tutto quadro: sotto occhiello e titolo lo schermo (o l'oggetto come scheda illustrata); su `indica` il
@@ -42,7 +44,8 @@ export const OggettoSchermo: React.FC<ScenaDi<"oggetto">> = (props) => {
   const { durata, etichetta, indica, conferma } = props;
   const piano = pianoOggetto(props, durata);
   const { righe, limite } = titoliOggetto(props, piano, stile);
-  const c = contenutoDi(props, f);
+  const dettagli = useDettagli();
+  const c = contenutoDi(props, f, dettagli);
   const tocca = piano.indica !== undefined && c.caldo !== undefined;
   const richiamo = tocca && c.tipo === "oggetto" && indica !== undefined;
   // la conferma e' un avviso dentro lo schermo, in basso: lo schermo non si accorcia per lei

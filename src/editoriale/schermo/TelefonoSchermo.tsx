@@ -2,6 +2,7 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { ALTEZZA, FONDO_UTILE, LARGHEZZA } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
+import { useDettagli } from "../DettagliVideo";
 import { pianoTelefono } from "../piani/telefono";
 import { fase, mix, uscita } from "../regia";
 import { SegnoInQuadro } from "../Segno";
@@ -22,12 +23,13 @@ const STACCO = 30;
 // esclusa e il cerchio su quella che resta, come sul set.
 export const TelefonoSchermo: React.FC<ScenaDi<"telefono">> = (props) => {
   const f = useCurrentFrame();
+  const dettagli = useDettagli();
   const stile = useStile();
   const { durata, etichetta, opzioni } = props;
   const piano = pianoTelefono(props, durata);
   const { righe } = titoloTelefono(props, piano, stile);
   const sottoITitoli = fineTitoloAlto(props.titolo, righe, stile, sopraIlTitolo(etichetta));
-  const c = contenutoTelefono({ tipo: "opzioni", opzioni });
+  const c = contenutoTelefono({ tipo: "opzioni", opzioni }, dettagli);
   const alto = sottoITitoli + STACCO;
   const quadro = { x: 0, y: alto, w: LARGHEZZA, h: ALTEZZA - alto };
   const fino = FONDO_UTILE - STACCO;

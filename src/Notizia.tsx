@@ -1,6 +1,9 @@
 import { Fragment } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
 
+import type { Dettagli } from "./editoriale/dettagli";
+import { dettagliDi } from "./editoriale/dettagli";
+import { DettagliVideo } from "./editoriale/DettagliVideo";
 import { Ferma } from "./editoriale/Ferma";
 import { scenaFerma } from "./editoriale/fermo";
 import { notificaSulloSchermo, suoniDettaglio } from "./editoriale/ganci/dettaglio";
@@ -26,14 +29,15 @@ import { FPS, fontsCss } from "./theme";
 import type { Timing } from "./timing";
 import { LivelloVoce } from "./voce";
 
-/** `variante` assente: l'aspetto del video approvato. */
-export type PropsNotizia = { storyboard: Storyboard; timing: Timing; audioBase: string; variante?: Variante; misuraImpaginazione?: boolean };
+/** `variante` assente: l'aspetto del video approvato; ogni dettaglio assente viene dallo slug (la regressione passa `DETTAGLI_BASE`). */
+export type PropsNotizia = { storyboard: Storyboard; timing: Timing; audioBase: string; variante?: Variante; dettagli?: Partial<Dettagli>; misuraImpaginazione?: boolean };
 
-export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase, variante, misuraImpaginazione }) => {
+export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase, variante, dettagli, misuraImpaginazione }) => {
   const f = useCurrentFrame();
   const linea = costruisciLinea(timing, FPS);
   const aspetto = varianteDi(variante);
   const stile = stileDelVideo(aspetto.stile, storyboard.slug);
+  const particolari = { ...dettagliDi(storyboard.slug, stile), ...dettagli };
   // il controllo d'impaginazione misura ogni scena ferma al suo posto, non a meta' di una spinta o sotto un lampo
   const scorrimento = stile.transizione === "scorrimento";
   const spinta = (stile.transizione === "spinta" || scorrimento) && !misuraImpaginazione;
@@ -44,6 +48,7 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
   return (
     <VarianteVideo.Provider value={aspetto}>
       <StileVideo.Provider value={stile}>
+        <DettagliVideo.Provider value={particolari}>
         <LivelloVoce.Provider value={livelloVoce(timing, linea, f)}>
           <AbsoluteFill style={{ background: stile.colori.fondo }}>
             <style>{fontsCss}</style>
@@ -111,6 +116,7 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
             {misuraImpaginazione && <MisuraImpaginazione />}
           </AbsoluteFill>
         </LivelloVoce.Provider>
+        </DettagliVideo.Provider>
       </StileVideo.Provider>
     </VarianteVideo.Provider>
   );

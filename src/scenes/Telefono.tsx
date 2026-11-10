@@ -1,5 +1,6 @@
 import { useCurrentFrame } from "remotion";
 
+import { useDettagli } from "../editoriale/DettagliVideo";
 import { pianoTelefono } from "../editoriale/piani/telefono";
 import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
@@ -32,6 +33,7 @@ function barrato(i: number, cam: Parameters<typeof proietta>[1]): Punto[] {
 // sull'opzione esclusa, il cerchio su quella che resta.
 export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
   const f = useCurrentFrame();
+  const dettagli = useDettagli();
   const stile = useStile();
   const { durata, etichetta, opzioni } = props;
   const piano = pianoTelefono(props, durata);
@@ -41,7 +43,7 @@ export const Telefono: React.FC<ScenaDi<"telefono">> = (props) => {
   return (
     <>
       <Set3D camera={cam} orologio={props.contesto.orologio}>
-        <Smartphone schermo={{ tipo: "opzioni", opzioni }} />
+        <Smartphone schermo={{ tipo: "opzioni", opzioni }} dettagli={dettagli} />
       </Set3D>
       <Velo alto={0.62} basso={0.55} />
       <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} pieno />

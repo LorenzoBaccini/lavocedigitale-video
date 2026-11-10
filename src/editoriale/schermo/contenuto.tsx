@@ -1,7 +1,8 @@
 import type { Rettangolo } from "../set/geometria";
 import { PULSANTE_PX, SCHERMO_PX } from "../set/geometria";
-import type { SchermoTelefono } from "../set/oggetti/disegni";
-import { disegnoTelefono, RIGA_EVIDENZIATA } from "../set/oggetti/disegni";
+import type { Orologio } from "../set/disegni";
+import type { AspettoTelefono, SchermoTelefono } from "../set/oggetti/disegni";
+import { disegnoTelefono, fondoTelefono, RIGA_EVIDENZIATA } from "../set/oggetti/disegni";
 import type { Schermo } from "../set/schermata";
 import { disegnoSchermo } from "../set/schermata";
 import { TELEFONO_PX } from "../set/telefono";
@@ -23,7 +24,7 @@ export interface Contenuto {
 }
 
 /** Lo schermo del portatile, lo stesso disegno della texture del set. */
-export const contenutoPortatile = (schermo: Schermo, orologio?: string): Contenuto => ({
+export const contenutoPortatile = (schermo: Schermo, orologio: Orologio): Contenuto => ({
   misure: SCHERMO_PX,
   fondo: "#1b2230",
   strato: <Disegno w={SCHERMO_PX.w} h={SCHERMO_PX.h} disegna={disegnoSchermo(schermo, orologio)} chiave={JSON.stringify([schermo, orologio])} />,
@@ -31,21 +32,19 @@ export const contenutoPortatile = (schermo: Schermo, orologio?: string): Contenu
   tipo: "portatile",
 });
 
-const FONDO_TELEFONO: Record<SchermoTelefono["tipo"], string> = { blocco: "#1b2230", elenco: "#101113", opzioni: "#f4f2ee" };
-
 /** Lo schermo del telefono: il disegno del set dipinto a 2×, perche' a tutto quadro e' ingrandito. */
-export const contenutoTelefono = (s: SchermoTelefono): Contenuto => ({
+export const contenutoTelefono = (s: SchermoTelefono, a: AspettoTelefono): Contenuto => ({
   misure: TELEFONO_PX,
-  fondo: FONDO_TELEFONO[s.tipo],
+  fondo: fondoTelefono(s, a),
   strato: (
     <Disegno
       w={TELEFONO_PX.w * 2}
       h={TELEFONO_PX.h * 2}
       disegna={(ctx) => {
         ctx.scale(2, 2);
-        disegnoTelefono(s)(ctx);
+        disegnoTelefono(s, a)(ctx);
       }}
-      chiave={JSON.stringify(s)}
+      chiave={JSON.stringify([s, a.ora, a.sfondo])}
       style={{ width: TELEFONO_PX.w, height: TELEFONO_PX.h }}
     />
   ),

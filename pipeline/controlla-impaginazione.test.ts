@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { DETTAGLI_BASE } from "../src/editoriale/dettagli.ts";
 import { ATTIVI, VARIANTE_BASE } from "../src/editoriale/variante.ts";
-import { avvisiNonAttivi, momentiDi, varianteDaArgomenti } from "./controlla-impaginazione.ts";
+import { avvisiNonAttivi, dettagliDaArgomenti, momentiDi, varianteDaArgomenti } from "./controlla-impaginazione.ts";
 
 test("un valore valido ma non ancora attivo si controlla con un avviso: il fotogramma mostra quello di base", () => {
   assert.deepEqual(avvisiNonAttivi(VARIANTE_BASE), []);
@@ -42,4 +43,12 @@ test("si misura poco dopo l'inizio, a meta' e alla fine della scena", () => {
 test("con il passo si misura tutta l'animazione, senza fotogrammi doppi", () => {
   const m = momentiDi(100, 90, 30);
   assert.deepEqual(m.map(([, f]) => f), [100, 108, 130, 145, 160, 189]);
+});
+
+test("i dettagli vengono dallo slug, salvo --dettagli=base e --oggetti=", () => {
+  assert.equal(dettagliDaArgomenti([], undefined), undefined);
+  assert.deepEqual(dettagliDaArgomenti(["--dettagli=base"], undefined), DETTAGLI_BASE);
+  assert.deepEqual(dettagliDaArgomenti(["--oggetti=taccuino,tazza,pianta"], undefined), { oggetti: ["taccuino", "tazza", "pianta"] });
+  assert.deepEqual(dettagliDaArgomenti(["--dettagli=base", "--oggetti=tazza"], { ora: "08:00" }), { ...DETTAGLI_BASE, oggetti: ["tazza"] });
+  assert.throws(() => dettagliDaArgomenti(["--oggetti=vaso"], undefined), /vaso sconosciuti/);
 });

@@ -4,6 +4,7 @@ import { RepeatWrapping } from "three";
 import { useCanvasTexture } from "../../three/useCanvasTexture";
 import { alluminioRuvido, notifica, tastiera } from "./disegni";
 import { BASE, CENTRO_SCHERMO_LOCALE, CERNIERA, INCLINAZIONE, NOTIFICA_PX, NOTIFICA_SCALA, PORTA_USB, SCHERMO, SCHERMO_PX } from "./geometria";
+import type { Orologio } from "./disegni";
 import type { Notifica, Schermo } from "./schermata";
 import { disegnoSchermo } from "./schermata";
 
@@ -24,7 +25,7 @@ const Toast: React.FC<Notifica> = ({ messaggio, mittente, azione, visibile, scar
 };
 
 // Portatile da 14" grigio scuro, con usura: lo schermo mostra un'interfaccia vera, la notifica sta su un piano a parte.
-export const Portatile: React.FC<{ schermo?: Schermo; notifica?: Notifica; orologio?: string }> = ({ schermo = { tipo: "desktop" }, notifica: toast, orologio }) => {
+export const Portatile: React.FC<{ schermo?: Schermo; notifica?: Notifica; orologio: Orologio }> = ({ schermo = { tipo: "desktop" }, notifica: toast, orologio }) => {
   const chiave = JSON.stringify([schermo, orologio]);
   const immagine = useCanvasTexture(SCHERMO_PX.w, SCHERMO_PX.h, disegnoSchermo(schermo, orologio), [chiave]);
   const tasti = useCanvasTexture(1024, 360, tastiera);

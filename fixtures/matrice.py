@@ -126,7 +126,7 @@ def main():
     # la notifica arriva nel gancio solo prima di un allarme sul portatile: un caso con la notifica al limite
     gruppi[0].insert(1, allarmi()[1])
     parole = lambda f: len(f["testo"].split())
-    budget = 72 - parole(CHIUSURA)  # tetto di parole della durata media (LIMITI_DURATA)
+    budget = 72 - 7  # parole prima della chiusura in una media con la frase finale piu lunga (LIMITI_DURATA)
     n = 0
     for scene in gruppi:
         blocchi, blocco = [], []
@@ -138,7 +138,7 @@ def main():
         blocchi.append(blocco)
         for blocco in blocchi:
             n += 1
-            while len(blocco) < 5:
+            while len(blocco) < 5 or sum(map(parole, blocco)) < 50 - 3:  # una media anche con «Link nel post.»
                 blocco.append(frase(DETTA, "preciso", {"tipo": "teaser", "testo": "Ancora"}))
             sb = {"slug": f"matrice-{n:02d}", "orologio": "2026-03-02", "frasi": blocco + [CHIUSURA]}
             (radice / f"matrice-{n:02d}.storyboard.json").write_text(json.dumps(sb, ensure_ascii=False, indent=1) + "\n")

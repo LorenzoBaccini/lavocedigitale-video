@@ -1,5 +1,5 @@
-import type { NomeDurata } from "../editoriale/variante.ts";
-import { DISPOSITIVI, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
+import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
+import { contaParole, DISPOSITIVI, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
 import type { Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -203,11 +203,14 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
   } else {
     CONTROLLI[scena.tipo](scena, `${p}.scena`, errori);
   }
-  return typeof frase.testo === "string" ? frase.testo.trim().split(/\s+/).filter(Boolean).length : 0;
+  return typeof frase.testo === "string" ? contaParole(frase.testo) : 0;
 }
 
-/** `durata`: quella della variante, decide quante frasi e quante parole (`LIMITI_DURATA`). */
-export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValidazione {
+/**
+ * `durata` e `fraseFinale`: quelle della variante. Le parole sono quelle dette: le frasi prima della chiusura piu' la
+ * frase finale scelta; l'ultima frase del copione resta comunque `TESTO_CHIUSURA`, la sostituzione viene dopo.
+ */
+export function validaStoryboard(input: unknown, durata: NomeDurata, fraseFinale: FraseFinale): EsitoValidazione {
   const limiti = LIMITI_DURATA[durata];
   const errori: string[] = [];
   if (!èDizionario(input)) return { ok: false, errori: ["storyboard: oggetto richiesto"] };
@@ -221,9 +224,12 @@ export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValid
     errori.push(`frasi: ${frasi.length} frasi, la durata ${durata} ne vuole da ${limiti.frasi.min} a ${limiti.frasi.max}`);
   }
 
-  const parole = frasi.reduce<number>((tot, f, i) => tot + validaFrase(f, i, errori), 0);
-  if (parole < limiti.parole.min || parole > limiti.parole.max) {
-    errori.push(`copione: ${parole} parole, la durata ${durata} ne vuole da ${limiti.parole.min} a ${limiti.parole.max}`);
+  const conteggi = frasi.map((f, i) => validaFrase(f, i, errori));
+  const prima = conteggi.slice(0, -1).reduce((a, b) => a + b, 0);
+  const dette = prima + contaParole(FRASI_CHIUSURA[fraseFinale].testo);
+  if (dette < limiti.parole.min || dette > limiti.parole.max) {
+    const ammesse = paroleContenuto(durata, fraseFinale);
+    errori.push(`copione: ${prima} parole prima della chiusura (${dette} dette con la frase finale), la durata ${durata} ne vuole da ${ammesse.min} a ${ammesse.max} prima della chiusura`);
   }
 
   const ultima = frasi.at(-1);

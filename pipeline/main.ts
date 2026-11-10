@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { NomeDurata, Variante } from "../src/editoriale/variante.ts";
+import type { Variante } from "../src/editoriale/variante.ts";
 import { scegliVariante } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
@@ -21,6 +21,7 @@ import { èPrincipale } from "./principale.ts";
 import type { Storico } from "./storico.ts";
 import { argomentiElenco, chiavePresente } from "./s3.ts";
 import { aggiungi, analizzaStorico, CHIAVE_STORICO, riassunto, sequenzeRecenti, STORICO_VUOTO } from "./storico.ts";
+import type { Misura } from "./storyboard.ts";
 import { StoryboardScartato } from "./storyboard.ts";
 
 const URL_VIDEO = "https://lavocedigitale.it/images/video";
@@ -33,8 +34,8 @@ export interface Dipendenze {
   scriviStorico: (testo: string) => Promise<void>;
   /** Lancia un errore se manca la chiave di ElevenLabs: va saputo prima di spendere la chiamata a Claude. */
   verificaChiave: () => void;
-  /** `recenti`: le sequenze di scene degli ultimi video, che lo storyboard non deve ripetere; `durata`: quella della variante. */
-  scriviStoryboard: (a: ArticoloVideo, recenti: string[][], durata: NomeDurata) => Promise<Storyboard>;
+  /** `recenti`: le sequenze di scene degli ultimi video, che lo storyboard non deve ripetere; `misura`: durata e frase finale della variante. */
+  scriviStoryboard: (a: ArticoloVideo, recenti: string[][], misura: Misura) => Promise<Storyboard>;
   /** ElevenLabs: un wav per frase e `timing.json` nella cartella. Lancia un errore se la voce non arriva. */
   voce: (storyboard: Storyboard, cartella: string) => Promise<Timing>;
   /** Genera i suoni in `public/suoni` (fuori da git): servono già ai fotogrammi del controllo d'impaginazione. */
@@ -174,7 +175,7 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
 
   let storyboard: Storyboard;
   try {
-    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), variante.durata));
+    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), { durata: variante.durata, fraseFinale: variante.fraseFinale }));
     // la validazione ha visto la frase del copione: la frase finale della variante la sostituisce prima della voce
     storyboard = conFraseFinale({ ...storyboard, slug }, variante.fraseFinale);
   } catch (e) {
@@ -353,8 +354,8 @@ async function dipendenzeVere(articolo: ArticoloVideo): Promise<Dipendenze> {
     },
     verificaChiave: () => void chiaveElevenLabs(),
     // ogni risposta di Claude resta su disco prima dei controlli: finisce nell'artifact anche se scartata
-    scriviStoryboard: (a, recenti, durata) =>
-      scriviStoryboard(a, chiediAClaude, durata, recenti, (risposta, n) => writeFileSync(join(percorsi(a.slug).cartellaLavoro, `storyboard-claude-${n}.txt`), risposta)),
+    scriviStoryboard: (a, recenti, misura) =>
+      scriviStoryboard(a, chiediAClaude, misura, recenti, (risposta, n) => writeFileSync(join(percorsi(a.slug).cartellaLavoro, `storyboard-claude-${n}.txt`), risposta)),
     voce: (storyboard, cartella) => {
       writeFileSync(join(percorsi(storyboard.slug).cartellaLavoro, "storyboard.json"), JSON.stringify(storyboard, null, 2));
       return voceElevenLabs(storyboard, cartella);

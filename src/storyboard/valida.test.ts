@@ -9,19 +9,19 @@ const leggi = (): any =>
   JSON.parse(readFileSync(new URL("../../fixtures/windows10.storyboard.json", import.meta.url), "utf8"));
 
 const errori = (input: unknown): string[] => {
-  const esito = validaStoryboard(input, "lunga");
+  const esito = validaStoryboard(input, "media", 2);
   assert.equal(esito.ok, false);
   return esito.ok ? [] : esito.errori;
 };
 
 test("accetta lo storyboard del prototipo", () => {
-  assert.equal(validaStoryboard(leggi(), "lunga").ok, true);
+  assert.equal(validaStoryboard(leggi(), "media", 2).ok, true);
 });
 
 test("la notifica dell'allarme e' facoltativa, ma non oltre il suo limite", () => {
   const sb = leggi();
   delete sb.frasi[1].scena.notifica;
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
   sb.frasi[1].scena.notifica = "x".repeat(65);
   assert.ok(errori(sb).some((e) => e === "frasi[1].scena.notifica: 65 caratteri, massimo 64"));
   sb.frasi[1].scena.notifica = "";
@@ -43,7 +43,7 @@ test("rifiuta una chiave che non è nel testo", () => {
 test("accetta una chiave con maiuscole diverse dal testo", () => {
   const sb = leggi();
   sb.frasi[4].chiave = "stessa EDIZIONE";
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
 });
 
 test("rifiuta una chiave oltre 18 caratteri", () => {
@@ -56,7 +56,7 @@ test("rifiuta una chiave oltre 18 caratteri", () => {
 test("accetta indica sulla scena oggetto e rifiuta indica oltre 28 caratteri", () => {
   const sb = leggi();
   sb.frasi[5].scena.indica = "Verifica aggiornamenti";
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
   sb.frasi[5].scena.indica = "x".repeat(29);
   assert.ok(errori(sb).some((e) => e.includes("frasi[5].scena.indica")));
 });
@@ -106,13 +106,13 @@ test("rifiuta una data che non esiste nel calendario", () => {
   }
   const sb = leggi();
   sb.frasi[2].scena.data = "2028-02-29";
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
 });
 
 test("accetta un barrato di 26 caratteri e rifiuta 27", () => {
   const sb = leggi();
   sb.frasi[2].scena.barrato = "x".repeat(26);
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
   sb.frasi[2].scena.barrato = "x".repeat(27);
   assert.ok(errori(sb).some((e) => e.includes("frasi[2].scena.barrato")));
 });
@@ -123,14 +123,14 @@ test("rifiuta indica su una scena oggetto senza oggetto", () => {
   assert.ok(errori(sb).some((e) => e.includes("frasi[5].scena.indica")));
   delete sb.frasi[5].scena.indica;
   delete sb.frasi[5].scena.menu;
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
 });
 
 const fixture = (nome: string): any => JSON.parse(readFileSync(new URL(`../../fixtures/${nome}`, import.meta.url), "utf8"));
 const AL_LIMITE = ["tutte-le-scene.storyboard.json", "tutte-le-scene-2.storyboard.json", "tutte-le-scene-3.storyboard.json"].map(fixture);
 
 test("le fixture con i testi al limite passano la validazione", () => {
-  for (const sb of AL_LIMITE) assert.deepEqual(validaStoryboard(sb, "lunga"), { ok: true, storyboard: sb });
+  for (const sb of AL_LIMITE) assert.deepEqual(validaStoryboard(sb, "media", 2), { ok: true, storyboard: sb });
 });
 
 test("le fixture al limite coprono tutti i tipi di scena e tutti gli oggetti", () => {
@@ -156,7 +156,7 @@ test("i campi d'ambientazione sono facoltativi e controllati", () => {
   const sb = leggi();
   for (const f of sb.frasi) for (const c of ["schermata", "dispositivo", "mittente", "menu"]) delete f.scena[c];
   delete sb.orologio;
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
   sb.orologio = "2025-02-29";
   sb.frasi[0].scena.schermata = "desktop";
   sb.frasi[1].scena.dispositivo = "tablet";
@@ -173,7 +173,7 @@ test("i campi d'ambientazione sono facoltativi e controllati", () => {
 test("telefono: da 2 a 3 opzioni, l'esclusa e' una di loro", () => {
   const sb = leggi();
   sb.frasi[3].scena = { tipo: "telefono", etichetta: "Con solo la CIE", titolo: "l'app non ti fa entrare", opzioni: ["Entra con SPID", "Entra con CIE"], esclusa: "Entra con CIE" };
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
   sb.frasi[3].scena.esclusa = "Entra con la CIE";
   assert.ok(errori(sb).includes("frasi[3].scena.esclusa: deve essere una delle opzioni"));
   sb.frasi[3].scena.opzioni = ["Solo una"];
@@ -195,7 +195,7 @@ test("azione facoltativa entro il limite; menu solo con indica", () => {
 test("documenti: da 2 a 3 pezzi conosciuti, ognuno una volta", () => {
   const sb = leggi();
   sb.frasi[4].scena = { tipo: "documenti", etichetta: "Dal sito", titolo: "Entra dal sito", pezzi: [{ oggetto: "tessera", nota: "tessera sanitaria" }, { oggetto: "lettore", nota: "lettore e PIN" }] };
-  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
   sb.frasi[4].scena.pezzi.push({ oggetto: "tessera", nota: "x".repeat(25) }, { oggetto: "busta", nota: "PIN" });
   const e = errori(sb);
   assert.ok(e.includes("frasi[4].scena.pezzi: da 2 a 3 pezzi"));
@@ -209,7 +209,7 @@ test("indica e le note dei pezzi non hanno parole oltre il limite della colonna 
   const sb = leggi();
   const oggetto = sb.frasi.find((f: { scena: { tipo: string; indica?: string } }) => f.scena.tipo === "oggetto" && f.scena.indica !== undefined);
   oggetto.scena.indica = "Amministrazione";
-  assert.equal(validaStoryboard(sb, "lunga").ok, true, "15 lettere ci stanno");
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true, "15 lettere ci stanno");
   oggetto.scena.indica = "Riconfigurazioni ora";
   assert.ok(errori(sb).some((e) => e.endsWith("indica: «Riconfigurazioni» ha 16 lettere, massimo 15 per parola")));
 });

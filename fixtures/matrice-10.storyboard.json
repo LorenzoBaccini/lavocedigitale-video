@@ -117,6 +117,14 @@
    }
   },
   {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "teaser",
+    "testo": "Ancora"
+   }
+  },
+  {
    "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
    "chiave": "link",
    "scena": {

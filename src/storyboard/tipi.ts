@@ -1,4 +1,4 @@
-import type { NomeDurata } from "../editoriale/variante.ts";
+import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
 
 export type Oggetto = "portatile" | "chiavetta" | "smartphone" | "router" | "carta" | "nessuno";
 
@@ -75,18 +75,27 @@ export const FRASI_CHIUSURA = [
 export interface LimitiDurata {
   /** chiusura inclusa */
   frasi: { min: number; max: number };
-  /** contate sul copione di Claude, che finisce con `TESTO_CHIUSURA`: la frase finale piu' corta arriva dopo */
+  /** dette: le frasi prima della chiusura piu' la frase finale della variante, non `TESTO_CHIUSURA` */
   parole: { min: number; max: number };
   /** circa, a 2,35 parole al secondo: lo legge solo il prompt */
   secondi: { min: number; max: number };
 }
 
-/** Frasi e parole del copione per ogni durata della variante: il prompt chiede quella scelta, la validazione la applica. */
+/** Frasi e parole dette per ogni durata della variante: il prompt chiede quella scelta, la validazione la applica. */
 export const LIMITI_DURATA: Record<NomeDurata, LimitiDurata> = {
   corta: { frasi: { min: 4, max: 5 }, parole: { min: 32, max: 46 }, secondi: { min: 15, max: 21 } },
   media: { frasi: { min: 6, max: 8 }, parole: { min: 50, max: 72 }, secondi: { min: 23, max: 32 } },
   lunga: { frasi: { min: 8, max: 9 }, parole: { min: 72, max: 88 }, secondi: { min: 32, max: 40 } },
 };
+
+export const contaParole = (testo: string): number => testo.trim().split(/\s+/).filter(Boolean).length;
+
+/** Le parole che Claude scrive prima della chiusura: i limiti della durata meno la frase finale scelta. */
+export function paroleContenuto(durata: NomeDurata, fraseFinale: FraseFinale): { min: number; max: number } {
+  const { min, max } = LIMITI_DURATA[durata].parole;
+  const n = contaParole(FRASI_CHIUSURA[fraseFinale].testo);
+  return { min: min - n, max: max - n };
+}
 
 export const LIMITI = {
   testoFrase: 160,

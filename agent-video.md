@@ -37,9 +37,9 @@ La voce è quella della testata: frasi corte, soggetto e verbo, cose concrete, n
 
 ## La durata
 
-20. **La durata la sceglie la pipeline e te la dice sotto queste istruzioni** («Durata di questo video: …»). Scrivi in quella: la validazione scarta un copione con frasi o parole fuori dai suoi limiti. Frasi e parole contano anche l'ultima frase (regola 6, 13 parole).
+20. **La durata la sceglie la pipeline e te la dice sotto queste istruzioni** («Durata di questo video: …»). Scrivi in quella: la validazione scarta un copione con frasi o parole fuori dai suoi limiti. Le frasi contano anche l'ultima (regola 6); le parole che ti vengono chieste sono solo quelle delle frasi prima della chiusura, perché la frase detta alla fine non è quella che scrivi. La tabella dice il video intero, chiusura detta compresa.
 
-| durata | frasi | parole | secondi circa |
+| durata | frasi | parole dette | secondi circa |
 |---|---|---|---|
 | corta | 4-5 | 32-46 | 15-21 |
 | media | 6-8 | 50-72 | 23-32 |
@@ -79,7 +79,7 @@ Il campo `tipo` sceglie la scena; i campi con `?` sono facoltativi. `oggetto` è
 
 ## Limiti (la validazione li fa rispettare)
 
-- frasi e parole secondo la durata (regola 20; le parole si contano sui `testo`, la voce ne legge circa 2,35 al secondo), ogni `testo` di al massimo 160 caratteri;
+- frasi e parole secondo la durata (regola 20; le parole si contano sui `testo` prima della chiusura, la voce ne legge circa 2,35 al secondo), ogni `testo` di al massimo 160 caratteri;
 - `chiave` al massimo 18 caratteri e presente nel `testo`;
 - `titolo` al massimo 24 caratteri, `evidenza` 16, `etichetta` 32, `sopra` 32, `sottotitolo` 36, `conferma` 28, `indica` 28, `barrato` 26, `notifica` 64;
 - `timbro` al massimo 16 caratteri (come `evidenza`); `unita` 32; `nota` 36; `fonte` 32;
@@ -96,7 +96,7 @@ Le cifre di tutte le scene devono comparire nel corpo dell'articolo: un anno o u
 
 ## Esempi
 
-Articolo: «Installare Windows 10 da USB dopo la fine del supporto». Durata lunga.
+Articolo: «Installare Windows 10 da USB dopo la fine del supporto». Durata media.
 
 ```json
 {
@@ -128,10 +128,10 @@ Articolo: «Fascicolo sanitario dell'Emilia-Romagna, il nuovo portale e come si 
   "frasi": [
     { "testo": "Devi entrare nel fascicolo sanitario dell'Emilia-Romagna?", "chiave": "fascicolo", "scena": { "tipo": "gancio", "titolo": "Fascicolo sanitario", "evidenza": "Emilia-Romagna?", "sottotitolo": "portale nuovo, accesso quasi uguale", "oggetto": "portatile", "schermata": "sito" } },
     { "testo": "Dal sette luglio duemilaventisei c'è un portale nuovo, ma il vecchio resta.", "chiave": "portale nuovo", "scena": { "tipo": "data", "etichetta": "Dal 7 luglio 2026", "data": "2026-07-07", "timbro": "NUOVO PORTALE" } },
-    { "testo": "Dall'app ER-Salute entri solo con lo SPID.", "chiave": "solo con lo SPID", "scena": { "tipo": "allarme", "sopra": "Dall'app", "titolo": "entri solo con SPID", "notifica": "Accesso dall'app consentito solo con credenziali SPID", "mittente": "Fascicolo sanitario", "dispositivo": "smartphone" } },
+    { "testo": "Dall'app ER-Salute però entri solo con lo SPID.", "chiave": "solo con lo SPID", "scena": { "tipo": "allarme", "sopra": "Dall'app", "titolo": "entri solo con SPID", "notifica": "Accesso dall'app consentito solo con credenziali SPID", "mittente": "Fascicolo sanitario", "dispositivo": "smartphone" } },
     { "testo": "Con solo la CIE, l'app non ti fa entrare.", "chiave": "non ti fa entrare", "scena": { "tipo": "telefono", "etichetta": "Con solo la CIE", "titolo": "l'app non ti fa entrare", "opzioni": ["Entra con SPID", "Entra con CIE"], "esclusa": "Entra con CIE" } },
     { "testo": "Entra dal sito con la CIE, o con la tessera sanitaria, lettore e PIN.", "chiave": "dal sito", "scena": { "tipo": "documenti", "etichetta": "Al posto dell'app", "titolo": "Entra dal sito", "pezzi": [{ "oggetto": "documento", "nota": "CIE" }, { "oggetto": "tessera", "nota": "tessera sanitaria" }, { "oggetto": "lettore", "nota": "lettore e PIN" }] } },
-    { "testo": "Al primo accesso autorizza la consultazione in Consensi, o non prosegui.", "chiave": "Consensi", "scena": { "tipo": "oggetto", "etichetta": "Al primo accesso, in Consensi", "titolo": "Dai il consenso", "conferma": "Poi puoi modificarlo", "indica": "Autorizza consultazione", "oggetto": "portatile", "schermata": "sito", "menu": ["Consensi"] } },
+    { "testo": "Al primo accesso autorizza la consultazione nella sezione Consensi, o non prosegui.", "chiave": "Consensi", "scena": { "tipo": "oggetto", "etichetta": "Al primo accesso, in Consensi", "titolo": "Dai il consenso", "conferma": "Poi puoi modificarlo", "indica": "Autorizza consultazione", "oggetto": "portatile", "schermata": "sito", "menu": ["Consensi"] } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]
 }
@@ -144,7 +144,7 @@ Lo stesso articolo in durata corta: resta solo il punto che blocca chi apre l'ap
   "slug": "fascicolo-sanitario-emilia-romagna-nuovo-portale-accesso",
   "frasi": [
     { "testo": "Devi entrare nel fascicolo sanitario dell'Emilia-Romagna?", "chiave": "fascicolo", "scena": { "tipo": "gancio", "titolo": "Fascicolo sanitario", "evidenza": "Emilia-Romagna?", "sottotitolo": "dall'app serve lo SPID", "oggetto": "smartphone", "schermata": "app" } },
-    { "testo": "Dall'app ER-Salute entri solo con lo SPID.", "chiave": "solo con lo SPID", "scena": { "tipo": "allarme", "sopra": "Dall'app", "titolo": "entri solo con SPID", "notifica": "Accesso dall'app consentito solo con credenziali SPID", "mittente": "Fascicolo sanitario", "dispositivo": "smartphone" } },
+    { "testo": "Dall'app ER-Salute però entri solo con lo SPID, non con la CIE.", "chiave": "solo con lo SPID", "scena": { "tipo": "allarme", "sopra": "Dall'app", "titolo": "entri solo con SPID", "notifica": "Accesso dall'app consentito solo con credenziali SPID", "mittente": "Fascicolo sanitario", "dispositivo": "smartphone" } },
     { "testo": "Con la CIE, o con la tessera sanitaria, entra dal sito.", "chiave": "dal sito", "scena": { "tipo": "documenti", "etichetta": "Senza SPID", "titolo": "Entra dal sito", "pezzi": [{ "oggetto": "documento", "nota": "CIE" }, { "oggetto": "tessera", "nota": "tessera sanitaria" }] } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]

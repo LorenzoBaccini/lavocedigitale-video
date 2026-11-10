@@ -222,31 +222,30 @@ sale da sotto come in un feed; il controllo d'impaginazione la spegne come le al
 
 La durata è l'unica dimensione che cambia il copione invece dell'aspetto: Claude non la sceglie, la pipeline gliela
 chiede. Per questo la variante si sceglie prima dello storyboard (`pipeline/main.ts`) e `scriviStoryboard` riceve
-`variante.durata`.
+`variante.durata` e `variante.fraseFinale`.
 
-| durata | frasi (chiusura inclusa) | parole | secondi circa |
+| durata | frasi (chiusura inclusa) | parole dette | secondi circa |
 |---|---|---|---|
 | corta | 4-5 | 32-46 | 15-21 |
 | media | 6-8 | 50-72 | 23-32 |
 | lunga | 8-9 | 72-88 | 32-40 |
 
 I numeri stanno in un posto solo, `LIMITI_DURATA` (`src/storyboard/tipi.ts`). Il prompt li scrive da lì
-(`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata)` li applica.
-`agent-video.md` ha la stessa tabella perché Claude veda le tre durate e le regole di scrittura di ognuna (regola 20),
-e tre esempi, uno per durata: `durata.test.ts` controlla che la tabella coincida con `LIMITI_DURATA` e che ogni
-esempio passi la validazione nella durata che dichiara. `media` è la durata di prima con il tetto delle parole sceso
-da 78 a 72, perché non si sovrapponga a `lunga` oltre il confine (8 frasi e 72 parole stanno in tutte e due).
+(`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata, fraseFinale)` li
+applica. `agent-video.md` ha la stessa tabella perché Claude veda le tre durate e le regole di scrittura di ognuna
+(regola 20), e tre esempi (due medie e una corta): `durata.test.ts` controlla che la tabella coincida con
+`LIMITI_DURATA` e che ogni esempio passi nella durata che dichiara con ognuna delle tre frasi finali. `media` è la durata
+di prima con il tetto delle parole sceso a 72, perché non si sovrapponga a `lunga` oltre il confine.
 
-Le parole si contano sul copione di Claude, che finisce con `TESTO_CHIUSURA` (13 parole); la frase finale della
-variante, più corta (3-7 parole), la sostituisce dopo la validazione. Il video parlato quindi dura un po' meno dei
-secondi della tabella: una corta al limite inferiore sono 22-26 parole dette, una decina di secondi di voce più la coda
-della chiusura.
+Le parole contate sono quelle dette: le frasi prima della chiusura più la frase finale della variante (7, 3 o 7 parole),
+non `TESTO_CHIUSURA`, che il copione deve comunque avere e che `conFraseFinale` sostituisce dopo la validazione. A
+Claude il prompt dà solo le parole prima della chiusura, i limiti meno la frase scelta (`paroleContenuto`).
 
 Le regole di varietà non dipendono dal numero di scene e non vanno scalate. «Mai lo stesso tipo di fila» vale con
 qualunque lunghezza. La somiglianza con i video recenti è una quota sulla sequenza più lunga: con 3 scene (corta da 4
 frasi) il 70 % vuole tutte e 3 uguali, 2 su 3 passano; contro un video più lungo una corta non arriva mai alla soglia
-(3 posizioni su 6 o più). `windows10`, la fixture del video approvato (8 frasi, 77 parole), oggi è un copione lungo:
-`VARIANTE_BASE.durata` resta `media` perché la durata non cambia nessun fotogramma, solo i limiti del copione.
+(3 posizioni su 6 o più). `windows10`, la fixture del video approvato (8 frasi, 64 parole prima della chiusura), è
+una media con ogni frase finale, come `VARIANTE_BASE.durata`.
 
 Il job ha `timeout-minutes: 90` (era 75): una lunga sono fino a 9 scene e 40 secondi, e il render (circa 43 minuti per
 un video medio sui runner da 2 vCPU) cresce con loro. Il ruolo AWS dura 7200 s dal passo delle credenziali, che viene
@@ -344,7 +343,7 @@ della chiusura sono identici a quelli con la cartolina.
 Il frame fermo è l'ultimo della scena: lì il piano ha già scritto tutti i testi. I piani tengono testi e segni dentro la durata
 (`Math.min(durata - …)`), e `fermo.test.ts` lo prova per ogni scena di ogni fixture
 messa come ultima di contenuto, con frasi da 1 a 3 s: la durata corta con il copione al limite inferiore sta sopra
-quel minimo. `fixtures/chiusura-corta.storyboard.json` è quel caso (4 frasi, 37 parole, un allarme sul telefono prima
+quel minimo. `fixtures/chiusura-corta.storyboard.json` è quel caso (4 frasi, 29 parole prima della chiusura, un allarme sul telefono prima
 della chiusura). La spinta lenta, come le transizioni, è spenta nel controllo d'impaginazione: a fine chiusura un testo
 sul margine o vicino al sottotitolo si sposta in fuori di circa 10 px.
 

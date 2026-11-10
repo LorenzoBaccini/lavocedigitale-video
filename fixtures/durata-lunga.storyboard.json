@@ -2,13 +2,13 @@
   "slug": "durata-lunga",
   "frasi": [
     { "testo": "Hai ancora la password del Wi-Fi scritta sotto il router?", "chiave": "password", "scena": { "tipo": "gancio", "titolo": "La password del Wi-Fi", "evidenza": "sotto il router?", "sottotitolo": "chi la legge entra in rete", "oggetto": "router" } },
-    { "testo": "Chi passa vicino a casa può leggerla e collegarsi.", "chiave": "collegarsi", "scena": { "tipo": "allarme", "sopra": "Chi la legge", "titolo": "entra nella rete", "notifica": "Nuovo dispositivo connesso alla rete di casa", "mittente": "Rete di casa", "dispositivo": "smartphone" } },
+    { "testo": "Chi passa vicino a casa tua può leggerla e collegarsi subito.", "chiave": "collegarsi", "scena": { "tipo": "allarme", "sopra": "Chi la legge", "titolo": "entra nella rete", "notifica": "Nuovo dispositivo connesso alla rete di casa", "mittente": "Rete di casa", "dispositivo": "smartphone" } },
     { "testo": "Da quel momento vede i dispositivi collegati alla tua rete.", "chiave": "la tua rete", "scena": { "tipo": "rischio", "sopra": "Da quel momento", "titolo": "vede la tua rete", "dispositivo": "portatile" } },
-    { "testo": "Cambiarla richiede pochi minuti e nessun programma da installare.", "chiave": "pochi minuti", "scena": { "tipo": "checklist", "etichetta": "Ti serve", "oggetto": "router", "voci": [{ "grande": "il router", "piccolo": "acceso e collegato" }, { "grande": "un browser", "piccolo": "sul computer o sul telefono" }] } },
+    { "testo": "Cambiarla richiede pochi minuti e nessun programma nuovo da installare sul computer.", "chiave": "pochi minuti", "scena": { "tipo": "checklist", "etichetta": "Ti serve", "oggetto": "router", "voci": [{ "grande": "il router", "piccolo": "acceso e collegato" }, { "grande": "un browser", "piccolo": "sul computer o sul telefono" }] } },
     { "testo": "Apri la pagina del router dal browser del computer.", "chiave": "pagina del router", "scena": { "tipo": "oggetto", "etichetta": "Dal browser", "titolo": "Apri il router", "indica": "Accedi", "oggetto": "portatile", "schermata": "sito" } },
     { "testo": "Nella sezione Wi-Fi scegli una password lunga e nuova.", "chiave": "password lunga", "scena": { "tipo": "telefono", "etichetta": "Sezione Wi-Fi", "titolo": "Password nuova", "opzioni": ["Password lunga", "Password breve"], "esclusa": "Password breve" } },
     { "testo": "Poi ricollega i tuoi dispositivi con la password nuova.", "chiave": "password nuova", "scena": { "tipo": "confronto", "etichetta": "Prima e dopo", "a": { "titolo": "Sotto il router", "valore": "Vecchia" }, "b": { "titolo": "Solo tua", "valore": "Nuova" } } },
-    { "testo": "Così la rete di casa torna a essere soltanto tua.", "chiave": "soltanto tua", "scena": { "tipo": "teaser", "testo": "Nell'articolo, i passi per ogni router" } },
+    { "testo": "Così la rete di casa torna a essere davvero soltanto tua.", "chiave": "soltanto tua", "scena": { "tipo": "teaser", "testo": "Nell'articolo, i passi per ogni router" } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "slug": "durata-corta",
   "frasi": [
-    { "testo": "Il telefono ti chiede di aggiornare?", "chiave": "aggiornare", "scena": { "tipo": "gancio", "titolo": "Il telefono", "evidenza": "si aggiorna?", "sottotitolo": "non rimandare a stasera", "oggetto": "smartphone", "schermata": "sistema" } },
-    { "testo": "Fallo subito: chiude falle già sfruttate.", "chiave": "falle", "scena": { "tipo": "rischio", "sopra": "Senza aggiornare", "titolo": "falle già sfruttate", "dispositivo": "smartphone" } },
-    { "testo": "Collegalo al Wi-Fi e lascialo in carica.", "chiave": "in carica", "scena": { "tipo": "oggetto", "etichetta": "Wi-Fi e caricatore", "titolo": "Installa ora", "indica": "Installa ora", "oggetto": "smartphone", "schermata": "sistema", "menu": ["Aggiornamento"] } },
+    { "testo": "Il telefono ti chiede di aggiornare il sistema stasera?", "chiave": "aggiornare", "scena": { "tipo": "gancio", "titolo": "Il telefono", "evidenza": "si aggiorna?", "sottotitolo": "non rimandare a stasera", "oggetto": "smartphone", "schermata": "sistema" } },
+    { "testo": "Fallo subito: l'aggiornamento chiude falle che qualcuno sta già sfruttando.", "chiave": "falle", "scena": { "tipo": "rischio", "sopra": "Senza aggiornare", "titolo": "falle già sfruttate", "dispositivo": "smartphone" } },
+    { "testo": "Collegalo al Wi-Fi, lascialo in carica e poi premi Installa.", "chiave": "in carica", "scena": { "tipo": "oggetto", "etichetta": "Wi-Fi e caricatore", "titolo": "Installa ora", "indica": "Installa ora", "oggetto": "smartphone", "schermata": "sistema", "menu": ["Aggiornamento"] } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]
 }

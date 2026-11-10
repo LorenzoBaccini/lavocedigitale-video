@@ -14,6 +14,13 @@ const DURATA_SPINTA = 22;
 /** Su che cosa si apre il gancio: la notifica, il titolo della pagina, la barra del desktop, la schermata del telefono, l'oggetto. */
 export type Dettaglio = "notifica" | "titolo" | "barra" | "telefono" | "oggetto";
 
+/**
+ * Se la notifica dell'allarme che segue e' sullo schermo del gancio: sul set sempre (sta sul portatile, che c'e' sempre); a
+ * tutto quadro solo quando lo schermo e' quello del portatile (portatile o nessun oggetto).
+ */
+export const notificaSulloSchermo = (s: Pick<ScenaDi<"gancio">, "oggetto" | "contesto">, aTuttoQuadro: boolean): boolean =>
+  s.contesto.messaggioSeguente !== undefined && (!aTuttoQuadro || s.oggetto === "portatile" || s.oggetto === "nessuno");
+
 /** Il dettaglio, deterministico dal contenuto: la notifica se c'e' sullo schermo, altrimenti cio' che l'oggetto mostra. */
 export function dettaglioDi(s: Pick<ScenaDi<"gancio">, "oggetto" | "schermata">, conNotifica: boolean): Dettaglio {
   if (conNotifica) return "notifica";
@@ -52,7 +59,7 @@ export function riquadroDettaglioSchermo(d: Dettaglio, s: Pick<ScenaDi<"gancio">
 /** Lo spazio attorno al titolo della pagina nel primo piano: il titolo non e' mai tagliato. */
 export const MARGINE_DETTAGLIO = 70;
 
-/** Aperto sulla notifica, il suo suono va sul primo fotogramma: alla fine sembrerebbe una seconda notifica. */
+/** Aperto sulla notifica (solo se e' sullo schermo, `notificaSulloSchermo`), il suo suono va sul primo fotogramma: alla fine sembrerebbe una seconda notifica. */
 export const suoniDettaglio = (suoni: Effetto[]): Effetto[] => suoni.map((e) => (e.suono === "notifica" ? { ...e, da: 0 } : e));
 
 /** Quanto il primo piano si e' allargato al frame f (0 stretto, 1 la scena del gancio). */

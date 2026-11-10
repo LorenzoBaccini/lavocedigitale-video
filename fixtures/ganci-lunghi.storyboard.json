@@ -37,6 +37,29 @@
    }
   },
   {
+   "testo": "Serve lo SPID per la autenticazione sul portale della Regione?",
+   "chiave": "autenticazione",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Autenticazione",
+    "evidenza": "SPID",
+    "sottotitolo": "Sul portale",
+    "oggetto": "portatile",
+    "schermata": "app"
+   }
+  },
+  {
+   "testo": "Come capire se il contatore ha subito una manomissione nascosta?",
+   "chiave": "manomissione",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Contatore",
+    "evidenza": "Manomissione",
+    "sottotitolo": "Come accorgersene",
+    "oggetto": "router"
+   }
+  },
+  {
    "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
    "chiave": "link",
    "scena": {

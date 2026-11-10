@@ -4,7 +4,7 @@ import { ALTEZZA, FONDO_UTILE, LARGHEZZA, MARGINE, TITOLO_TOP } from "../../impa
 import type { ScenaDi } from "../../scenes/props";
 import { Blocco } from "../ganci/Blocco";
 import type { Dettaglio } from "../ganci/dettaglio";
-import { allargamento, dettaglioDi, pianoDettaglio, riquadroDettaglioSchermo } from "../ganci/dettaglio";
+import { allargamento, dettaglioDi, notificaSulloSchermo, pianoDettaglio, riquadroDettaglioSchermo } from "../ganci/dettaglio";
 import { bloccoDiviso, tingiPerBlocco } from "../ganci/diviso";
 import { Parola } from "../ganci/Parola";
 import { pianoGancio } from "../piani/gancio";
@@ -83,7 +83,7 @@ const GancioSulloSchermo: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGa
   const c = contenutoGancio(props, f);
   const quadroScena = { x: 0, y: quota, w: LARGHEZZA, h: ALTEZZA - quota };
   const scalaBase = scalaInsieme(c, quadroScena, FONDO_UTILE - quota);
-  const conNotifica = piano.notifica !== undefined && c.tipo === "portatile" && contesto.messaggioSeguente !== undefined;
+  const conNotifica = notificaSulloSchermo(props, true);
   const [pu, pv] = PARTENZA[variante.apertura];
   // sulla pagina la camera parte dal titolo, che comincia a sinistra: l'apertura la sposta solo di poco
   const pagina = props.oggetto === "portatile" && (props.schermata ?? "sistema") !== "sistema";

@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
 
-import { suoniDettaglio } from "./editoriale/ganci/dettaglio";
+import { notificaSulloSchermo, suoniDettaglio } from "./editoriale/ganci/dettaglio";
 import { Lampo } from "./editoriale/Lampo";
 import { pianoScena } from "./editoriale/piani";
 import { SCENE_SCHERMO } from "./editoriale/schermo";
@@ -51,7 +51,7 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
               const voce = (
                 <>
                   <Audio src={staticFile(`${audioBase}/${timing.clips[i].file}`)} />
-                  <Suoni effetti={frase.scena.tipo === "gancio" && aspetto.gancio === "dettaglio" ? suoniDettaglio(suoni) : suoni} />
+                  <Suoni effetti={frase.scena.tipo === "gancio" && aspetto.gancio === "dettaglio" && notificaSulloSchermo({ oggetto: frase.scena.oggetto, contesto: props.contesto }, stile.set === "schermo") ? suoniDettaglio(suoni) : suoni} />
                 </>
               );
               if (!spinta) {

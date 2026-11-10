@@ -232,8 +232,10 @@ apertura (`agent-video.md`), le fixture con più ganci li provano tutti.
   (`fantasmaChiave`, stessa impaginazione parola per parola, inchiostro al 20 %) sotto il titolo vero, che la riempie
   quando la voce la dice. I corpi partono grandi e calano finché la stima (`lineeDi`, a capo a parole intere) sta nel
   90 % della fascia; nessuna parola supera la riga da sola (`emDi`: 0,58 em a lettera, 0,74 le maiuscole, 0,92 m e w;
-  nella riga della chiave le minuscole a 0,54 em, perché venga davvero enorme: il controllo d'impaginazione misura quella
-  vera). L'oggetto non compare mai: lo spec ammette «o mai», e un oggetto piccolo nell'ultimo terzo vorrebbe dire un
+  nella riga della chiave le minuscole a 0,54 em, perché venga davvero enorme). Quel 0,54 non ha margine: Lora grassetto
+  arriva a circa 0,51 em a lettera sulle parole tonde, e la garanzia è il controllo d'impaginazione, non la stima. Una
+  chiave nuova va provata lì; `ganci-lunghi` tiene i casi peggiori visti («prenotazione», «autenticazione»,
+  «manomissione»). L'oggetto non compare mai: lo spec ammette «o mai», e un oggetto piccolo nell'ultimo terzo vorrebbe dire un
   secondo canvas 3D e un titolo che si sposta. Sopra la parola logo e sottotitolo prendono l'inchiostro delle grafiche
   (`Overlay`).
 - **dettaglio** (`ganci/dettaglio.ts`): si apre su un primo piano e si allarga fino alla scena del gancio. Il dettaglio

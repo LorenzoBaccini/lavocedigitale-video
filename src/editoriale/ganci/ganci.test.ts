@@ -10,7 +10,7 @@ import { SCRIVANIA } from "../stili/scrivania.ts";
 import { NOMI_TINTE, studio } from "../stili/studio.ts";
 import { contrasto } from "../stili/colore.ts";
 import { altezzaParola, emDi, FASCIA_PAROLA, lineeDi, STACCO_CHIAVE, titoloParola } from "../testate/parola.ts";
-import { dettaglioDi, FINE_DETTAGLIO, MARGINE_DETTAGLIO, pianoDettaglio, riquadroDettaglio, riquadroDettaglioSchermo, suoniDettaglio } from "./dettaglio.ts";
+import { dettaglioDi, FINE_DETTAGLIO, MARGINE_DETTAGLIO, notificaSulloSchermo, pianoDettaglio, riquadroDettaglio, riquadroDettaglioSchermo, suoniDettaglio } from "./dettaglio.ts";
 import { bloccoDiviso, coloriDiviso, FINE_DIVISO, tingiPerBlocco } from "./diviso.ts";
 
 const STILI = [SCRIVANIA, NOTTE, SCHERMO, ...NOMI_TINTE.map(studio)];
@@ -59,6 +59,17 @@ test("a tutto quadro, sul sito, il primo piano sta sulla scheda del browser e la
 
 test("aperto sulla notifica, il suono della notifica va sul primo fotogramma", () => {
   assert.deepEqual(suoniDettaglio([{ da: 70, suono: "notifica" }]), [{ da: 0, suono: "notifica" }]);
+});
+
+test("il suono si sposta solo se la notifica e' sullo schermo: a tutto quadro il telefono non la mostra", () => {
+  const conAllarme = { contesto: { messaggioSeguente: "Accesso sospetto" } };
+  assert.equal(notificaSulloSchermo({ oggetto: "smartphone", ...conAllarme }, false), true, "sul set sta sul portatile");
+  assert.equal(notificaSulloSchermo({ oggetto: "smartphone", ...conAllarme }, true), false);
+  assert.equal(notificaSulloSchermo({ oggetto: "chiavetta", ...conAllarme }, true), false);
+  assert.equal(notificaSulloSchermo({ oggetto: "portatile", ...conAllarme }, true), true);
+  assert.equal(notificaSulloSchermo({ oggetto: "nessuno", ...conAllarme }, true), true);
+  assert.equal(notificaSulloSchermo({ oggetto: "portatile", contesto: {} }, false), false);
+  assert.equal(dettaglioDi({ oggetto: "smartphone" }, notificaSulloSchermo({ oggetto: "smartphone", ...conAllarme }, true)), "telefono");
 });
 
 test("a dettaglio il titolo e la spinta aspettano che il primo piano si sia allargato", () => {

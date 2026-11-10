@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { fase } from "../editoriale/regia";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
+import { allineaTesto, useStile } from "../editoriale/stili";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
 
 // Ripiego per uno schema senza scena: la frase stampata su un foglio.

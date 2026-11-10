@@ -5,7 +5,7 @@ import { Foglio } from "../editoriale/carta/Foglio";
 import { spintaFoglio } from "../editoriale/piani/carta";
 import { ENTRATA_CHIUSURA, INDIRIZZO, pianoChiusura, TESTATA } from "../editoriale/piani/chiusura";
 import { fase, uscita } from "../editoriale/regia";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
+import { allineaFlesso, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
 import { MARGINE } from "../impaginazione";
 import { LogoMark } from "../Logo";

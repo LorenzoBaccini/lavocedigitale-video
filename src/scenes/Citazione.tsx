@@ -7,7 +7,7 @@ import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoCitazione } from "../editoriale/piani/citazione";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
+import { allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
 import { sottolineatura } from "../editoriale/tratto";
 import { LARGHEZZA } from "../impaginazione";

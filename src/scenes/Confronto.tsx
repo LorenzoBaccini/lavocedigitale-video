@@ -7,7 +7,7 @@ import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoConfronto } from "../editoriale/piani/confronto";
 import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
+import { allineaFlesso, useStile } from "../editoriale/stili";
 import { cerchiatura } from "../editoriale/tratto";
 import { LARGHEZZA, MARGINE, TITOLO_TOP } from "../impaginazione";
 import type { Confronto as Lato } from "../storyboard/tipi";

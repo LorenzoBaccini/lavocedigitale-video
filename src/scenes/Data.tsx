@@ -8,7 +8,7 @@ import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoData } from "../editoriale/piani/data";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
-import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
+import { allineaFlesso, useStile } from "../editoriale/stili";
 import { conAlfa } from "../editoriale/stili/alfa";
 import { cerchiatura, sottolineatura } from "../editoriale/tratto";
 import { FONDO_UTILE, LARGHEZZA, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";

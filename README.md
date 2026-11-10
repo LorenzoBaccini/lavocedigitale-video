@@ -92,7 +92,7 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    `FONDO_TITOLO`, che lascia il posto all'entrata delle parole; le note a mano scendono di corpo, e poi
    si spostano, perché la parola più lunga stia nel margine, ma mai oltre 20 px a sinistra del punto indicato (`src/editoriale/set/nota.ts`): per questo `indica` e le note dei pezzi non hanno parole oltre 15 lettere (`LIMITI.parolaNota`).
    Subito dopo, il **controllo di somiglianza** (`pipeline/somiglianza.ts`): se il video somiglia troppo a uno
-   degli ultimi 5 cambia stile e gancio, con la stessa voce. Vedi [Il controllo di somiglianza](#il-controllo-di-somiglianza).
+   degli ultimi 3 cambia stile e gancio, con la stessa voce. Vedi [Il controllo di somiglianza](#il-controllo-di-somiglianza).
 4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, con la variante uscita dal controllo di somiglianza.
 5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su
    `https://lavocedigitale.it/images/video/<slug>.mp4`. Poi lo storico, prima dei post: se non si
@@ -451,17 +451,19 @@ Nello storico ogni fotogramma è una stringa da 23 caratteri, `dHash in esadecim
 
 **La distanza** (`distanza`) va da 0 a 1. Per ogni fotogramma si sommano la forma (Hamming / 64), pesata `PESO_FORMA` =
 0.65, e il colore (distanza RGB normalizzata), pesato 0.35. Poi si fa la media sui sei fotogrammi, col primo che pesa il
-doppio. Il video si confronta con gli ultimi 5 dello storico che hanno un'impronta (`confronta`). Le voci senza impronta,
+doppio. Il video si confronta con gli ultimi 3 dello storico che hanno un'impronta (`confronta`, `CONFRONTATI`). Le voci senza impronta,
 cioè quelle vecchie o quelle di un controllo saltato, si ignorano.
 
 **Sotto `SOGLIA` (0.32)** si cambia variante con `prossimaVariante`:
 
 - cambiano solo stile e gancio, perché voce e copione sono già pagati: frase finale e durata restano, e restano anche
   musica, luce, apertura e chiusura;
-- al secondo tentativo cambia lo stile, verso uno mai usato negli ultimi 5 se c'è, altrimenti con la memoria più
-  lunga possibile, e mai uno già provato;
-- il gancio cambia al terzo tentativo, o già al secondo se il nuovo stile con lo stesso gancio è fra gli ultimi 5. In
+- al secondo tentativo cambia lo stile, verso uno mai usato negli ultimi 3 se c'è, altrimenti con la memoria più
+  lunga possibile, e mai uno già provato. Con 4 stili uno libero c'è sempre;
+- il gancio cambia al terzo tentativo, o già al secondo se il nuovo stile con lo stesso gancio è fra gli ultimi 3. In
   quel caso va verso un gancio mai usato con quello stile;
+- la memoria dei tentativi è `CONFRONTATI` (3), più severa della `PROFONDITA` della variante, che per stile e gancio è
+  2: un tentativo evita anche il terzo video, perché è lì che il confronto ha trovato la somiglianza;
 - le scelte sono deterministiche da slug e numero del tentativo;
 - ogni variante nuova ripassa il controllo d'impaginazione, e se non lo passa è scartata ma conta;
 - al massimo 3 tentativi, poi si tiene la variante più lontana.
@@ -494,9 +496,19 @@ sotto quelle di stile diverso. Il margine è piccolo e dipende dal peso della fo
 
 Le coppie dello stesso stile con un gancio diverso cadono a cavallo della soglia: 36 su 56 stanno sotto.
 
-Gli stili sono 4 e il confronto guarda 5 video, quindi lo stile di uno degli ultimi 5 torna quasi sempre: succede nel
-92 % dei casi su 500 slug simulati. Per questo i tentativi in più saranno frequenti. Un tentativo costa un controllo
-d'impaginazione più 6 fotogrammi. Sul Mac di sviluppo sono circa 11 s più 4 s, e la prima impronta col bundle 7 s; sul
+**Perché 3 video e non 5.** Gli stili sono 4 e la variante esclude solo gli ultimi 2. Con una finestra di 5, lo stile
+di uno degli ultimi 5 tornava nel 92 % dei casi. Siccome quasi tutte le coppie dello stesso stile cadono sotto la
+soglia, l'86 % dei video avrebbe esaurito i 3 tentativi.
+
+Con la finestra di 3 la simulazione su 500 slug in fila, con la variante vera e i tentativi rimessi nello storico, dà:
+
+- se basta lo stesso stile per essere troppo simili (il caso pessimista), ritenta il 40.8 % dei video e nessuno arriva
+  al terzo tentativo;
+- se serve la stessa coppia stile+gancio, ritenta il 31.0 % e anche qui nessuno arriva al terzo.
+
+Il secondo tentativo trova sempre una variante libera. La realtà sta fra i due casi.
+
+Un tentativo costa un controllo d'impaginazione più 6 fotogrammi. Sul Mac di sviluppo sono circa 11 s più 4 s, e la prima impronta col bundle 7 s; sul
 runner, che ha 2 vCPU e gira in `swangle`, ci vuole di più.
 
 Per ritarare, dalla radice del repo:

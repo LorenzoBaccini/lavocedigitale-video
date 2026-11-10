@@ -9,8 +9,8 @@ import type { VoceStorico } from "./storico.ts";
 export type Impronta = string[];
 
 export const N_FOTOGRAMMI = 6;
-/** Quanti video recenti con impronta si confrontano. */
-export const CONFRONTATI = 5;
+/** Quanti video recenti con impronta si confrontano; e' anche la memoria dei tentativi nella scelta di stile e gancio. */
+export const CONFRONTATI = 3;
 export const MAX_TENTATIVI = 3;
 /** Sotto questa distanza dal video piu' vicino si cambia variante: taratura nel README. */
 export const SOGLIA = 0.32;
@@ -84,17 +84,18 @@ const valore = (v: Partial<Variante>, dim: "stile" | "gancio") => (dim === "stil
 function cambia<K extends "stile" | "gancio">(dim: K, slug: string, tentativo: number, provate: Variante[], recenti: Partial<Variante>[]): Variante[K] {
   const nonProvate = (ATTIVI[dim] as readonly Variante[K][]).filter((o) => !provate.some((p) => p[dim] === o));
   const opzioni = nonProvate.length > 0 ? nonProvate : (ATTIVI[dim] as readonly Variante[K][]);
-  for (let profondita = CONFRONTATI; profondita >= 0; profondita--) {
+  const pesca = (libere: readonly Variante[K][]) => libere[hash(`${slug}:somiglianza:${dim}:${tentativo}`) % libere.length];
+  for (let profondita = CONFRONTATI; profondita > 0; profondita--) {
     const usate = new Set(recenti.slice(0, profondita).map((v) => valore(v, dim)));
     const libere = opzioni.filter((o) => !usate.has(o));
-    if (libere.length > 0) return libere[hash(`${slug}:somiglianza:${dim}:${tentativo}`) % libere.length];
+    if (libere.length > 0) return pesca(libere);
   }
-  return opzioni[0];
+  return pesca(opzioni);
 }
 
 /**
  * La variante del tentativo `tentativo` (2 o 3): cambia lo stile; il gancio cambia al terzo, o gia' al secondo se lo stile
- * nuovo con quel gancio e' fra gli ultimi 5, verso un gancio non usato con quello stile. Voce e copione sono gia' pagati:
+ * nuovo con quel gancio e' fra gli ultimi `CONFRONTATI`, verso un gancio non usato con quello stile. Voce e copione sono gia' pagati:
  * frase finale e durata restano, come musica, luce, apertura e chiusura.
  */
 export function prossimaVariante(slug: string, attuale: Variante, tentativo: number, provate: Variante[], recenti: Partial<Variante>[]): Variante {

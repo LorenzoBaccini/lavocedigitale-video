@@ -69,11 +69,11 @@ test("solo stringhe da 16 esadecimali piu' #rrggbb, sei in tutto, sono un'impron
   assert.ok(!èImpronta(undefined));
 });
 
-test("il confronto guarda gli ultimi 5 video con impronta e ignora quelli senza", () => {
+test("il confronto guarda gli ultimi 3 video con impronta e ignora quelli senza", () => {
   const lontana = uguale("ffffffffffffffff#ffffff");
-  const recenti = [voce("senza"), voce("a", lontana), voce("b", lontana), voce("c", lontana), voce("d", lontana), voce("e", lontana), voce("vicino-ma-vecchio", uguale(NERO))];
+  const recenti = [voce("senza"), voce("a", lontana), voce("b", lontana), voce("c", lontana), voce("vicino-ma-quarto", uguale(NERO))];
   const r = confronta(uguale(NERO), recenti);
-  assert.equal(CONFRONTATI, 5);
+  assert.equal(CONFRONTATI, 3);
   assert.equal(r?.slug, "a");
   assert.equal(r?.distanza, 1);
   assert.equal(confronta(uguale(NERO), [voce("x"), voce("y")]), undefined);
@@ -85,7 +85,7 @@ test("il confronto riporta il video piu' vicino", () => {
   assert.equal(r?.slug, "b");
 });
 
-test("la variante successiva cambia lo stile, non uno degli ultimi 5 se si puo', e lascia voce e copione", () => {
+test("la variante successiva cambia lo stile, non uno degli ultimi 3 se si puo', e lascia voce e copione", () => {
   const v: Variante = { ...VARIANTE_BASE, stile: "scrivania", gancio: "scena" };
   const recenti = [{ stile: "studio" }, { stile: "scrivania" }, {}] as Partial<Variante>[];
   const n = prossimaVariante("slug", v, 2, [v], recenti);
@@ -97,7 +97,7 @@ test("la variante successiva cambia lo stile, non uno degli ultimi 5 se si puo',
   assert.deepEqual(prossimaVariante("slug", v, 2, [v], recenti), n);
 });
 
-test("se tutti gli stili sono negli ultimi 5 accorcia la memoria ma non ripete uno stile gia' provato", () => {
+test("se tutti gli stili sono fra i recenti accorcia la memoria ma non ripete uno stile gia' provato", () => {
   const v: Variante = { ...VARIANTE_BASE, stile: "notte" };
   const recenti = ATTIVI.stile.map((stile) => ({ stile })) as Partial<Variante>[];
   for (let t = 0; t < 20; t++) {
@@ -108,12 +108,22 @@ test("se tutti gli stili sono negli ultimi 5 accorcia la memoria ma non ripete u
   assert.ok(!["notte", "studio"].includes(n.stile));
 });
 
-test("se lo stile nuovo con lo stesso gancio e' fra gli ultimi 5 cambia gia' al secondo tentativo anche il gancio, verso una coppia non usata", () => {
+test("se lo stile nuovo con lo stesso gancio e' fra gli ultimi 3 cambia gia' al secondo tentativo anche il gancio, verso una coppia non usata", () => {
   const v: Variante = { ...VARIANTE_BASE, stile: "notte", gancio: "scena" };
-  const recenti = ATTIVI.stile.map((stile) => ({ stile, gancio: "scena" })) as Partial<Variante>[];
-  for (let t = 0; t < 20; t++) assert.notEqual(prossimaVariante(`s${t}`, v, 2, [v], recenti).gancio, "scena");
-  const libero = prossimaVariante("x", v, 2, [v], [{ stile: "notte", gancio: "scena" }]);
-  assert.equal(libero.gancio, "scena", "con uno stile non visto negli ultimi 5 il gancio resta");
+  const recenti = [{ stile: "scrivania", gancio: "scena" }, { stile: "studio", gancio: "scena" }, { stile: "schermo", gancio: "scena" }] as Partial<Variante>[];
+  for (let t = 0; t < 20; t++) {
+    const n = prossimaVariante(`s${t}`, v, 2, [v], recenti);
+    assert.equal(n.stile, "schermo");
+    assert.notEqual(n.gancio, "scena");
+  }
+});
+
+test("una coppia stile+gancio oltre il terzo video non conta: il gancio resta", () => {
+  const v: Variante = { ...VARIANTE_BASE, stile: "notte", gancio: "scena" };
+  const recenti = [{ stile: "scrivania", gancio: "parola" }, { stile: "studio", gancio: "parola" }, { stile: "notte", gancio: "parola" }, { stile: "schermo", gancio: "scena" }] as Partial<Variante>[];
+  const n = prossimaVariante("x", v, 2, [v], recenti);
+  assert.equal(n.stile, "schermo");
+  assert.equal(n.gancio, "scena");
 });
 
 test("al terzo tentativo cambia anche il gancio", () => {

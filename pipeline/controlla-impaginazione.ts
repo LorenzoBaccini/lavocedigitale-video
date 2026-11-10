@@ -35,7 +35,12 @@ export function momentiDi(inizio: number, durata: number, passo?: number): [stri
 let bundleInCorso: Promise<string> | undefined;
 
 async function apri() {
-  const serveUrl = await (bundleInCorso ??= bundle({ entryPoint: resolve("src/index.ts") }));
+  // un bundle fallito non resta in cache: la chiamata dopo ci riprova
+  bundleInCorso ??= bundle({ entryPoint: resolve("src/index.ts") }).catch((e) => {
+    bundleInCorso = undefined;
+    throw e;
+  });
+  const serveUrl = await bundleInCorso;
   const chromiumOptions = { gl: (process.env.RENDER_GL ?? GL_PREDEFINITO) as "angle" };
   const browser = await openBrowser("chrome", { chromiumOptions, logLevel: "error" });
   return { serveUrl, chromiumOptions, browser };

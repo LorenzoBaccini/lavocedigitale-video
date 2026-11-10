@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 
-import type { Variante } from "../src/editoriale/variante.ts";
+import type { Valori, Variante } from "../src/editoriale/variante.ts";
 import { APERTURE, ATTIVI, DIMENSIONI, VARIANTE_BASE, varianteDi } from "../src/editoriale/variante.ts";
 import type { Misura } from "../src/impaginazione.ts";
 import { PREFISSO_MISURA, problemiImpaginazione, ZONE } from "../src/impaginazione.ts";
@@ -98,9 +98,12 @@ export function varianteDaArgomenti(argomenti: string[], base: Variante | undefi
   return varianteDi({ ...base, ...campi });
 }
 
-/** I valori forzati ma non ancora costruiti: il fotogramma mostra quello di base, un controllo pulito non vale per loro. */
-export function avvisiNonAttivi(v: Variante): string[] {
-  return FORZABILI.filter((k) => !ATTIVI[k].includes(v[k] as never)).map((k) => `${k} ${v[k]} non ancora attivo: si vede ${VARIANTE_BASE[k]}`);
+/**
+ * I valori forzati ma non ancora costruiti: il fotogramma mostra quello di base, un controllo pulito non vale per loro.
+ * `attivi` e' per i test: oggi ogni valore forzabile e' attivo.
+ */
+export function avvisiNonAttivi(v: Variante, attivi: Valori = ATTIVI): string[] {
+  return FORZABILI.filter((k) => !attivi[k].includes(v[k] as never)).map((k) => `${k} ${v[k]} non ancora attivo: si vede ${VARIANTE_BASE[k]}`);
 }
 
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]

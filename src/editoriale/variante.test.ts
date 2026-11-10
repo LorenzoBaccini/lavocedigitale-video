@@ -56,12 +56,24 @@ test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate 
   assert.deepEqual(ATTIVI.stile, ["scrivania", "studio", "notte", "schermo"]);
   assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "dettaglio", "diviso"]);
   assert.deepEqual(ATTIVI.chiusura, ["cartolina", "integrata"]);
-  assert.deepEqual(ATTIVI.durata, ["media"]);
+  assert.deepEqual(ATTIVI.durata, ["corta", "media", "lunga"]);
   assert.deepEqual(ATTIVI.fraseFinale, [0, 1, 2]);
   for (const s of SLUGS) {
     const v = scegliVariante(s, [{ stile: "scrivania", gancio: "scena", chiusura: "cartolina", durata: "media" }]);
     for (const k of Object.keys(ATTIVI) as (keyof Variante)[]) assert.ok(ATTIVI[k].includes(v[k] as never), `${s} ${k}`);
   }
+});
+
+test("la durata non ripete quella dell'ultimo video, e sugli slug passano tutte e tre", () => {
+  const viste = new Set<string>();
+  for (const s of SLUGS) {
+    for (const ultima of ["corta", "media", "lunga"] as const) {
+      const v = scegliVariante(s, [{ durata: ultima }]);
+      assert.notEqual(v.durata, ultima, `${s} dopo ${ultima}`);
+      viste.add(v.durata);
+    }
+  }
+  assert.deepEqual([...viste].sort(), ["corta", "lunga", "media"]);
 });
 
 test("con meno valori attivi che video esclusi la memoria si accorcia: l'ultimo valore non si ripete mai", () => {

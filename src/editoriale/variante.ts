@@ -41,7 +41,6 @@ export const VARIANTE_BASE: Variante = { musica: "caldo", luce: "calda", apertur
 export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APERTURE, stile: NOMI_STILI, gancio: GANCI, chiusura: CHIUSURE, fraseFinale: FRASI_FINALI, durata: DURATE };
 
 // Solo i valori gia' costruiti, elencati a mano: un valore aggiunto a DIMENSIONI non va in produzione da solo.
-// La durata resta media finche' prompt e validazione non conoscono le altre.
 export const ATTIVI: Valori = {
   musica: NOMI_TEMI,
   luce: LUCI,
@@ -50,7 +49,7 @@ export const ATTIVI: Valori = {
   gancio: ["scena", "parola", "dettaglio", "diviso"],
   chiusura: ["cartolina", "integrata"],
   fraseFinale: [0, 1, 2],
-  durata: ["media"],
+  durata: ["corta", "media", "lunga"],
 };
 
 /** Quanti video recenti escludono i loro valori; musica, luce e apertura n-1: in n video di fila passano tutte. */

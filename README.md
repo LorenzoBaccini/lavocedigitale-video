@@ -70,10 +70,10 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    slug degli ultimi 200 pubblicati. Se non si legge, il video salta (in prova si va avanti). Un
    video già nello storico o ancora su S3 non si rifà.
    Subito dopo si sceglie la **variante** (`src/editoriale/variante.ts`): dipende solo dallo slug e
-   dallo storico, quindi viene prima dello storyboard (che dovrà scrivere nella sua durata). Vedi
+   dallo storico, quindi viene prima dello storyboard, che scrive nella sua durata. Vedi
    [Varianti e stili](#varianti-e-stili).
-1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md` e le sequenze degli
-   ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
+1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md`, la durata della
+   variante (vedi [La durata](#la-durata)) e le sequenze degli ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
    (`src/storyboard/cifre.ts`: ogni numero deve stare nell'articolo) sono un solo controllo, con un
    ritentativo. La CLI gira senza strumenti, senza MCP, con modello fissato, con un ambiente ridotto
    (nessun segreto del job) e in una cartella temporanea; l'articolo sta fra `<articolo>` e
@@ -217,6 +217,40 @@ pillola bianca opaca, chiave blu (`schermo.test.ts`: testo e chiave oltre 4,5:1,
 scheda e grigio). Niente ombre sui testi, niente vignettatura, grana leggera. Titoli a sinistra come lo studio, ma la
 transizione è lo `scorrimento`: la stessa spinta di 10 frame in verticale (`Spinta` con `verticale`), la scena nuova
 sale da sotto come in un feed; il controllo d'impaginazione la spegne come le altre.
+
+### La durata
+
+La durata è l'unica dimensione che cambia il copione invece dell'aspetto: Claude non la sceglie, la pipeline gliela
+chiede. Per questo la variante si sceglie prima dello storyboard (`pipeline/main.ts`) e `scriviStoryboard` riceve
+`variante.durata`.
+
+| durata | frasi (chiusura inclusa) | parole | secondi circa |
+|---|---|---|---|
+| corta | 4-5 | 32-46 | 15-21 |
+| media | 6-8 | 50-72 | 23-32 |
+| lunga | 8-9 | 72-88 | 32-40 |
+
+I numeri stanno in un posto solo, `LIMITI_DURATA` (`src/storyboard/tipi.ts`). Il prompt li scrive da lì
+(`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata)` li applica.
+`agent-video.md` ha la stessa tabella perché Claude veda le tre durate e le regole di scrittura di ognuna (regola 20),
+e tre esempi, uno per durata: `durata.test.ts` controlla che la tabella coincida con `LIMITI_DURATA` e che ogni
+esempio passi la validazione nella durata che dichiara. `media` è la durata di prima con il tetto delle parole sceso
+da 78 a 72, perché non si sovrapponga a `lunga` oltre il confine (8 frasi e 72 parole stanno in tutte e due).
+
+Le parole si contano sul copione di Claude, che finisce con `TESTO_CHIUSURA` (13 parole); la frase finale della
+variante, più corta (3-7 parole), la sostituisce dopo la validazione. Il video parlato quindi dura un po' meno dei
+secondi della tabella: una corta al limite inferiore sono 22-26 parole dette, una decina di secondi di voce più la coda
+della chiusura.
+
+Le regole di varietà non dipendono dal numero di scene e non vanno scalate. «Mai lo stesso tipo di fila» vale con
+qualunque lunghezza. La somiglianza con i video recenti è una quota sulla sequenza più lunga: con 3 scene (corta da 4
+frasi) il 70 % vuole tutte e 3 uguali, 2 su 3 passano; contro un video più lungo una corta non arriva mai alla soglia
+(3 posizioni su 6 o più). `windows10`, la fixture del video approvato (8 frasi, 77 parole), oggi è un copione lungo:
+`VARIANTE_BASE.durata` resta `media` perché la durata non cambia nessun fotogramma, solo i limiti del copione.
+
+Il job ha `timeout-minutes: 90` (era 75): una lunga sono fino a 9 scene e 40 secondi, e il render (circa 43 minuti per
+un video medio sui runner da 2 vCPU) cresce con loro. Il ruolo AWS dura 7200 s dal passo delle credenziali, che viene
+dopo installazioni e articolo: copre i 90 minuti.
 
 ### I ganci
 

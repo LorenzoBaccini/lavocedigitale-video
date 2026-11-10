@@ -391,6 +391,7 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   const f = finte({ leggiStorico: async () => JSON.stringify({ recenti, pubblicati: ["b", "a"] }) });
   const esito = await eseguiPipeline(SLUG, { prova: true }, f.dip);
   assert.deepEqual(f.chiamate.scriviStoryboard[0][1], [["gancio", "telefono"], ["gancio", "data"]]);
+  assert.equal(f.chiamate.scriviStoryboard[0][2], esito.variante?.durata, "lo storyboard riceve la durata della variante");
   assert.equal(esito.variante?.musica, "notturno");
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));

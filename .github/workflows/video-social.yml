@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: produzione
     # Render ~43 min sui runner da 2 vCPU (5 nov 2026); i repo pubblici hanno runner da 4 vCPU.
-    timeout-minutes: 75
+    timeout-minutes: 90
     env:
       # Si pubblica solo con prova spenta (il sito la manda spenta). Attenzione: `cond && '' || x`
       # darebbe sempre x, '' e' falso.

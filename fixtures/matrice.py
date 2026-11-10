@@ -126,7 +126,7 @@ def main():
     # la notifica arriva nel gancio solo prima di un allarme sul portatile: un caso con la notifica al limite
     gruppi[0].insert(1, allarmi()[1])
     parole = lambda f: len(f["testo"].split())
-    budget = 78 - parole(CHIUSURA)
+    budget = 72 - parole(CHIUSURA)  # tetto di parole della durata media (LIMITI_DURATA)
     n = 0
     for scene in gruppi:
         blocchi, blocco = [], []

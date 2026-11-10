@@ -28,7 +28,7 @@ test("le tre frasi finali sono corte, e la frase del copione non e' fra loro", (
 test("la validazione vuole la frase del copione: la sostituzione viene dopo", () => {
   const sb = leggi();
   assert.equal(sb.frasi.at(-1)!.testo, TESTO_CHIUSURA);
-  assert.equal(validaStoryboard(sb).ok, true);
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
 });
 
 test("ogni frase finale prende il posto dell'ultima con la sua chiave; il resto non cambia", () => {

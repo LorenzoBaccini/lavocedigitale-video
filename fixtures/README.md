@@ -28,10 +28,18 @@
   larghezza della chiave. Serve al gancio
   `parola` (niente testo fuori dai margini) e agli altri formati: `--gancio=parola --scene=gancio --passo=5`.
 - `chiusura-corta.storyboard.json`: un copione da durata corta al limite inferiore (4 frasi, 37 parole) con un allarme
-  sul telefono subito prima della chiusura: il caso della chiusura integrata che ferma una scena 3D corta. La
-  validazione di oggi (durata media) lo scarterebbe. Si prova con frasi cortissime:
+  sul telefono subito prima della chiusura: il caso della chiusura integrata che ferma una scena 3D corta. Passa la
+  validazione con `durata: corta` (con `media` no: 4 frasi). Si prova con frasi cortissime:
   `--secondi=1.2 --chiusura=integrata --scene=chiusura --passo=5`. Come le altre fixture finisce con `TESTO_CHIUSURA`:
   la frase finale della variante la mette la pipeline (`conFraseFinale`).
+- `durata-corta.storyboard.json` e `durata-lunga.storyboard.json`: i due estremi di `LIMITI_DURATA`, una corta al limite
+  inferiore (4 frasi, 32 parole: gancio, rischio e oggetto sul telefono) e una lunga al limite superiore (9 frasi, 88
+  parole, otto tipi di scena diversi). Sono copioni che la pipeline accetterebbe (varietà compresa) e passano solo nella
+  loro durata (`src/storyboard/durata.test.ts`). Il controllo, in ogni stile e con le due chiusure:
+  `controlla-impaginazione.ts fixtures/durata-corta.storyboard.json --stile=notte --chiusura=integrata --durata=corta --passo=5`.
+- Le durate delle altre fixture, per chi le valida: `windows10` e le `tutte-le-scene` (8 frasi, 74-77 parole) sono
+  lunghe, `matrice-NN`, `rischio-portatile` e `ganci-lunghi` medie (ma `ganci-lunghi` non passa la validazione: il primo titolo ha 25 caratteri, uno oltre `LIMITI.titolo`),
+  `chiusura-corta` corta.
 - Nessuna fixture dichiara `variante`: hanno tutte l'aspetto di base. Le varianti si provano con
   `controlla-impaginazione.ts <fixture> --ogni-apertura` (le tre inquadrature d'apertura del gancio) o
   `--variante=musica:chiaro,luce:sera,apertura:alta`; stile, gancio, chiusura e durata con

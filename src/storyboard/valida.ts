@@ -1,4 +1,5 @@
-import { DISPOSITIVI, LIMITI, OGGETTI, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
+import type { NomeDurata } from "../editoriale/variante.ts";
+import { DISPOSITIVI, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
 import type { Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -205,7 +206,9 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
   return typeof frase.testo === "string" ? frase.testo.trim().split(/\s+/).filter(Boolean).length : 0;
 }
 
-export function validaStoryboard(input: unknown): EsitoValidazione {
+/** `durata`: quella della variante, decide quante frasi e quante parole (`LIMITI_DURATA`). */
+export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValidazione {
+  const limiti = LIMITI_DURATA[durata];
   const errori: string[] = [];
   if (!èDizionario(input)) return { ok: false, errori: ["storyboard: oggetto richiesto"] };
 
@@ -214,13 +217,13 @@ export function validaStoryboard(input: unknown): EsitoValidazione {
 
   const frasi = input.frasi;
   if (!Array.isArray(frasi)) return { ok: false, errori: [...errori, "frasi: elenco richiesto"] };
-  if (frasi.length < LIMITI.frasi.min || frasi.length > LIMITI.frasi.max) {
-    errori.push(`frasi: ${frasi.length} frasi, servono da ${LIMITI.frasi.min} a ${LIMITI.frasi.max}`);
+  if (frasi.length < limiti.frasi.min || frasi.length > limiti.frasi.max) {
+    errori.push(`frasi: ${frasi.length} frasi, la durata ${durata} ne vuole da ${limiti.frasi.min} a ${limiti.frasi.max}`);
   }
 
   const parole = frasi.reduce<number>((tot, f, i) => tot + validaFrase(f, i, errori), 0);
-  if (parole < LIMITI.paroleCopione.min || parole > LIMITI.paroleCopione.max) {
-    errori.push(`copione: ${parole} parole, servono da ${LIMITI.paroleCopione.min} a ${LIMITI.paroleCopione.max}`);
+  if (parole < limiti.parole.min || parole > limiti.parole.max) {
+    errori.push(`copione: ${parole} parole, la durata ${durata} ne vuole da ${limiti.parole.min} a ${limiti.parole.max}`);
   }
 
   const ultima = frasi.at(-1);

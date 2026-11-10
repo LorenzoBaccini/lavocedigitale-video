@@ -274,8 +274,9 @@ frase dopo la validazione e prima della voce (`conFraseFinale`, puro e provato),
 (a schermo `lavocedigitale.it`): ElevenLabs legge la frase scelta, il sottotitolo dell'ultima scena la scrive, e testata e
 indirizzo della cartolina o della fascia sono gli stessi per tutte e tre. La frase base (2) è la più vicina a quella di
 prima.
-Le tre frasi durano circa 3,3–3,9 s parlate (la frase di prima 5,1–5,7), più la coda di 1,2 s che resta (`CODA_S` in
-`linea.ts`: ci esce la musica).
+Con la voce di oggi le tre frasi durano circa 3,3–4,0 s parlate (la frase di prima 5,1–5,7; misurate sulle voci già pagate
+tagliate dopo «it», stimate per sillabe per le frasi 0 e 1), più la coda di 1,2 s che resta (`CODA_S` in `linea.ts`: ci
+esce la musica): la chiusura passa da 6,3–6,9 s a 4,5–5,2 s.
 
 **cartolina** (`scenes/Chiusura.tsx`): la scheda finale sulla superficie delle grafiche dello stile (`Foglio`: carta,
 poster, griglia, scheda). Marchio e testata entrano in 6 frame dal primo (`ENTRATA_CHIUSURA`), l'indirizzo è scritto

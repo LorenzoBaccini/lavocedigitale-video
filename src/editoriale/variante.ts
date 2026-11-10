@@ -8,7 +8,7 @@ export const LUCI = ["calda", "chiara", "mattino", "sera"] as const;
 export const APERTURE = ["classica", "radente", "alta"] as const;
 export const GANCI = ["scena", "parola", "dettaglio", "diviso"] as const;
 export const CHIUSURE = ["cartolina", "integrata"] as const;
-/** l'indice della frase finale parlata, fra le tre della chiusura */
+/** l'indice della frase finale parlata in `FRASI_CHIUSURA` (storyboard/tipi.ts) */
 export const FRASI_FINALI = [0, 1, 2] as const;
 export const DURATE = ["corta", "media", "lunga"] as const;
 
@@ -41,8 +41,7 @@ export const VARIANTE_BASE: Variante = { musica: "caldo", luce: "calda", apertur
 export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APERTURE, stile: NOMI_STILI, gancio: GANCI, chiusura: CHIUSURE, fraseFinale: FRASI_FINALI, durata: DURATE };
 
 // Solo i valori gia' costruiti: la pipeline non deve pubblicare uno stile, un gancio o una chiusura ancora segnaposto.
-// fraseFinale resta sulla frase di base finche' la pipeline non sostituisce davvero l'ultima frase: lo storico direbbe il falso.
-export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania", "studio", "notte", "schermo"], chiusura: ["cartolina"], fraseFinale: [2], durata: ["media"] };
+export const ATTIVI: Valori = { ...DIMENSIONI, durata: ["media"] };
 
 /** Quanti video recenti escludono i loro valori; musica, luce e apertura n-1: in n video di fila passano tutte. */
 export const PROFONDITA: { [K in Dimensione]: number } = {

@@ -27,6 +27,11 @@
   parola sola lunga e tonda («autenticazione» su un'app, «manomissione» col router), il caso peggiore della stima della
   larghezza della chiave. Serve al gancio
   `parola` (niente testo fuori dai margini) e agli altri formati: `--gancio=parola --scene=gancio --passo=5`.
+- `chiusura-corta.storyboard.json`: un copione da durata corta al limite inferiore (4 frasi, 37 parole) con un allarme
+  sul telefono subito prima della chiusura: il caso della chiusura integrata che ferma una scena 3D corta. La
+  validazione di oggi (durata media) lo scarterebbe. Si prova con frasi cortissime:
+  `--secondi=1.2 --chiusura=integrata --scene=chiusura --passo=5`. Come le altre fixture finisce con `TESTO_CHIUSURA`:
+  la frase finale della variante la mette la pipeline (`conFraseFinale`).
 - Nessuna fixture dichiara `variante`: hanno tutte l'aspetto di base. Le varianti si provano con
   `controlla-impaginazione.ts <fixture> --ogni-apertura` (le tre inquadrature d'apertura del gancio) o
   `--variante=musica:chiaro,luce:sera,apertura:alta`; stile, gancio, chiusura e durata con

@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
 
+import { Ferma } from "./editoriale/Ferma";
+import { scenaFerma } from "./editoriale/fermo";
 import { notificaSulloSchermo, suoniDettaglio } from "./editoriale/ganci/dettaglio";
 import { Lampo } from "./editoriale/Lampo";
 import { pianoScena } from "./editoriale/piani";
@@ -17,6 +19,7 @@ import { MisuraImpaginazione } from "./MisuraImpaginazione";
 import { Overlay } from "./Overlay";
 import type { PropsScena } from "./scenes";
 import { SCENE, Tipografica } from "./scenes";
+import { ChiusuraIntegrata } from "./scenes/ChiusuraIntegrata";
 import { propsFrase } from "./scenes/propsFrase";
 import type { Scena, Storyboard } from "./storyboard/tipi";
 import { FPS, fontsCss } from "./theme";
@@ -36,6 +39,8 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
   const spinta = (stile.transizione === "spinta" || scorrimento) && !misuraImpaginazione;
   const lampo = stile.transizione === "lampo" && !misuraImpaginazione;
   const ultima = storyboard.frasi.length - 1;
+  // chiusura integrata: niente scena finale, l'ultima di contenuto resta ferma sotto la fascia
+  const ferma = scenaFerma(storyboard.frasi.map((fr) => fr.scena.tipo), aspetto.chiusura);
   return (
     <VarianteVideo.Provider value={aspetto}>
       <StileVideo.Provider value={stile}>
@@ -46,15 +51,38 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
               // lo stile schermo non monta il set 3D: le scene del set hanno la loro resa a tutto quadro
               const Componente = ((stile.set === "schermo" ? SCENE_SCHERMO[frase.scena.tipo] : undefined) ?? SCENE[frase.scena.tipo]) as React.FC<PropsScena<Scena>> | undefined;
               const props = propsFrase(storyboard, timing, linea, i);
-              const scena = Componente ? <Componente {...props} /> : <Tipografica testo={frase.testo} durata={linea.durate[i]} />;
-              const { suoni } = pianoScena(props, linea.durate[i]);
+              const fascia = ferma !== undefined && i === ultima;
+              const scena = fascia ? <ChiusuraIntegrata {...(props as PropsScena<Extract<Scena, { tipo: "chiusura" }>>)} /> : Componente ? <Componente {...props} /> : <Tipografica testo={frase.testo} durata={linea.durate[i]} />;
+              // senza il foglio non c'e' il fruscio della carta
+              const suoni = fascia ? [] : pianoScena(props, linea.durate[i]).suoni;
               const voce = (
                 <>
                   <Audio src={staticFile(`${audioBase}/${timing.clips[i].file}`)} />
                   <Suoni effetti={frase.scena.tipo === "gancio" && aspetto.gancio === "dettaglio" && notificaSulloSchermo({ oggetto: frase.scena.oggetto, contesto: props.contesto }, stile.set === "schermo") ? suoniDettaglio(suoni) : suoni} />
                 </>
               );
-              if (!spinta) {
+              if (i === ferma) {
+                const coda = linea.durate[ultima];
+                return (
+                  <Fragment key={i}>
+                    <Sequence from={linea.inizi[i]} durationInFrames={linea.durate[i] + coda}>
+                      <Ferma durata={linea.durate[i]} chiusura={coda} spinta={!misuraImpaginazione}>
+                        {spinta ? (
+                          <Spinta durata={linea.durate[i]} entra={i > 0} esce={false} verticale={scorrimento}>
+                            {scena}
+                          </Spinta>
+                        ) : (
+                          scena
+                        )}
+                      </Ferma>
+                    </Sequence>
+                    <Sequence from={linea.inizi[i]} durationInFrames={linea.durate[i]} layout="none">
+                      {voce}
+                    </Sequence>
+                  </Fragment>
+                );
+              }
+              if (!spinta || fascia) {
                 return (
                   <Sequence key={i} from={linea.inizi[i]} durationInFrames={linea.durate[i]}>
                     {scena}
@@ -76,7 +104,7 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
                 </Fragment>
               );
             })}
-            {lampo && <Lampo inizi={linea.inizi} />}
+            {lampo && <Lampo inizi={ferma === undefined ? linea.inizi : linea.inizi.slice(0, ultima)} />}
             <Stanza />
             <Sottofondo tema={aspetto.musica} timing={timing} linea={linea} />
             <Overlay storyboard={storyboard} timing={timing} linea={linea} />

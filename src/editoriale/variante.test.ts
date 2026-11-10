@@ -55,9 +55,9 @@ test("stile e gancio evitano gli ultimi 2 video; chiusura, frase finale e durata
 test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate non ancora costruiti restano fuori", () => {
   assert.deepEqual(ATTIVI.stile, ["scrivania", "studio", "notte", "schermo"]);
   assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "dettaglio", "diviso"]);
-  assert.deepEqual(ATTIVI.chiusura, ["cartolina"]);
+  assert.deepEqual(ATTIVI.chiusura, ["cartolina", "integrata"]);
   assert.deepEqual(ATTIVI.durata, ["media"]);
-  assert.deepEqual(ATTIVI.fraseFinale, [2]);
+  assert.deepEqual(ATTIVI.fraseFinale, [0, 1, 2]);
   for (const s of SLUGS) {
     const v = scegliVariante(s, [{ stile: "scrivania", gancio: "scena", chiusura: "cartolina", durata: "media" }]);
     for (const k of Object.keys(ATTIVI) as (keyof Variante)[]) assert.ok(ATTIVI[k].includes(v[k] as never), `${s} ${k}`);

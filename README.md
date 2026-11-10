@@ -78,6 +78,9 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    ritentativo. La CLI gira senza strumenti, senza MCP, con modello fissato, con un ambiente ridotto
    (nessun segreto del job) e in una cartella temporanea; l'articolo sta fra `<articolo>` e
    `</articolo>`, dichiarato materiale e non istruzioni.
+   Il copione finisce sempre con `TESTO_CHIUSURA` (lo pretendono prompt e validazione); subito dopo la
+   validazione `conFraseFinale` (`src/storyboard/fraseFinale.ts`) mette al suo posto la frase finale della
+   variante: voce, sottotitolo, storyboard dell'artifact e props vedono solo quella. Vedi [Le chiusure](#le-chiusure).
 2. **Voce** (`pipeline/voce-elevenlabs.ts`): una sola chiamata all'endpoint `with-timestamps`;
    `pipeline/allineamento.ts` ricava le parole e le assegna alle frasi, ffmpeg taglia una clip per
    frase. Se ElevenLabs fallisce il video salta: nessuna voce di riserva.
@@ -113,8 +116,7 @@ prima degli stili lo erano. Per le altre dimensioni nuove un valore assente non 
 La pipeline sceglie solo fra i valori di `ATTIVI`: uno stile, un gancio, una chiusura o una durata si
 aggiungono lì quando sono costruiti e passano il controllo d'impaginazione, non prima. Se i valori
 attivi sono meno dei video da escludere, la memoria si accorcia un video alla volta (l'ultimo valore resta
-escluso finché ce n'è un altro); con un solo valore attivo si ripete. `fraseFinale` resta sulla frase di
-base finché la pipeline non sostituisce davvero l'ultima frase del copione. `DIMENSIONI` tiene
+escluso finché ce n'è un altro); con un solo valore attivo si ripete. `DIMENSIONI` tiene
 invece tutti i valori validi: le props e il controllo d'impaginazione possono forzarne uno qualsiasi.
 `VARIANTE_BASE` è il video approvato (`scrivania`, `scena`, `cartolina`, `media`): lo ha chi non dichiara
 una variante, come le fixture.
@@ -259,6 +261,45 @@ apertura (`agent-video.md`), le fixture con più ganci li provano tutti.
 
 Il controllo d'impaginazione misura solo i ganci con `--scene=gancio`; `fixtures/ganci-lunghi.storyboard.json` ha tre
 domande da 64 caratteri con la chiave da 18 all'inizio, in mezzo e in fondo.
+
+### Le chiusure
+
+La chiusura dura meno di prima: la frase finale parlata è corta e la scena finale è veloce.
+
+**La frase finale** (`variante.fraseFinale`, 0, 1 o 2) indicizza `FRASI_CHIUSURA` in `storyboard/tipi.ts`: «Il resto è su
+la voce digitale punto it.», «Link nel post: la voce digitale punto it.», «Trovi tutto su la voce digitale punto it.».
+La frase che Claude scrive oggi («Trovi tutto su la voce digitale punto it, il link è nel post.», `TESTO_CHIUSURA`) non è
+fra le tre: resta solo il testo che la validazione si aspetta, e il prompt non cambia. La pipeline sostituisce l'ultima
+frase dopo la validazione e prima della voce (`conFraseFinale`, puro e provato), con la chiave `la voce digitale punto it`
+(a schermo `lavocedigitale.it`): ElevenLabs legge la frase scelta, il sottotitolo dell'ultima scena la scrive, e testata e
+indirizzo della cartolina o della fascia sono gli stessi per tutte e tre. La frase base (2) è la più vicina a quella di
+prima.
+Le tre frasi durano circa 3,3–3,9 s parlate (la frase di prima 5,1–5,7), più la coda di 1,2 s che resta (`CODA_S` in
+`linea.ts`: ci esce la musica).
+
+**cartolina** (`scenes/Chiusura.tsx`): la scheda finale sulla superficie delle grafiche dello stile (`Foglio`: carta,
+poster, griglia, scheda). Marchio e testata entrano in 6 frame dal primo (`ENTRATA_CHIUSURA`), l'indirizzo è scritto
+entro 20 frame anche se la voce lo dice dopo, e la sottolineatura parte quando la voce lo dice (`piani/chiusura.ts`). Prima
+la testata partiva al frame 4 in 10 frame e l'indirizzo aspettava la voce (un secondo e mezzo). La cartolina quindi cambia:
+la regressione a pixel quasi identici vale per le scene prima della chiusura, non per lei.
+
+**integrata**: nessuna scena finale. In `Notizia` l'ultima scena di contenuto resta montata anche per la durata della
+chiusura dentro `Ferma` (`editoriale/Ferma.tsx`): oltre la sua fine vede sempre il suo ultimo frame (lo stesso trucco della
+`Spinta`, una `Sequence` interna spostata di quanto si è oltre la fine; niente `<Freeze>`, che azzera l'origine della
+sequenza) e si avvicina piano del 2 % (`scalaFerma` in `editoriale/fermo.ts`). Non esce con la spinta, lo scorrimento o il
+lampo dello stile: la chiusura non è un cambio di scena. Sopra, la fascia (`scenes/ChiusuraIntegrata.tsx`) cresce da
+sinistra in 6 frame attorno al logo, che resta dove sta l'angolo di sempre, nel velo dello stile col filo dell'accento
+sotto, e porta testata e indirizzo coi tempi della cartolina (stesso piano: la ridondanza del sottotitolo è la stessa). Sta
+fra 200 e 366 px, sopra i titoli delle scene (da `TITOLO_TOP`); i testi stanno a destra della zona del logo. Niente
+fruscio della carta: non c'è un foglio. Sotto la fascia logo e sottotitolo seguono la scena ferma, non la chiusura
+(`Overlay`). Vale uguale in schermo: la fascia è 2D e `Ferma` non sa che cosa tiene fermo.
+
+Il frame fermo è l'ultimo della scena: lì il piano ha già scritto tutti i testi. I piani tengono testi e segni dentro la durata
+(`Math.min(durata - …)`), e `fermo.test.ts` lo prova per ogni scena di ogni fixture
+messa come ultima di contenuto, con frasi da 1 a 3 s: la durata corta con il copione al limite inferiore sta sopra
+quel minimo. `fixtures/chiusura-corta.storyboard.json` è quel caso (4 frasi, 37 parole, un allarme sul telefono prima
+della chiusura). La spinta lenta, come le transizioni, è spenta nel controllo d'impaginazione: a fine chiusura un testo
+sul margine o vicino al sottotitolo si sposta in fuori di circa 10 px.
 
 Il controllo d'impaginazione forza le dimensioni con `--stile= --gancio= --chiusura= --durata=` (un valore
 sconosciuto è un errore; uno valido ma non ancora in `ATTIVI` dà un avviso, perché il fotogramma mostra

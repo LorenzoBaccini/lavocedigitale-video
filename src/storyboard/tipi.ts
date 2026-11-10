@@ -57,7 +57,18 @@ export interface Storyboard {
   frasi: Frase[];
 }
 
+/** L'ultima frase che Claude scrive e la validazione pretende; la pipeline la sostituisce con una di `FRASI_CHIUSURA`. */
 export const TESTO_CHIUSURA = "Trovi tutto su la voce digitale punto it, il link è nel post.";
+
+/** Le frasi finali dette davvero, indicizzate da `fraseFinale` della variante. */
+export const FRASI_CHIUSURA = [
+  "Il resto è su la voce digitale punto it.",
+  "Link nel post: la voce digitale punto it.",
+  "Trovi tutto su la voce digitale punto it.",
+] as const;
+
+/** La chiave delle frasi finali: l'indirizzo, che a schermo diventa lavocedigitale.it. */
+export const CHIAVE_CHIUSURA = "la voce digitale punto it";
 
 export const LIMITI = {
   frasi: { min: 6, max: 8 },

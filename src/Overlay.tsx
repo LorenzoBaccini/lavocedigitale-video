@@ -2,6 +2,7 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { pop } from "./anim";
 import { SU_CARTA } from "./editoriale/carta/stile";
+import { scenaFerma } from "./editoriale/fermo";
 import { FINE_DETTAGLIO } from "./editoriale/ganci/dettaglio";
 import { coloriDiviso, pienoDiviso } from "./editoriale/ganci/diviso";
 import { useStile } from "./editoriale/stili";
@@ -26,9 +27,12 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
   const chiusura = frase.scena.tipo === "chiusura";
   // sulle scene grafiche sottotitolo e logo prendono l'inchiostro dello stile
   const variante = useVariante();
+  // con la chiusura integrata sotto la fascia si vede ancora l'ultima scena di contenuto
+  const ferma = chiusura ? scenaFerma(storyboard.frasi.map((fr) => fr.scena.tipo), variante.chiusura) : undefined;
+  const visibile = storyboard.frasi[ferma ?? i].scena.tipo;
   // il gancio a parola sta sulla superficie delle grafiche; col blocco del diviso il logo prende il colore del blocco
-  const gancio = frase.scena.tipo === "gancio" ? variante.gancio : undefined;
-  const grafica = SU_CARTA.has(frase.scena.tipo) || gancio === "parola";
+  const gancio = visibile === "gancio" ? variante.gancio : undefined;
+  const grafica = SU_CARTA.has(visibile) || gancio === "parola";
   const pienoBlocco = gancio === "diviso" ? pienoDiviso(f - linea.inizi[i]) : 0;
   const sotto = grafica ? stile.sottotitolo.sulleGrafiche : stile.sottotitolo.sulSet;
   const { blocco, locale, ridondante: scritto } = sottotitoloAlFrame(storyboard, timing, linea, f);

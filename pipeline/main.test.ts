@@ -8,6 +8,7 @@ import type { Variante } from "../src/editoriale/variante.ts";
 import { VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
+import { FRASI_CHIUSURA, TESTO_CHIUSURA } from "../src/storyboard/tipi.ts";
 import type { Timing } from "../src/timing.ts";
 import type { ArticoloVideo } from "./articolo.ts";
 import { avvisaFallimento, eseguiPipeline, slugValido, type Dipendenze } from "./main.ts";
@@ -394,7 +395,19 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));
   assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).variante, esito.variante);
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile schermo · gancio ${esito.variante?.gancio} · chiusura cartolina · frase finale \\d · durata media · musica notturno`));
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile schermo · gancio ${esito.variante?.gancio} · chiusura (cartolina|integrata) · frase finale \\d · durata media · musica notturno`));
+});
+
+test("la frase finale della variante sostituisce quella del copione prima della voce: voce, render e storico la vedono", async () => {
+  const f = finte();
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  assert.equal(esito.stato, "pubblicato");
+  const attesa = FRASI_CHIUSURA[esito.variante!.fraseFinale];
+  const allaVoce = f.chiamate.voce[0][0] as Storyboard;
+  assert.equal(allaVoce.frasi.at(-1)!.testo, attesa);
+  assert.deepEqual(allaVoce.frasi.slice(0, -1), storyboard.frasi.slice(0, -1));
+  assert.equal((f.chiamate.render[0][0] as PropsNotizia).storyboard.frasi.at(-1)!.testo, attesa);
+  assert.equal(storyboard.frasi.at(-1)!.testo, TESTO_CHIUSURA, "lo storyboard di Claude resta quello validato");
 });
 
 test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se lo storyboard viene scartato", async () => {

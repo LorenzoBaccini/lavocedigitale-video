@@ -7,6 +7,7 @@ import type { Variante } from "../src/editoriale/variante.ts";
 import { scegliVariante } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
+import { conFraseFinale } from "../src/storyboard/fraseFinale.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import type { Timing } from "../src/timing.ts";
@@ -174,7 +175,8 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   let storyboard: Storyboard;
   try {
     [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico)));
-    storyboard = { ...storyboard, slug };
+    // la validazione ha visto la frase del copione: la frase finale della variante la sostituisce prima della voce
+    storyboard = conFraseFinale({ ...storyboard, slug }, variante.fraseFinale);
   } catch (e) {
     if (!(e instanceof StoryboardScartato)) throw e;
     Object.assign(esito, { stato: "saltato", motivo: e.motivo });

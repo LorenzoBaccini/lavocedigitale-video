@@ -6,20 +6,26 @@ import { suCarta } from "./carta.ts";
 export const INDIRIZZO = "lavocedigitale.it";
 export const TESTATA = "La Voce Digitale";
 
+/** In quanti frame entrano il marchio e la testata (la scheda della cartolina, la fascia dell'integrata). */
+export const ENTRATA_CHIUSURA = 6;
+/** L'indirizzo e' scritto al piu' tardi qui, anche se la voce lo dice dopo. */
+const INDIRIZZO_ENTRO = 20;
+
 export interface PianoChiusura extends PianoCarta {
   testata: number;
   indirizzo: number;
   sottolinea: number;
 }
 
-// La chiusura: il marchio e la testata su carta, poi l'indirizzo, sottolineato a pennarello quando la voce lo dice.
+// La chiusura: marchio e testata subito, l'indirizzo entro due terzi di secondo, sottolineato quando la voce lo dice.
+// Lo stesso piano regge la cartolina e la fascia della chiusura integrata.
 export function pianoChiusura(s: ScenaDi<"chiusura">, durata: number): PianoChiusura {
-  const testata = 4;
+  const testata = 0;
   const detto = quandoDice(s.voce, INDIRIZZO, Math.round(durata * 0.3));
-  const indirizzo = Math.max(10, detto - 2);
-  const sottolinea = Math.min(durata - 14, detto + 8);
+  const indirizzo = Math.min(INDIRIZZO_ENTRO, Math.max(ENTRATA_CHIUSURA, detto - 2));
+  const sottolinea = Math.min(durata - 14, Math.max(indirizzo + 6, detto + 4));
   const testi = [
-    { testo: TESTATA, da: testata + 6 },
+    { testo: TESTATA, da: testata + ENTRATA_CHIUSURA },
     { testo: INDIRIZZO, da: indirizzo + 4 },
   ];
   return { testata, indirizzo, sottolinea, ...suCarta(testi, [], [testata, indirizzo, sottolinea], durata, s.contesto) };

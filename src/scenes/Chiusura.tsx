@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 
 import { Foglio } from "../editoriale/carta/Foglio";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { INDIRIZZO, pianoChiusura, TESTATA } from "../editoriale/piani/chiusura";
+import { ENTRATA_CHIUSURA, INDIRIZZO, pianoChiusura, TESTATA } from "../editoriale/piani/chiusura";
 import { fase, uscita } from "../editoriale/regia";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
@@ -19,7 +19,7 @@ export const Chiusura: React.FC<ScenaDi<"chiusura">> = (props) => {
   const livello = useContext(LivelloVoce);
   const { durata } = props;
   const piano = pianoChiusura(props, durata);
-  const t = fase(f, piano.testata, piano.testata + 10);
+  const t = fase(f, piano.testata, piano.testata + ENTRATA_CHIUSURA);
   return (
     <Foglio tipo="liscia" spinta={spintaFoglio(f, durata, piano.stacchi)}>
       <div style={{ position: "absolute", top: 600, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile) }}>

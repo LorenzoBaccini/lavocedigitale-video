@@ -2,7 +2,10 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { pop } from "./anim";
 import { SU_CARTA } from "./editoriale/carta/stile";
+import { coloriDiviso, pienoDiviso } from "./editoriale/ganci/diviso";
 import { useStile } from "./editoriale/stili";
+import { mescola } from "./editoriale/stili/colore";
+import { useVariante } from "./editoriale/VarianteVideo";
 import { LOGO, MARGINE, SOTTOTITOLO_BASSO } from "./impaginazione";
 import type { Linea } from "./linea";
 import { livelloVoce, scenaAlFrame } from "./linea";
@@ -21,7 +24,11 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
   const frase = storyboard.frasi[i];
   const chiusura = frase.scena.tipo === "chiusura";
   // sulle scene grafiche sottotitolo e logo prendono l'inchiostro dello stile
-  const grafica = SU_CARTA.has(frase.scena.tipo);
+  const variante = useVariante();
+  // il gancio a parola sta sulla superficie delle grafiche; col blocco del diviso il logo prende il colore del blocco
+  const gancio = frase.scena.tipo === "gancio" ? variante.gancio : undefined;
+  const grafica = SU_CARTA.has(frase.scena.tipo) || gancio === "parola";
+  const pienoBlocco = gancio === "diviso" ? pienoDiviso(f - linea.inizi[i]) : 0;
   const sotto = grafica ? stile.sottotitolo.sulleGrafiche : stile.sottotitolo.sulSet;
   const { blocco, locale, ridondante } = sottotitoloAlFrame(storyboard, timing, linea, f);
   // anticipo di 2 frame: al cambio di blocco il sottotitolo non resta mai trasparente
@@ -33,7 +40,7 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
       <div style={{ position: "absolute", top: 0, left: 0, height: 10, width: `${(f / linea.totale) * 100}%`, background: stile.colori.accento }} />
       {!chiusura && (
         <div style={{ position: "absolute", top: LOGO.y, left: LOGO.x }}>
-          <LogoMark size={LOGO.lato} color={grafica ? stile.colori.inchiostro.testo : stile.colori.testo} livello={livelloVoce(timing, linea, f)} />
+          <LogoMark size={LOGO.lato} color={grafica ? stile.colori.inchiostro.testo : pienoBlocco > 0 ? mescola(stile.colori.testo, coloriDiviso(stile).testo, pienoBlocco) : stile.colori.testo} livello={livelloVoce(timing, linea, f)} />
         </div>
       )}
       {!ridondante && (

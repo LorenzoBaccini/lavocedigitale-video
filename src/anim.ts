@@ -1,6 +1,6 @@
 import { spring } from "remotion";
 
-import { FPS } from "./theme";
+import { FPS } from "./theme.ts";
 
 export const pop = (frame: number, delay = 0, damping = 12) =>
   spring({ frame: frame - delay, fps: FPS, config: { damping, stiffness: 180 } });

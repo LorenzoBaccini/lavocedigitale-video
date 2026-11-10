@@ -22,6 +22,9 @@
 - `rischio-portatile.storyboard.json`: tre `rischio` sul portatile (con e senza `dispositivo`) con sopratitolo e
   titolo cortissimi, medi e al limite, più un allarme sul portatile. Riproduce un caso reale di video scartato (schermo a
   cavallo del sopratitolo). Va provata con `--passo=15`: deve uscire pulita in ogni fotogramma.
+- `ganci-lunghi.storyboard.json`: tre ganci con la domanda più lunga che si scrive per intero (64 caratteri) e una
+  chiave da 18 all'inizio, in mezzo e in fondo, su portatile con pagina, telefono e chiavetta. Serve al gancio
+  `parola` (niente testo fuori dai margini) e agli altri formati: `--gancio=parola --scene=gancio --passo=5`.
 - Nessuna fixture dichiara `variante`: hanno tutte l'aspetto di base. Le varianti si provano con
   `controlla-impaginazione.ts <fixture> --ogni-apertura` (le tre inquadrature d'apertura del gancio) o
   `--variante=musica:chiaro,luce:sera,apertura:alta`; stile, gancio, chiusura e durata con

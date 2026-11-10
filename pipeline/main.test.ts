@@ -394,7 +394,7 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));
   assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).variante, esito.variante);
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile schermo · gancio scena · chiusura cartolina · frase finale \d · durata media · musica notturno/);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile schermo · gancio ${esito.variante?.gancio} · chiusura cartolina · frase finale \\d · durata media · musica notturno`));
 });
 
 test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se lo storyboard viene scartato", async () => {

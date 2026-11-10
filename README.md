@@ -216,6 +216,42 @@ scheda e grigio). Niente ombre sui testi, niente vignettatura, grana leggera. Ti
 transizione è lo `scorrimento`: la stessa spinta di 10 frame in verticale (`Spinta` con `verticale`), la scena nuova
 sale da sotto come in un feed; il controllo d'impaginazione la spegne come le altre.
 
+### I ganci
+
+Il primo secondo decide se si scorre via: il gancio (`variante.gancio`) cambia il primo fotogramma, in ogni stile.
+La scena del gancio (`scenes/Gancio.tsx` sul set, `schermo/GancioSchermo.tsx` a tutto quadro) sceglie la resa dalla
+variante; tempi, testi, suoni e sottotitolo restano quelli di `piani/gancio.ts` per tutti e quattro, quindi la
+ridondanza del sottotitolo non cambia. Il formato vale per ogni scena `gancio`: il copione la mette sempre in
+apertura (`agent-video.md`), le fixture con più ganci li provano tutti.
+
+- **scena**: quello di prima, pixel per pixel.
+- **parola** (`ganci/Parola.tsx`, `testate/parola.ts`): niente set, niente oggetto. La frase detta a tutta pagina
+  sulla superficie delle grafiche dello stile (`Foglio`: carta, poster, griglia, scheda), centrata in verticale fra
+  `TITOLO_TOP` e `FONDO_TITOLO`, ogni parola entra a tempo con la voce (gli stessi tempi del titolo di sempre). La
+  chiave è almeno 1,6 volte il resto e sottolineata. I corpi partono grandi e calano finché la stima delle righe
+  (`altezzaRighe`) sta nell'82 % della fascia; nessuna parola supera la riga da sola (`emDi`: 0,58 em a lettera,
+  0,74 le maiuscole, per la larghezza dello stile). L'oggetto non compare mai: lo spec ammette «o mai», e un oggetto
+  piccolo nell'ultimo terzo vorrebbe dire un secondo canvas 3D e un titolo che si sposta. Sopra la parola logo e
+  sottotitolo prendono l'inchiostro delle grafiche (`Overlay`).
+- **dettaglio** (`ganci/dettaglio.ts`): si apre su un primo piano stretto e si allarga fino alla scena del gancio.
+  Il dettaglio dipende dal contenuto: la notifica se arriverà un allarme (allora c'è già dal primo fotogramma, e alla
+  fine la camera ci torna come prima), il titolo della pagina, la barra del desktop, la scheda della schermata di
+  blocco, o il punto caldo dell'oggetto. Sul set la camera parte in asse sul dettaglio (`primoPiano` in
+  `set/inquadrature.ts`) e si allarga con `allarga` (distanza in proporzione, lo zoom sembra uniforme); a tutto quadro
+  il riquadro parte dall'alto del fotogramma e scende sotto il titolo mentre la ripresa si allarga. 6 frame fermi, 22
+  di allargamento: il titolo entra solo dopo (le parole dette prima arrivano insieme) e la spinta sulla chiave non
+  comincia prima, perché a primo piano lo schermo copre tutto il quadro.
+- **diviso** (`ganci/diviso.ts`, `ganci/Blocco.tsx`): la metà alta è un blocco nell'accento dello stile col titolo
+  nella sua posizione di sempre; titolo e logo ci stanno nel colore dello stile che sull'accento contrasta di più
+  (fondo, velo, superficie, testo, inchiostro: oltre 3:1 in ogni stile e tinta, `ganci.test.ts`). Dopo 10 frame il
+  blocco sale fino alla quota sotto il titolo (lo schermo del portatile sale con il suo bordo; a tutto quadro la
+  ripresa parte dal punto che conta), poi in 8 frame svanisce mentre il titolo torna del suo colore: entro 28 frame la
+  scena è intera e il titolo non ha mai attraversato il bordo del blocco. Il blocco è un ingombro a bordo: il
+  controllo d'impaginazione verifica che il titolo ci stia dentro intero.
+
+Il controllo d'impaginazione misura solo i ganci con `--scene=gancio`; `fixtures/ganci-lunghi.storyboard.json` ha tre
+domande da 64 caratteri con la chiave da 18 all'inizio, in mezzo e in fondo.
+
 Il controllo d'impaginazione forza le dimensioni con `--stile= --gancio= --chiusura= --durata=` (un valore
 sconosciuto è un errore; uno valido ma non ancora in `ATTIVI` dà un avviso, perché il fotogramma mostra
 ancora quello di base) e con `--variante=luce:sera,apertura:alta`:

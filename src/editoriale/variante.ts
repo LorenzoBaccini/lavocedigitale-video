@@ -42,7 +42,7 @@ export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APE
 
 // Solo i valori gia' costruiti: la pipeline non deve pubblicare uno stile, un gancio o una chiusura ancora segnaposto.
 // fraseFinale resta sulla frase di base finche' la pipeline non sostituisce davvero l'ultima frase: lo storico direbbe il falso.
-export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania", "studio", "notte", "schermo"], gancio: ["scena"], chiusura: ["cartolina"], fraseFinale: [2], durata: ["media"] };
+export const ATTIVI: Valori = { ...DIMENSIONI, stile: ["scrivania", "studio", "notte", "schermo"], chiusura: ["cartolina"], fraseFinale: [2], durata: ["media"] };
 
 /** Quanti video recenti escludono i loro valori; musica, luce e apertura n-1: in n video di fila passano tutte. */
 export const PROFONDITA: { [K in Dimensione]: number } = {

@@ -1,0 +1,47 @@
+{
+ "slug": "ganci-lunghi",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Devi proprio rinnovare lo SPID se ti basta la firma elettronica?",
+   "chiave": "firma elettronica",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "SPID o firma elettronica?",
+    "evidenza": "Rinnovo",
+    "sottotitolo": "Dal sito",
+    "oggetto": "portatile",
+    "schermata": "sito"
+   }
+  },
+  {
+   "testo": "Perché la batteria del telefono si scarica di notte se è spento?",
+   "chiave": "Perché la batteria",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Batteria scarica",
+    "evidenza": "Di notte",
+    "sottotitolo": "Anche da spento",
+    "oggetto": "smartphone"
+   }
+  },
+  {
+   "testo": "Perché lo smartphone si scarica di notte anche quando è spento?!",
+   "chiave": "notte anche quando",
+   "scena": {
+    "tipo": "gancio",
+    "titolo": "Batteria scarica",
+    "evidenza": "Di notte",
+    "sottotitolo": "Anche da spento",
+    "oggetto": "chiavetta"
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

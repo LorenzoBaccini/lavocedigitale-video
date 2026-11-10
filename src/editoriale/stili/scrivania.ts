@@ -1,5 +1,5 @@
-import { SANS, SERIF } from "../../theme";
-import type { Stile } from "./tipi";
+import { SANS, SERIF } from "../../theme.ts";
+import type { Stile } from "./tipi.ts";
 
 const CARTA_CHIARA = "#FAFAF7";
 const AMBRA = "#D97706";

@@ -31,9 +31,10 @@ export function momentiDi(inizio: number, durata: number, passo?: number): [stri
 /**
  * Via scelta: `renderStill` con la prop `misuraImpaginazione`, che fa scrivere in console a `MisuraImpaginazione`
  * i rettangoli dei nodi `data-impaginazione`; qui li si legge con `onBrowserLog`.
- * Va lanciato con la radice del repo come cwd. Con `cartellaStill` salva il fotogramma di fine frase di ogni scena.
+ * Va lanciato con la radice del repo come cwd. Con `cartellaStill` salva il fotogramma di fine frase di ogni scena; con `solo`
+ * misura solo le scene di quel tipo.
  */
-export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?: string, passo?: number): Promise<string[]> {
+export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?: string, passo?: number, solo?: string): Promise<string[]> {
   const serveUrl = await bundle({ entryPoint: resolve("src/index.ts") });
   const chromiumOptions = { gl: (process.env.RENDER_GL ?? GL_PREDEFINITO) as "angle" };
   const browser = await openBrowser("chrome", { chromiumOptions, logLevel: "error" });
@@ -43,6 +44,7 @@ export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?
   try {
     const composition = await selectComposition({ serveUrl, id: "notizia", inputProps, puppeteerInstance: browser, chromiumOptions, logLevel: "error" });
     for (const [i, frase] of props.storyboard.frasi.entries()) {
+      if (solo && frase.scena.tipo !== solo) continue;
       const momenti = momentiDi(linea.inizi[i], linea.durate[i], passo);
       for (const [momento, frame] of momenti) {
         let misure: Misura[] | undefined;
@@ -103,8 +105,8 @@ export function avvisiNonAttivi(v: Variante): string[] {
 
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
 //        [--variante=musica:chiaro,luce:sera,apertura:alta] [--stile=…] [--gancio=…] [--chiusura=…] [--durata=…]
-//        [--ogni-apertura] [--passo=N] [--secondi=N]
-// --secondi: durata delle frasi di uno storyboard senza voce (3 di default).
+//        [--ogni-apertura] [--passo=N] [--secondi=N] [--scene=gancio]
+// --secondi: durata delle frasi di uno storyboard senza voce (3 di default). --scene: misura solo le scene di quel tipo.
 // Con --ogni-apertura il controllo gira una volta per ogni inquadratura d'apertura del gancio.
 if (èPrincipale(import.meta.url)) {
   const argomenti = process.argv.slice(2);
@@ -115,11 +117,12 @@ if (èPrincipale(import.meta.url)) {
   for (const avviso of avvisiNonAttivi(variante)) console.warn(`attenzione: ${avviso}`);
   const aperture = argomenti.includes("--ogni-apertura") ? APERTURE : [variante.apertura];
   const passo = Number(argomenti.find((a) => a.startsWith("--passo="))?.slice("--passo=".length)) || undefined;
+  const solo = argomenti.find((a) => a.startsWith("--scene="))?.slice("--scene=".length);
   process.chdir(fileURLToPath(new URL("..", import.meta.url)));
   const problemi: string[] = [];
   for (const apertura of aperture) {
     const v = { ...variante, apertura };
-    const trovati = await controllaImpaginazione({ ...props, variante: v }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo);
+    const trovati = await controllaImpaginazione({ ...props, variante: v }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo, solo);
     problemi.push(...trovati.map((p) => (aperture.length > 1 ? `apertura ${apertura}: ${p}` : p)));
     console.log(`variante ${v.stile}/${v.gancio}/${v.chiusura}/${v.durata} ${v.musica}/${v.luce}/${v.apertura}: ${trovati.length ? `${trovati.length} problemi` : "pulita"}`);
   }

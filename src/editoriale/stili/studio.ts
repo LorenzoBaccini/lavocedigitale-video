@@ -1,5 +1,5 @@
 import { GROTESK } from "../../theme.ts";
-import { impronta } from "../impronta.ts";
+import { improntaMescolata } from "../impronta.ts";
 import { conAlfa } from "./alfa.ts";
 import { mescola } from "./colore.ts";
 import type { Stile } from "./tipi.ts";
@@ -28,7 +28,7 @@ export type NomeTinta = keyof typeof TINTE;
 export const NOMI_TINTE = Object.keys(TINTE) as NomeTinta[];
 
 /** La tinta del fondale di un video: deterministica dallo slug, scorrelata dalle scelte della variante. */
-export const tintaDi = (slug: string): NomeTinta => NOMI_TINTE[impronta(`tinta:${slug}`) % NOMI_TINTE.length];
+export const tintaDi = (slug: string): NomeTinta => NOMI_TINTE[improntaMescolata(`tinta:${slug}`) % NOMI_TINTE.length];
 
 /** La pillola scura del sottotitolo: colore e opacita'. */
 export const PILLOLA = { colore: "#0e1014", alfa: 0.9 };

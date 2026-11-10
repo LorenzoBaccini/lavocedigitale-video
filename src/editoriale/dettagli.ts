@@ -1,4 +1,4 @@
-import { impronta } from "./impronta.ts";
+import { improntaMescolata } from "./impronta.ts";
 import { contrasto, mescola, sovrapponi } from "./stili/colore.ts";
 import type { Stile } from "./stili/tipi.ts";
 
@@ -62,14 +62,7 @@ export const sfondiBlocco = ({ colori }: Stile): SfondoBlocco[] => {
 const PRIMO_MINUTO = 7 * 60;
 const MINUTI = 16 * 60;
 
-// FNV-1a mescola poco i bit bassi: senza il rimescolamento finale (murmur3) scelte diverse andrebbero di pari passo
-const rimescola = (h: number) => {
-  h = Math.imul(h ^ (h >>> 16), 0x85ebca6b);
-  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
-  return (h ^ (h >>> 16)) >>> 0;
-};
-
-const scelta = (slug: string, chiave: string, n: number) => rimescola(impronta(`${slug}:${chiave}`)) % n;
+const scelta = (slug: string, chiave: string, n: number) => improntaMescolata(`${slug}:${chiave}`) % n;
 
 /** L'ora «HH:MM» di uno slug, fra le 07:00 e le 22:59. */
 export function oraDi(slug: string): string {

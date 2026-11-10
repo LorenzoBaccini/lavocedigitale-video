@@ -108,12 +108,19 @@ timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta
 ## Varianti e stili
 
 Ogni video ha una variante con otto dimensioni: `musica`, `luce`, `apertura`, `stile`, `gancio`,
-`chiusura`, `fraseFinale`, `durata`. La pipeline la sceglie deterministica dallo slug (FNV-1a), fra i
+`chiusura`, `fraseFinale`, `durata`. La pipeline la sceglie deterministica dallo slug (FNV-1a con
+rimescolamento finale, `improntaMescolata`), fra i
 valori non usati dagli ultimi video dello storico. Quanti video escludono dipende dalla dimensione
 (`PROFONDITA`): `stile` e `gancio` gli ultimi 2 (non una rotazione fissa, che diventerebbe un ciclo
 riconoscibile), `chiusura`, `fraseFinale` e `durata` l'ultimo, `musica`, `luce` e `apertura` n-1 (in n
 video di fila passano tutte). Nello storico una voce senza `stile` vale `scrivania`: i video pubblicati
 prima degli stili lo erano. Per le altre dimensioni nuove un valore assente non esclude niente.
+
+Senza il rimescolamento le dimensioni andavano di pari passo: con due valori liberi `% 2` guarda solo il
+bit basso di FNV-1a, uguale per ogni chiave dello stesso slug, e su 300 video di fila uscivano 4 coppie
+stile/gancio su 16. Oggi passano tutte (`variante.test.ts`, `impronta.test.ts`). La `chiusura` invece
+alterna per scelta: due valori con l'ultimo escluso lasciano una sola possibilità. Lo stesso vale, con
+un ciclo più lungo, per `musica`, `luce` e `apertura` (memoria n-1).
 
 La pipeline sceglie solo fra i valori di `ATTIVI`: uno stile, un gancio, una chiusura o una durata si
 aggiungono lì quando sono costruiti e passano il controllo d'impaginazione, non prima. Se i valori
@@ -387,7 +394,8 @@ rifatto in locale ha gli stessi.
 - **Gli oggetti di scena sulla scrivania**: due fra taccuino, tazza e pianta, e solo nel set scrivania (studio e notte
   non ne hanno).
 
-Ogni scelta passa da `impronta(slug:chiave)` e poi da un rimescolamento finale (il fmix32 di murmur3). FNV-1a da sola
+Ogni scelta passa da `improntaMescolata(slug:chiave)`: FNV-1a e poi un rimescolamento finale (il fmix32 di murmur3),
+lo stesso della variante e della tinta dello studio. FNV-1a da sola
 mescola poco i bit bassi: con `% 4`, due scelte con chiavi che finiscono con la stessa lettera andavano di pari passo
 (stessa finitura, quindi stesso sfondo). Il test controlla che su 400 slug escano tutte le 48 combinazioni.
 

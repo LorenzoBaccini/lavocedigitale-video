@@ -117,3 +117,30 @@ test("la variante di base e' il video di oggi", () => {
     { stile: "scrivania", gancio: "scena", chiusura: "cartolina", durata: "media" },
   );
 });
+
+// 300 video di fila: ogni slug sceglie con lo storico dei precedenti, come in produzione
+function sequenza(n: number): Variante[] {
+  const fatte: Variante[] = [];
+  for (let i = 0; i < n; i++) fatte.unshift(scegliVariante(`articolo-sintetico-${i}`, fatte.slice(0, 5)));
+  return fatte.reverse();
+}
+
+test("su 300 video di fila passano tutte le coppie stile×gancio, nessuna oltre il doppio della sua parte", () => {
+  const coppie = new Map<string, number>();
+  for (const v of sequenza(300)) coppie.set(`${v.stile}/${v.gancio}`, (coppie.get(`${v.stile}/${v.gancio}`) ?? 0) + 1);
+  const attese = ATTIVI.stile.length * ATTIVI.gancio.length;
+  assert.equal(coppie.size, attese, [...coppie.keys()].join(" "));
+  for (const [coppia, n] of coppie) assert.ok(n <= (2 * 300) / attese, `${coppia}: ${n}`);
+});
+
+test("le scelte delle dimensioni non vanno di pari passo", () => {
+  const video = sequenza(300);
+  const coppia = (a: keyof Variante, b: keyof Variante) => new Set(video.map((v) => `${v[a]}|${v[b]}`)).size;
+  // con valori legati ogni valore di una dimensione ne avrebbe uno solo dell'altra
+  assert.ok(coppia("stile", "durata") > ATTIVI.stile.length, "stile e durata");
+  assert.ok(coppia("gancio", "fraseFinale") > ATTIVI.gancio.length, "gancio e frase finale");
+  assert.ok(coppia("stile", "chiusura") > ATTIVI.stile.length, "stile e chiusura");
+  assert.ok(coppia("durata", "fraseFinale") > ATTIVI.durata.length, "durata e frase finale");
+  const combinazioni = new Set(video.map((v) => [v.stile, v.gancio, v.durata, v.fraseFinale, v.chiusura].join("|")));
+  assert.ok(combinazioni.size > 100, `${combinazioni.size} combinazioni di stile, gancio, durata, frase finale e chiusura`);
+});

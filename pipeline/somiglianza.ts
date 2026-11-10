@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-import { impronta as hash } from "../src/editoriale/impronta.ts";
+import { improntaMescolata as hash } from "../src/editoriale/impronta.ts";
 import type { Variante } from "../src/editoriale/variante.ts";
 import { ATTIVI } from "../src/editoriale/variante.ts";
 import type { VoceStorico } from "./storico.ts";

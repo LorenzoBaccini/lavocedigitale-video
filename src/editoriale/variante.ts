@@ -1,6 +1,6 @@
 import { NOMI_TEMI } from "../../suoni/sottofondo.ts";
 import type { NomeTema } from "../../suoni/sottofondo.ts";
-import { impronta } from "./impronta.ts";
+import { improntaMescolata } from "./impronta.ts";
 import { NOMI_STILI } from "./stili/tipi.ts";
 import type { NomeStile } from "./stili/tipi.ts";
 
@@ -74,9 +74,9 @@ function scegli<K extends Dimensione>(dim: K, slug: string, recenti: Partial<Var
   for (let profondita = PROFONDITA[dim]; profondita > 0; profondita--) {
     const usate = new Set(recenti.slice(0, profondita).map((v) => valoreStorico(v, dim)));
     const libere = opzioni.filter((o) => !usate.has(o));
-    if (libere.length > 0) return libere[impronta(`${slug}:${dim}`) % libere.length];
+    if (libere.length > 0) return libere[improntaMescolata(`${slug}:${dim}`) % libere.length];
   }
-  return opzioni[impronta(`${slug}:${dim}`) % opzioni.length];
+  return opzioni[improntaMescolata(`${slug}:${dim}`) % opzioni.length];
 }
 
 const NOMI_DIMENSIONI = Object.keys(DIMENSIONI) as Dimensione[];

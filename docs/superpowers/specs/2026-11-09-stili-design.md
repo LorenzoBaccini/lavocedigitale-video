@@ -124,3 +124,23 @@ Telegram riporta anche stile, gancio, chiusura, durata e l'esito del controllo d
 
 Palette esatte, curve d'animazione, forme delle transizioni, scelta di come ogni scena 3D si traduce in `schermo`:
 contano i vincoli sopra e il giudizio sui fotogrammi (provini messi a confronto con quelli dei video pubblicati).
+
+## Decisioni prese durante la costruzione
+
+Dove questa spec e il codice non coincidono vale il codice, descritto nel README. Le scelte cambiate strada facendo:
+
+- **3 video confrontati, non 5** (`CONFRONTATI` in `pipeline/somiglianza.ts`). Con 4 stili e la variante che ne
+  esclude 2, in una finestra di 5 lo stesso stile tornava quasi sempre e quasi ogni video avrebbe esaurito i tentativi.
+- **Frasi finali più corte**, non le tre frasi di 2-3 s scritte sopra: «Tutto su la voce digitale punto it.», «Link nel
+  post.», «Il resto è nel link del post.» (`FRASI_CHIUSURA` in `src/storyboard/tipi.ts`). La coda dopo l'ultima parola
+  scende da 1,2 a **0,8 s** (`CODA_S` in `src/linea.ts`).
+- **`VARIANTE_BASE` ha la frase finale 2**, «Il resto è nel link del post.», non la frase di oggi, che non è fra le
+  tre: il piano dice «frase di oggi», ma la frase di oggi resta solo come testo atteso dalla validazione.
+- **Chiusure da 1,9 a 4,3 s** con la coda, a seconda della frase, contro i 6,3–6,9 s di prima.
+- **I limiti di parole si contano sul testo detto**: le frasi prima della chiusura più la frase finale della variante,
+  non la frase di chiusura che Claude scrive e che la pipeline sostituisce (`LIMITI_DURATA`, `paroleContenuto`).
+- **Gli oggetti di scena stanno ai bordi** della scrivania, a sinistra, lontano dal portatile: al centro o dietro lo
+  schermo finivano sotto i titoli o il sottotitolo e non passavano il controllo d'impaginazione.
+- **La soglia di somiglianza è 0.32**, con `PESO_FORMA` 0.65, tarata su pochi video. Va ritarata dopo una dozzina di
+  video pubblicati con l'impronta, anche perché il rimescolamento dell'impronta ha cambiato quali coppie
+  stile/gancio escono.

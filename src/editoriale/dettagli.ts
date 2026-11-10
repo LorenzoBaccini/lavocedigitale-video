@@ -33,7 +33,7 @@ export const DETTAGLI_BASE: Dettagli = { ora: "10:24", finitura: "grafite", sfon
 /** Quanto e' forte l'alone al centro della schermata di blocco. */
 export const ALFA_ALONE = 0.26;
 /** Il buio di partenza degli sfondi: ogni tinta dello stile ci si mescola, cosi' il testo bianco si legge sempre. */
-const BUIO = "#10131a";
+export const BUIO = "#10131a";
 
 /** Il testo piu' debole della schermata di blocco: il titolo #f3f4f6 sul riquadro bianco al 12 %. */
 export const leggibile = (sotto: string) => contrasto("#f3f4f6", sovrapponi("#ffffff", 0.12, sotto)) >= 5;
@@ -44,7 +44,8 @@ function sfondo(tinta: string, quanto: number, alone?: string): SfondoBlocco {
     const fondo = mescola(BUIO, tinta, k);
     if (leggibile(fondo) && (!alone || leggibile(sovrapponi(alone, ALFA_ALONE, fondo)))) return alone ? { fondo, alone } : { fondo };
   }
-  return alone ? { fondo: BUIO, alone } : { fondo: BUIO };
+  // il buio da solo regge (il test lo prova); l'alone no: se nemmeno a quantita' zero si legge, si toglie
+  return alone && leggibile(sovrapponi(alone, ALFA_ALONE, BUIO)) ? { fondo: BUIO, alone } : { fondo: BUIO };
 }
 
 // quanto della tinta entra nel buio, e se c'e' l'alone (della stessa tinta)
@@ -53,6 +54,7 @@ const RICETTE: [number, boolean][] = [[0.18, true], [0.5, false], [0.24, true], 
 /** I quattro sfondi possibili della schermata di blocco: le prime quattro tinte diverse della tavolozza dello stile. */
 export const sfondiBlocco = ({ colori }: Stile): SfondoBlocco[] => {
   const tinte = [...new Set([colori.accento, colori.superficie, colori.inchiostro.timbro, colori.segnoSuChiaro, colori.inchiostro.penna, colori.tenue])];
+  if (tinte.length < RICETTE.length) throw new Error(`sfondiBlocco: la tavolozza ha ${tinte.length} tinte diverse, ne servono ${RICETTE.length}`);
   return RICETTE.map(([quanto, alone], i) => sfondo(tinte[i], quanto, alone ? tinte[i] : undefined));
 };
 

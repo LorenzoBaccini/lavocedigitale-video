@@ -1,8 +1,8 @@
 import { Environment, Lightformer } from "@react-three/drei";
 import { RepeatWrapping } from "three";
 
-import type { Dettagli } from "../dettagli";
 import { useCanvasTexture } from "../../three/useCanvasTexture";
+import type { Dettagli } from "../dettagli";
 import { useVariante } from "../VarianteVideo";
 import { legno, legnoRuvido } from "./disegni";
 import type { Camera } from "./geometria";

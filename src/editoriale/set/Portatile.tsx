@@ -2,9 +2,9 @@ import { RoundedBox } from "@react-three/drei";
 import { RepeatWrapping } from "three";
 
 import { useCanvasTexture } from "../../three/useCanvasTexture";
+import type { Orologio } from "./disegni";
 import { alluminioRuvido, notifica, tastiera } from "./disegni";
 import { BASE, CENTRO_SCHERMO_LOCALE, CERNIERA, INCLINAZIONE, NOTIFICA_PX, NOTIFICA_SCALA, PORTA_USB, SCHERMO, SCHERMO_PX } from "./geometria";
-import type { Orologio } from "./disegni";
 import type { Notifica, Schermo } from "./schermata";
 import { disegnoSchermo } from "./schermata";
 

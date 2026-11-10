@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { inAsse, PIANTA, puntoSchermo, SCHERMO_PX, TAZZA } from "./geometria.ts";
-import { FOGLIE, sagomaInQuadro, sagomaPianta, sagomaTazza } from "./sagome.ts";
+import { inAsse, PIANTA, proietta, puntoSchermo, SCHERMO_PX, TAZZA } from "./geometria.ts";
+import { FOGLIE, involucro, sagomaInQuadro, sagomaPianta, sagomaTazza } from "./sagome.ts";
 
 const tazza = sagomaTazza(TAZZA.posizione, TAZZA.raggio, TAZZA.altezza, TAZZA.manico);
 const pianta = sagomaPianta(PIANTA.posizione, PIANTA.raggio, PIANTA.vaso);
@@ -25,7 +25,13 @@ test("una sagoma alle spalle della camera non c'e'", () => {
   assert.equal(sagomaInQuadro(pianta, { pos: [-3.8, 2, 4], look: [-3.8, 2, 10] }), undefined);
 });
 
-test("la parte fuori quadro si taglia: gli angoli restano dentro il fotogramma", () => {
-  const angoli = sagomaInQuadro(pianta, { pos: [0, 9, 16], look: [3, 1, 0] });
-  for (const a of angoli ?? []) assert.ok(a.x >= -0.01 && a.x <= 1080.01 && a.y >= -0.01 && a.y <= 1920.01, JSON.stringify(a));
+// la pianta a cavallo del bordo sinistro: meta' dentro, meta' fuori
+test("la parte fuori quadro si taglia: gli angoli restano dentro il fotogramma, alcuni sul bordo", () => {
+  const cam = { pos: [-3, 6, 10] as [number, number, number], look: [-4, 1, -2] as [number, number, number] };
+  const intera = involucro(pianta.map((p) => proietta(p, cam)));
+  assert.ok(intera.some((a) => a.x < 0), "la sagoma intera esce dal fotogramma");
+  const angoli = sagomaInQuadro(pianta, cam);
+  assert.ok(angoli && angoli.length >= 3);
+  for (const a of angoli) assert.ok(a.x >= -0.01 && a.x <= 1080.01 && a.y >= -0.01 && a.y <= 1920.01, JSON.stringify(a));
+  assert.ok(angoli.filter((a) => Math.abs(a.x) < 0.01).length >= 2, "il taglio sul bordo sinistro");
 });

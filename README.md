@@ -421,8 +421,10 @@ Il taccuino non dichiara un ingombro: c'era già e non è mai stato controllato.
 
 **Regressione.** `PropsNotizia.dettagli` è un `Partial<Dettagli>` che si appoggia sopra quelli dello slug.
 
-- `DETTAGLI_BASE` (10:24, grafite, `#1b2230` senza alone, solo il taccuino) è il video approvato. I provini di
-  regressione lo passano: con quello la scrivania resta identica a prima.
+- `DETTAGLI_BASE` (10:24, grafite, `#1b2230` senza alone, solo il taccuino) è il video approvato. Con quello la
+  scrivania resta identica a prima. Nel repo non c'è un banco di regressione: gli script dei provini stanno in `out/`,
+  che è fuori da git. Chi confronta i fotogrammi deve passare `dettagli: DETTAGLI_BASE` nelle props del render, come per
+  `variante`: senza, i dettagli vengono dallo slug e l'ora, lo sfondo e gli oggetti cambiano.
 - Il controllo d'impaginazione prende i dettagli dallo slug:
   - `--dettagli=base` forza quelli di base;
   - `--oggetti=taccuino,tazza,pianta` forza gli oggetti. Con tutti e tre, un giro solo controlla ogni coppia

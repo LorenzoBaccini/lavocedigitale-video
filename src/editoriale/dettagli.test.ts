@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { ALFA_ALONE, DETTAGLI_BASE, dettagliDi, FINITURE, NOMI_FINITURE, OGGETTI_SCRIVANIA, oraDi, sfondiBlocco } from "./dettagli.ts";
+import { ALFA_ALONE, BUIO, DETTAGLI_BASE, dettagliDi, FINITURE, leggibile, NOMI_FINITURE, OGGETTI_SCRIVANIA, oraDi, sfondiBlocco } from "./dettagli.ts";
 import { contrasto, sovrapponi } from "./stili/colore.ts";
 import { NOTTE } from "./stili/notte.ts";
 import { SCHERMO } from "./stili/schermo.ts";
@@ -90,4 +90,21 @@ test("sopra ogni sfondo di ogni stile il testo bianco della schermata di blocco 
 
 test("i dettagli di base sono quelli del video approvato", () => {
   assert.deepEqual(DETTAGLI_BASE, { ora: "10:24", finitura: "grafite", sfondo: { fondo: "#1b2230" }, oggetti: ["taccuino"] });
+});
+
+const conTinte = (accento: string, superficie: string, timbro: string, segno: string, tenue = superficie) => ({
+  ...SCRIVANIA,
+  colori: { ...SCRIVANIA.colori, accento, superficie, tenue, segnoSuChiaro: segno, inchiostro: { ...SCRIVANIA.colori.inchiostro, timbro, penna: accento } },
+});
+
+test("con meno di quattro tinte diverse sfondiBlocco lo dice, invece di passare un colore assente", () => {
+  assert.throws(() => sfondiBlocco(conTinte("#ffffff", "#ffffff", "#ffffff", "#000000")), /2 tinte diverse, ne servono 4/);
+});
+
+test("anche con tinte chiarissime lo sfondo si legge: il buio di ripiego regge e l'alone che non regge si toglie", () => {
+  assert.ok(leggibile(BUIO));
+  for (const { fondo, alone } of sfondiBlocco(conTinte("#ffffff", "#fefefe", "#fdfdfd", "#fcfcfc", "#fbfbfb"))) {
+    assert.ok(leggibile(fondo), fondo);
+    if (alone) assert.ok(leggibile(sovrapponi(alone, ALFA_ALONE, fondo)), `${alone} su ${fondo}`);
+  }
 });

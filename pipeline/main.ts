@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { Variante } from "../src/editoriale/variante.ts";
-import { scegliVariante } from "../src/editoriale/variante.ts";
+import { scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
 import { conFraseFinale } from "../src/storyboard/fraseFinale.ts";
@@ -176,7 +176,7 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   }
 
   // Dipende solo dallo slug e dallo storico: prima dello storyboard, che ne riceve la durata.
-  const variante = scegliVariante(slug, storico.recenti.map((v) => v.variante));
+  let variante = scegliVariante(slug, storico.recenti.map((v) => v.variante));
   esito.variante = variante;
 
   let storyboard: Storyboard;
@@ -207,8 +207,18 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   dip.generaSuoni();
   const problemi = await dip.controllaImpaginazione(conVariante(variante));
   if (problemi.length > 0) {
-    Object.assign(esito, { stato: "saltato", motivo: `impaginazione: ${riassumiProblemi(problemi)}` });
-    return;
+    // la voce e' gia' pagata: prima di saltare si riprova con l'aspetto del video approvato, stessa durata e frase finale
+    const sicura: Variante = { ...variante, stile: VARIANTE_BASE.stile, gancio: VARIANTE_BASE.gancio, chiusura: VARIANTE_BASE.chiusura };
+    const aspetto = (v: Variante) => `${v.stile}/${v.gancio}/${v.chiusura}`;
+    const diversa = aspetto(sicura) !== aspetto(variante);
+    if (!diversa || (await dip.controllaImpaginazione(conVariante(sicura))).length > 0) {
+      const ripiego = diversa ? `, anche ${aspetto(sicura)} non passa` : "";
+      Object.assign(esito, { stato: "saltato", motivo: `impaginazione: ${riassumiProblemi(problemi)}${ripiego}` });
+      return;
+    }
+    esito.righe.push(`Impaginazione: ${aspetto(variante)} scartata (${riassumiProblemi(problemi)}), ripiego su ${aspetto(sicura)}`);
+    variante = sicura;
+    esito.variante = sicura;
   }
 
   // voce e storyboard sono gia' pagati: la somiglianza cambia solo stile e gancio

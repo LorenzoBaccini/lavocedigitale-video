@@ -138,7 +138,7 @@ test("i problemi d'impaginazione si contano una volta e nel motivo ne vanno al m
   const motivo = esito.motivo ?? "";
   assert.equal(motivo.match(/si sovrappone/g)?.length, 5);
   assert.match(motivo, /^impaginazione: frase 1 \(allarme\): titolo: si sovrappone/);
-  assert.match(motivo, /e altri 3$/);
+  assert.match(motivo, /e altri 3, anche scrivania\/scena\/cartolina non passa$/);
 });
 
 test("un crash del controllo d'impaginazione chiude con errore notificato e senza render", async () => {
@@ -557,6 +557,42 @@ test("somiglianza: un errore di ffmpeg salta il controllo, il video si pubblica 
   assert.equal(f.n("render"), 1);
   assert.equal("impronta" in JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0], false);
   assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Somiglianza: controllo saltato: ffmpeg è uscito con codice 1/);
+});
+
+test("se la variante scelta non passa l'impaginazione si riprova con scrivania/scena/cartolina, con la stessa voce", async () => {
+  const f = finte({ controllaImpaginazione: async (props) => (props.variante?.stile === "scrivania" ? [] : ["frase 2 (data), fine: titolo: fuori dai margini"]) });
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  const prima = (f.chiamate.controllaImpaginazione[0][0] as PropsNotizia).variante!;
+  assert.notEqual(prima.stile, "scrivania", "lo slug di prova deve scegliere un altro stile");
+  assert.equal(esito.stato, "pubblicato");
+  assert.equal(f.n("voce"), 1);
+  assert.equal(f.n("scriviStoryboard"), 1);
+  const resa = (f.chiamate.render[0][0] as PropsNotizia).variante!;
+  assert.deepEqual(resa, { ...prima, stile: "scrivania", gancio: "scena", chiusura: "cartolina" });
+  assert.deepEqual((f.chiamate.controllaImpaginazione[1][0] as PropsNotizia).variante, resa);
+  assert.deepEqual(JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0].variante, resa);
+  assert.ok(String(f.chiamate.sendMessageToOwner[0][0]).includes(`Impaginazione: ${prima.stile}/${prima.gancio}/${prima.chiusura} scartata (frase 2 (data): titolo: fuori dai margini), ripiego su scrivania/scena/cartolina`));
+});
+
+test("se anche la variante sicura non passa l'impaginazione salta, senza un'altra voce", async () => {
+  const f = finte({ controllaImpaginazione: async () => ["titolo fuori"] });
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  assert.equal(esito.stato, "saltato");
+  assert.equal(f.n("controllaImpaginazione"), 2);
+  assert.equal(f.n("voce"), 1);
+  assert.equal(f.n("scriviStoryboard"), 1);
+  assert.equal(f.n("render"), 0);
+  assert.equal(esito.motivo, "impaginazione: titolo fuori, anche scrivania/scena/cartolina non passa");
+});
+
+test("una variante gia' sicura che non passa l'impaginazione salta subito", async () => {
+  // con lo storico vuoto questo slug sceglie scrivania/scena/cartolina
+  const slug = "articolo-di-prova-116";
+  const f = finte({ leggiArticolo: async () => ({ ...articolo, slug }), controllaImpaginazione: async () => ["titolo fuori"] });
+  const esito = await eseguiPipeline(slug, { prova: true }, f.dip);
+  assert.deepEqual([esito.variante?.stile, esito.variante?.gancio, esito.variante?.chiusura], ["scrivania", "scena", "cartolina"]);
+  assert.equal(f.n("controllaImpaginazione"), 1);
+  assert.equal(esito.motivo, "impaginazione: titolo fuori");
 });
 
 test("somiglianza: se l'impaginazione della variante scelta fallisce il controllo non parte", async () => {

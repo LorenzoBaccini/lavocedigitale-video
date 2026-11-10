@@ -86,7 +86,9 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    frase. Se ElevenLabs fallisce il video salta: nessuna voce di riserva.
 3. **Controllo d'impaginazione** (`pipeline/controlla-impaginazione.ts`): fotogrammi a inizio, metà
    e fine di ogni frase; `src/impaginazione.ts` segnala testo fuori dai margini, sul logo, sulla zona
-   del sottotitolo o a cavallo di uno schermo 3D. Se c'è un problema il video salta. Le scene con testo
+   del sottotitolo o a cavallo di uno schermo 3D. Se c'è un problema la voce è già pagata: si riprova una volta con
+   l'aspetto del video approvato (scrivania/scena/cartolina, stessa durata e frase finale), e il video salta solo se
+   non passa neanche quello. Le scene con testo
    sopra e sotto un oggetto 3D (rischio, telefono) tengono l'oggetto nella fascia in ogni fotogramma con
    `fraLeQuote` (`src/editoriale/set/geometria.ts`); i titoli animati appoggiati in basso partono da
    `FONDO_TITOLO`, che lascia il posto all'entrata delle parole; le note a mano scendono di corpo, e poi

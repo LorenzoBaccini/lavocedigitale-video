@@ -13,6 +13,7 @@ import type { Timing } from "../src/timing.ts";
 import type { ArticoloVideo } from "./articolo.ts";
 import { avvisaFallimento, eseguiPipeline, slugValido, type Dipendenze } from "./main.ts";
 import { buildVideoPost } from "./post-video.ts";
+import type { Impronta } from "./somiglianza.ts";
 import { StoryboardScartato } from "./storyboard.ts";
 
 const SLUG = "installare-windows-10-usb-dopo-fine-supporto";
@@ -36,6 +37,9 @@ const timing = (): Timing => ({
   clips: storyboard.frasi.map(() => ({ file: "s.wav", secondi: 3.5, inviluppo: [0] })),
 });
 
+const IMPRONTA_VICINA: Impronta = Array(6).fill("0000000000000000#000000");
+const IMPRONTA_LONTANA: Impronta = Array(6).fill("ffffffffffffffff#ffffff");
+
 function finte(sovrascrivi: Partial<Dipendenze> = {}) {
   const chiamate: Record<string, unknown[][]> = {};
   const registra =
@@ -54,6 +58,7 @@ function finte(sovrascrivi: Partial<Dipendenze> = {}) {
     voce: async () => timing(),
     generaSuoni: () => {},
     controllaImpaginazione: async () => [],
+    impronta: async () => IMPRONTA_LONTANA,
     render: async () => {},
     caricaVideo: async () => URL_VIDEO,
     postReelToFacebook: async () => ({ ok: true, postId: "fb1" }),
@@ -225,7 +230,7 @@ test("il resoconto riporta slug, stato, voce, durata e tempi", async () => {
   assert.match(testo, /Voce: elevenlabs/);
   // 8 clip da 3,5 s più 0,8 s di coda sulla chiusura
   assert.match(testo, /Durata: 28\.8 s/);
-  assert.match(testo, /storyboard \d+ s · voce \d+ s · render \d+ s/);
+  assert.match(testo, /storyboard \d+ s · voce \d+ s · somiglianza \d+ s · render \d+ s/);
 });
 
 test("pubblicato: il resoconto è solo testo con URL dell'mp4 e id dei post", async () => {
@@ -501,6 +506,63 @@ test("una voce dello storico con la variante rovinata non fa cadere la scelta", 
   const esito = await eseguiPipeline(SLUG, { prova: true }, f.dip);
   assert.equal(esito.stato, "prova");
   assert.ok(esito.variante);
+});
+
+test("somiglianza: l'impronta si prende sulle props del render, entra nello storico e il resoconto ha l'esito", async () => {
+  const recenti = [{ ...voceStorico("a", VARIANTE_BASE, ["gancio", "chiusura"]), impronta: IMPRONTA_VICINA }];
+  const f = finte({ leggiStorico: async () => JSON.stringify({ recenti, pubblicati: ["a"] }) });
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  assert.equal(esito.stato, "pubblicato");
+  assert.equal(f.n("impronta"), 1);
+  assert.deepEqual(f.chiamate.impronta[0][0], f.chiamate.render[0][0]);
+  assert.deepEqual(JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0].impronta, IMPRONTA_LONTANA);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Somiglianza: ok, distanza minima 1\.00 da a/);
+});
+
+test("somiglianza: troppo simile cambia variante con la stessa voce e lo stesso copione, rifa' l'impaginazione e registra la nuova", async () => {
+  const recenti = [{ ...voceStorico("a", VARIANTE_BASE, ["gancio", "chiusura"]), impronta: IMPRONTA_VICINA }];
+  let prima: Variante | undefined;
+  const f = finte({
+    leggiStorico: async () => JSON.stringify({ recenti, pubblicati: ["a"] }),
+    impronta: async (props) => {
+      prima ??= props.variante;
+      return props.variante === prima ? IMPRONTA_VICINA : IMPRONTA_LONTANA;
+    },
+  });
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  assert.equal(esito.stato, "pubblicato");
+  assert.equal(f.n("voce"), 1);
+  assert.equal(f.n("scriviStoryboard"), 1);
+  assert.equal(f.n("controllaImpaginazione"), 2);
+  const resa = f.chiamate.render[0][0] as PropsNotizia;
+  assert.notEqual(resa.variante?.stile, prima?.stile);
+  assert.equal(resa.variante?.fraseFinale, prima?.fraseFinale);
+  assert.equal(resa.variante?.durata, prima?.durata);
+  assert.deepEqual(resa.timing, (f.chiamate.controllaImpaginazione[0][0] as PropsNotizia).timing);
+  assert.deepEqual(esito.variante, resa.variante);
+  const voce = JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0];
+  assert.deepEqual(voce.variante, resa.variante);
+  assert.deepEqual(voce.impronta, IMPRONTA_LONTANA);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Somiglianza: cambiata variante 1 volta/);
+});
+
+test("somiglianza: un errore di ffmpeg salta il controllo, il video si pubblica senza impronta nello storico", async () => {
+  const f = finte({
+    impronta: async () => {
+      throw new Error("ffmpeg è uscito con codice 1");
+    },
+  });
+  const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
+  assert.equal(esito.stato, "pubblicato");
+  assert.equal(f.n("render"), 1);
+  assert.equal("impronta" in JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0], false);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Somiglianza: controllo saltato: ffmpeg è uscito con codice 1/);
+});
+
+test("somiglianza: se l'impaginazione della variante scelta fallisce il controllo non parte", async () => {
+  const f = finte({ controllaImpaginazione: async () => ["titolo fuori"] });
+  await eseguiPipeline(SLUG, { prova: true }, f.dip);
+  assert.equal(f.n("impronta"), 0);
 });
 
 test("a resoconto inviato lascia il segno per l'ultimo step del workflow, non se Telegram fallisce", async () => {

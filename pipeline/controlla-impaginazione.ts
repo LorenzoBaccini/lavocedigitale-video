@@ -16,6 +16,7 @@ import type { PropsNotizia } from "../src/Notizia.tsx";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import { èPrincipale } from "./principale.ts";
+import { fotogrammiFissi } from "./somiglianza.ts";
 
 const GL_PREDEFINITO = "swangle";
 
@@ -30,6 +31,33 @@ export function momentiDi(inizio: number, durata: number, passo?: number): [stri
   return [...fitti, ...base].sort((a, b) => a[1] - b[1]).filter((m, i, tutti) => i === 0 || m[1] !== tutti[i - 1][1]);
 }
 
+// Un bundle per processo: i tentativi della somiglianza cambiano solo le props. I suoni in public/ devono esserci gia'.
+let bundleInCorso: Promise<string> | undefined;
+
+async function apri() {
+  const serveUrl = await (bundleInCorso ??= bundle({ entryPoint: resolve("src/index.ts") }));
+  const chromiumOptions = { gl: (process.env.RENDER_GL ?? GL_PREDEFINITO) as "angle" };
+  const browser = await openBrowser("chrome", { chromiumOptions, logLevel: "error" });
+  return { serveUrl, chromiumOptions, browser };
+}
+
+/** I png dei sei fotogrammi fissi del controllo di somiglianza, con lo stesso bundle e lo stesso GL del controllo d'impaginazione. */
+export async function renderFotogrammi(props: PropsNotizia): Promise<Buffer[]> {
+  const { serveUrl, chromiumOptions, browser } = await apri();
+  try {
+    const composition = await selectComposition({ serveUrl, id: "notizia", inputProps: props, puppeteerInstance: browser, chromiumOptions, logLevel: "error" });
+    const png: Buffer[] = [];
+    for (const frame of fotogrammiFissi(composition.durationInFrames, FPS)) {
+      const { buffer } = await renderStill({ composition, serveUrl, frame, inputProps: props, chromiumOptions, puppeteerInstance: browser, output: null, logLevel: "error" });
+      if (!buffer) throw new Error(`fotogramma ${frame}: nessun png`);
+      png.push(buffer);
+    }
+    return png;
+  } finally {
+    await browser.close({ silent: true });
+  }
+}
+
 /**
  * Via scelta: `renderStill` con la prop `misuraImpaginazione`, che fa scrivere in console a `MisuraImpaginazione`
  * i rettangoli dei nodi `data-impaginazione`; qui li si legge con `onBrowserLog`.
@@ -37,9 +65,7 @@ export function momentiDi(inizio: number, durata: number, passo?: number): [stri
  * misura solo le scene di quel tipo.
  */
 export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?: string, passo?: number, solo?: string): Promise<string[]> {
-  const serveUrl = await bundle({ entryPoint: resolve("src/index.ts") });
-  const chromiumOptions = { gl: (process.env.RENDER_GL ?? GL_PREDEFINITO) as "angle" };
-  const browser = await openBrowser("chrome", { chromiumOptions, logLevel: "error" });
+  const { serveUrl, chromiumOptions, browser } = await apri();
   const inputProps = { ...props, misuraImpaginazione: true };
   const linea = costruisciLinea(props.timing, FPS);
   const problemi: string[] = [];

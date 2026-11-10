@@ -66,7 +66,7 @@ Nessuna chiave fissa, nessun ID di account nel repo.
 ## Cosa fa la pipeline
 
 0. **Storico** (`pipeline/storico.ts`): `video-storico.json` nel bucket, fuori dal prefisso `video/`
-   che scade dopo 7 giorni. Tiene le sequenze di scene e le varianti degli ultimi 10 video e gli
+   che scade dopo 7 giorni. Tiene le sequenze di scene, le varianti e le impronte degli ultimi 10 video e gli
    slug degli ultimi 200 pubblicati. Se non si legge, il video salta (in prova si va avanti). Un
    video già nello storico o ancora su S3 non si rifà.
    Subito dopo si sceglie la **variante** (`src/editoriale/variante.ts`): dipende solo dallo slug e
@@ -91,7 +91,9 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    `fraLeQuote` (`src/editoriale/set/geometria.ts`); i titoli animati appoggiati in basso partono da
    `FONDO_TITOLO`, che lascia il posto all'entrata delle parole; le note a mano scendono di corpo, e poi
    si spostano, perché la parola più lunga stia nel margine, ma mai oltre 20 px a sinistra del punto indicato (`src/editoriale/set/nota.ts`): per questo `indica` e le note dei pezzi non hanno parole oltre 15 lettere (`LIMITI.parolaNota`).
-4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, con la variante scelta all'inizio.
+   Subito dopo, il **controllo di somiglianza** (`pipeline/somiglianza.ts`): se il video somiglia troppo a uno
+   degli ultimi 5 cambia stile e gancio, con la stessa voce. Vedi [Il controllo di somiglianza](#il-controllo-di-somiglianza).
+4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, con la variante uscita dal controllo di somiglianza.
 5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su
    `https://lavocedigitale.it/images/video/<slug>.mp4`. Poi lo storico, prima dei post: se non si
    scrive, non si posta.
@@ -429,6 +431,83 @@ Il taccuino non dichiara un ingombro: c'era già e non è mai stato controllato.
   - `--dettagli=base` forza quelli di base;
   - `--oggetti=taccuino,tazza,pianta` forza gli oggetti. Con tutti e tre, un giro solo controlla ogni coppia
     possibile, perché ogni oggetto ha il suo posto fisso.
+
+### Il controllo di somiglianza
+
+La variante evita i valori degli ultimi video dimensione per dimensione. Non sa però come il video *appare* rispetto a
+quelli già usciti. Il controllo lo misura sui fotogrammi, dopo il controllo d'impaginazione e prima del render
+completo.
+
+**L'impronta.** Sei fotogrammi fissi: inizio, 1 s, 30 %, 50 %, 70 % e 90 % della durata. Li fa `renderFotogrammi`
+(`pipeline/controlla-impaginazione.ts`), con lo stesso bundle del controllo d'impaginazione: il bundle si fa una volta
+per processo. Per ogni fotogramma ffmpeg dà due valori:
+
+- un dHash a 64 bit (`scale=9:8,format=gray`, `rawvideo`): un bit per coppia di pixel vicini, 1 se il sinistro è più
+  chiaro;
+- il colore medio (`scale=1:1`).
+
+Tutte e due le scale usano `flags=area`. Col bicubico di default l'1×1 campiona solo il centro, non fa la media.
+Nello storico ogni fotogramma è una stringa da 23 caratteri, `dHash in esadecimale#rrggbb`.
+
+**La distanza** (`distanza`) va da 0 a 1. Per ogni fotogramma si sommano la forma (Hamming / 64), pesata `PESO_FORMA` =
+0.65, e il colore (distanza RGB normalizzata), pesato 0.35. Poi si fa la media sui sei fotogrammi, col primo che pesa il
+doppio. Il video si confronta con gli ultimi 5 dello storico che hanno un'impronta (`confronta`). Le voci senza impronta,
+cioè quelle vecchie o quelle di un controllo saltato, si ignorano.
+
+**Sotto `SOGLIA` (0.32)** si cambia variante con `prossimaVariante`:
+
+- cambiano solo stile e gancio, perché voce e copione sono già pagati: frase finale e durata restano, e restano anche
+  musica, luce, apertura e chiusura;
+- al secondo tentativo cambia lo stile, verso uno mai usato negli ultimi 5 se c'è, altrimenti con la memoria più
+  lunga possibile, e mai uno già provato;
+- il gancio cambia al terzo tentativo, o già al secondo se il nuovo stile con lo stesso gancio è fra gli ultimi 5. In
+  quel caso va verso un gancio mai usato con quello stile;
+- le scelte sono deterministiche da slug e numero del tentativo;
+- ogni variante nuova ripassa il controllo d'impaginazione, e se non lo passa è scartata ma conta;
+- al massimo 3 tentativi, poi si tiene la variante più lontana.
+
+Il controllo non blocca mai la pubblicazione: un errore di ffmpeg o del render dei fotogrammi lo salta, e il video
+esce senza impronta. Il resoconto Telegram dice come è andata, per esempio «Somiglianza: ok, distanza minima 0.41 da
+…» oppure «cambiata variante 1 volta (…), ok con notte/scena…», e riporta il tempo speso.
+
+**Taratura** (9-10 novembre 2026), con `pipeline/taratura-somiglianza.ts`:
+
+- i video pubblicati (4 mp4, tutti scrivania/scena) e 4 render locali di uno stesso copione nei quattro stili;
+- i fotogrammi fissi di tre copioni reali in tutti gli stili e i ganci, 23 combinazioni, fatte con le voci già pagate.
+
+Contano le coppie fra copioni diversi, perché in produzione due articoli non sono mai lo stesso:
+
+| coppie, `PESO_FORMA` 0.65 | n | distanza |
+|---|---|---|
+| stesso stile e stesso gancio | 39 | 0.149–0.307 |
+| stile diverso | 234 | 0.341–0.654 |
+| stesso stile, gancio diverso | 56 | 0.208–0.417 |
+| stesso copione e variante, mp4 pubblicato contro render locale | 1 | 0.01 |
+
+La soglia 0.32 sta fra 0.307 e 0.341, con un margine di 0.013 sopra le coppie dello stesso stile e gancio e di 0.021
+sotto quelle di stile diverso. Il margine è piccolo e dipende dal peso della forma:
+
+- solo con un peso fra 0.6 e 0.7 le due classi si separano;
+- col solo colore e con la sola forma si sovrappongono;
+- i fotogrammi centrali seguono le scene del copione più che lo stile: fra due scrivania il colore al 50 % arriva a
+  0.7.
+
+Le coppie dello stesso stile con un gancio diverso cadono a cavallo della soglia: 36 su 56 stanno sotto.
+
+Gli stili sono 4 e il confronto guarda 5 video, quindi lo stile di uno degli ultimi 5 torna quasi sempre: succede nel
+92 % dei casi su 500 slug simulati. Per questo i tentativi in più saranno frequenti. Un tentativo costa un controllo
+d'impaginazione più 6 fotogrammi. Sul Mac di sviluppo sono circa 11 s più 4 s, e la prima impronta col bundle 7 s; sul
+runner, che ha 2 vCPU e gira in `swangle`, ci vuole di più.
+
+Per ritarare, dalla radice del repo:
+
+```
+RENDER_GL=angle node --experimental-strip-types pipeline/taratura-somiglianza.ts \
+  out/<slug>/<slug>.mp4=pubblicato out/<slug>/props.json@notte/parola=notte-parola
+```
+
+Stampa per ogni voce l'impronta e i secondi, poi la matrice delle distanze. `@stile/gancio` forza la variante come
+farebbe un tentativo della pipeline.
 
 ## Rifare in locale un video del runner, senza ripagare
 

@@ -18,6 +18,8 @@ import type { FacebookResult } from "./canali/facebook.ts";
 import type { TelegramResult } from "./canali/telegram.ts";
 import { buildVideoPost } from "./post-video.ts";
 import { èPrincipale } from "./principale.ts";
+import type { Impronta } from "./somiglianza.ts";
+import { scegliDiversa } from "./somiglianza.ts";
 import type { Storico } from "./storico.ts";
 import { argomentiElenco, chiavePresente } from "./s3.ts";
 import { aggiungi, analizzaStorico, CHIAVE_STORICO, riassunto, sequenzeRecenti, STORICO_VUOTO } from "./storico.ts";
@@ -42,6 +44,8 @@ export interface Dipendenze {
   generaSuoni: () => void;
   /** Restituisce i problemi d'impaginazione trovati sui fotogrammi di controllo; vuoto se è tutto a posto. */
   controllaImpaginazione: (props: PropsNotizia) => Promise<string[]>;
+  /** L'impronta dei sei fotogrammi fissi (somiglianza.ts). Un errore salta il controllo, non la pubblicazione. */
+  impronta: (props: PropsNotizia) => Promise<Impronta>;
   render: (props: PropsNotizia, uscita: string) => Promise<void>;
   /** Restituisce l'URL pubblico del video caricato. */
   caricaVideo: (file: string, slug: string) => Promise<string>;
@@ -57,7 +61,7 @@ export interface Esito {
   variante?: Variante;
   righe: string[];
   durata?: number;
-  tempi: { storyboard?: number; voce?: number; render?: number };
+  tempi: { storyboard?: number; voce?: number; somiglianza?: number; render?: number };
   file?: string;
 }
 
@@ -100,6 +104,7 @@ export function resoconto(slug: string, esito: Esito): string {
   const tempi = [
     t.storyboard !== undefined && `storyboard ${t.storyboard} s`,
     t.voce !== undefined && `voce ${t.voce} s`,
+    t.somiglianza !== undefined && `somiglianza ${t.somiglianza} s`,
     t.render !== undefined && `render ${t.render} s`,
   ].filter(Boolean);
   return [
@@ -197,13 +202,28 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   }
   esito.voce = timing.voce;
 
-  const props: PropsNotizia = { storyboard, timing, audioBase: p.audioBase, variante };
+  const conVariante = (v: Variante): PropsNotizia => ({ storyboard, timing, audioBase: p.audioBase, variante: v });
   dip.generaSuoni();
-  const problemi = await dip.controllaImpaginazione(props);
+  const problemi = await dip.controllaImpaginazione(conVariante(variante));
   if (problemi.length > 0) {
     Object.assign(esito, { stato: "saltato", motivo: `impaginazione: ${riassumiProblemi(problemi)}` });
     return;
   }
+
+  // voce e storyboard sono gia' pagati: la somiglianza cambia solo stile e gancio
+  const [scelta, secondiSomiglianza] = await cronometra(() =>
+    scegliDiversa({
+      slug,
+      variante,
+      recenti: storico.recenti,
+      impronta: (v) => dip.impronta(conVariante(v)),
+      controllaImpaginazione: (v) => dip.controllaImpaginazione(conVariante(v)),
+    }),
+  );
+  esito.tempi.somiglianza = secondiSomiglianza;
+  esito.righe.push(scelta.riga);
+  esito.variante = scelta.variante;
+  const props = conVariante(scelta.variante);
 
   [, esito.tempi.render] = await cronometra(() => dip.render(props, p.video));
   esito.durata = costruisciLinea(timing, FPS).totale / FPS;
@@ -218,7 +238,7 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   const testo = buildVideoPost(articolo, storyboard);
   const aMano = `Il post va fatto a mano con l'URL dell'mp4: ${url}\nTesto: ${testo}`;
   // Prima dei post: senza lo slug nello storico, dopo la scadenza dell'mp4 un nuovo lancio ripubblicherebbe.
-  const errStorico = await scriviConUnRitentativo(() => dip.scriviStorico(JSON.stringify(aggiungi(storico, riassunto(storyboard, variante, oggi())))));
+  const errStorico = await scriviConUnRitentativo(() => dip.scriviStorico(JSON.stringify(aggiungi(storico, riassunto(storyboard, scelta.variante, oggi(), scelta.impronta)))));
   if (errStorico) {
     esito.righe.push(`✗ Storico: ${errStorico}`, `Nessun post: senza lo storico un nuovo lancio fra 7 giorni ripubblicherebbe. ${aMano}`);
     Object.assign(esito, { stato: "errore", motivo: "storico non scritto, post non fatti per non rischiare un doppio post" });
@@ -330,7 +350,8 @@ async function esisteChiave(chiave: string): Promise<boolean> {
 async function dipendenzeVere(articolo: ArticoloVideo): Promise<Dipendenze> {
   const { scriviStoryboard, chiediAClaude } = await import("./storyboard.ts");
   const { renderVideo } = await import("./render.ts");
-  const { controllaImpaginazione } = await import("./controlla-impaginazione.ts");
+  const { controllaImpaginazione, renderFotogrammi } = await import("./controlla-impaginazione.ts");
+  const { improntaFotogramma } = await import("./somiglianza.ts");
   const { voceElevenLabs, chiaveElevenLabs } = await import("./voce-elevenlabs.ts");
   const { generaFoley } = await import("../suoni/foley.ts");
   const { postReelToFacebook } = await import("./canali/facebook.ts");
@@ -365,6 +386,11 @@ async function dipendenzeVere(articolo: ArticoloVideo): Promise<Dipendenze> {
     controllaImpaginazione: (props) => {
       writeFileSync(join(percorsi(props.storyboard.slug).cartellaLavoro, "props.json"), JSON.stringify(props));
       return controllaImpaginazione(props);
+    },
+    impronta: async (props) => {
+      const impronta: string[] = [];
+      for (const png of await renderFotogrammi(props)) impronta.push(await improntaFotogramma(png));
+      return impronta;
     },
     render: async (props, uscita) => {
       const file = join(dirname(uscita), "props.json");

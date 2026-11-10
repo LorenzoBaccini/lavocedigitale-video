@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 
 import { improntaMescolata as hash } from "../src/editoriale/impronta.ts";
-import type { Variante } from "../src/editoriale/variante.ts";
+import type { NomeDurata, Variante } from "../src/editoriale/variante.ts";
 import { ATTIVI } from "../src/editoriale/variante.ts";
 import type { VoceStorico } from "./storico.ts";
 
@@ -17,6 +17,13 @@ export const SOGLIA = 0.32;
 /** Il peso della forma (dHash) contro quello del colore medio nella distanza di un fotogramma: tarato col resto, vedi README. */
 export const PESO_FORMA = 0.65;
 const PESI = [2, 1, 1, 1, 1, 1];
+/**
+ * Entro quanti minuti dall'inizio di `produci` puo' partire un tentativo nuovo, per durata. Il job ha 90 minuti
+ * (`timeout-minutes` del workflow): meno ~5 di preparazione, il render stimato sul runner (corta 30, media 45, lunga 56:
+ * ~43 min misurati su una media, in proporzione ai secondi) e 10 di margine per il tentativo stesso, l'upload e i post.
+ * Da stringere con i tempi dei primi resoconti.
+ */
+export const ULTIMO_TENTATIVO_MINUTI: Record<NomeDurata, number> = { corta: 45, media: 30, lunga: 19 };
 
 const FOTOGRAMMA = /^[0-9a-f]{16}#[0-9a-f]{6}$/;
 
@@ -133,7 +140,11 @@ export async function scegliDiversa(a: {
   recenti: VoceStorico[];
   impronta: (v: Variante) => Promise<Impronta>;
   controllaImpaginazione: (v: Variante) => Promise<string[]>;
+  /** l'inizio di `produci`, in ms: da li' si conta `ULTIMO_TENTATIVO_MINUTI` */
+  inizio: number;
+  ora?: () => number;
 }): Promise<Scelta> {
+  const ora = a.ora ?? Date.now;
   let prima: Impronta;
   try {
     prima = await a.impronta(a.variante);
@@ -150,6 +161,12 @@ export async function scegliDiversa(a: {
   const recentiVarianti = a.recenti.map((v) => v.variante);
   let interrotto: string | undefined;
   for (let t = 2; t <= MAX_TENTATIVI; t++) {
+    const minuti = (ora() - a.inizio) / 60_000;
+    const limite = ULTIMO_TENTATIVO_MINUTI[a.variante.durata];
+    if (minuti >= limite) {
+      interrotto = `tempo finito (${Math.floor(minuti)} min dall'inizio, limite ${limite} per una ${a.variante.durata})`;
+      break;
+    }
     const v = prossimaVariante(a.slug, provate[provate.length - 1], t, provate, recentiVarianti);
     provate.push(v);
     try {

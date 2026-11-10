@@ -479,7 +479,10 @@ cioè quelle vecchie o quelle di un controllo saltato, si ignorano.
   2: un tentativo evita anche il terzo video, perché è lì che il confronto ha trovato la somiglianza;
 - le scelte sono deterministiche da slug e numero del tentativo;
 - ogni variante nuova ripassa il controllo d'impaginazione, e se non lo passa è scartata ma conta;
-- al massimo 3 tentativi, poi si tiene la variante più lontana.
+- al massimo 3 tentativi, poi si tiene la variante più lontana;
+- un tentativo nuovo parte solo se resta tempo per il render nei 90 minuti del job: entro 45, 30 o 19 minuti
+  dall'inizio della pipeline per una corta, una media o una lunga (`ULTIMO_TENTATIVO_MINUTI`, da stringere con i tempi
+  dei primi resoconti). Oltre, si tiene la più lontana e il resoconto dice «tempo finito».
 
 Il controllo non blocca mai la pubblicazione: un errore di ffmpeg o del render dei fotogrammi lo salta, e il video
 esce senza impronta. Il resoconto Telegram dice come è andata, per esempio «Somiglianza: ok, distanza minima 0.41 da
@@ -519,7 +522,9 @@ Con la finestra di 3 la simulazione su 500 slug in fila, con la variante vera e 
   al terzo tentativo;
 - se serve la stessa coppia stile+gancio, ritenta il 31.0 % e anche qui nessuno arriva al terzo.
 
-Il secondo tentativo trova sempre una variante libera. La realtà sta fra i due casi.
+Il secondo tentativo trova sempre una variante libera. La realtà sta fra i due casi. Questi numeri vengono da prima
+del rimescolamento dell'impronta (vedi «Varianti e stili»): oggi passano tutte le 16 coppie stile/gancio, e le
+percentuali vanno rifatte con la taratura.
 
 Un tentativo costa un controllo d'impaginazione più 6 fotogrammi. Sul Mac di sviluppo sono circa 11 s più 4 s, e la prima impronta col bundle 7 s; sul
 runner, che ha 2 vCPU e gira in `swangle`, ci vuole di più.

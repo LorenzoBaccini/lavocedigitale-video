@@ -135,6 +135,7 @@ function riassumiProblemi(problemi: string[]): string {
 }
 
 async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, esito: Esito): Promise<void> {
+  const inizio = Date.now();
   if (!slugValido(slug)) {
     Object.assign(esito, { stato: "errore", motivo: "slug non valido" });
     return;
@@ -218,6 +219,7 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
       recenti: storico.recenti,
       impronta: (v) => dip.impronta(conVariante(v)),
       controllaImpaginazione: (v) => dip.controllaImpaginazione(conVariante(v)),
+      inizio,
     }),
   );
   esito.tempi.somiglianza = secondiSomiglianza;

@@ -18,6 +18,7 @@ import {
   prossimaVariante,
   scegliDiversa,
   SOGLIA,
+  ULTIMO_TENTATIVO_MINUTI,
 } from "./somiglianza.ts";
 import type { VoceStorico } from "./storico.ts";
 
@@ -140,6 +141,8 @@ function finto(impronte: Record<string, Impronta | Error>, impaginazione: Record
   const chiave = (v: Variante) => `${v.stile}/${v.gancio}`;
   return {
     chiamate,
+    inizio: 0,
+    ora: () => 0,
     impronta: async (v: Variante) => {
       chiamate.impronta.push(chiave(v));
       const r = impronte[chiave(v)] ?? impronte["*"];
@@ -222,6 +225,38 @@ test("un errore di ffmpeg al primo colpo salta il controllo senza impronta", asy
   assert.deepEqual(r.variante, V1);
   assert.equal(r.impronta, undefined);
   assert.match(r.riga, /controllo saltato: ffmpeg è uscito con codice 1/);
+});
+
+test("finito il tempo per il render non parte un altro tentativo: tiene la piu' lontana gia' provata", async () => {
+  const quasi = uguale("000000000000000f#000000");
+  const v2 = prossimaVariante("s", V1, 2, [V1], [VARIANTE_BASE]);
+  const f = finto({ "scrivania/scena": VICINA, [`${v2.stile}/${v2.gancio}`]: quasi, "*": VICINA });
+  // orologio finto: si parte a 12 minuti e ogni impronta ne costa 10
+  let minuti = 12;
+  const impronta = f.impronta;
+  f.impronta = async (v: Variante) => {
+    minuti += 10;
+    return impronta(v);
+  };
+  const r = await scegliDiversa({ slug: "s", variante: V1, recenti: [voce("prima", VICINA)], ...f, ora: () => minuti * 60_000 });
+  assert.equal(ULTIMO_TENTATIVO_MINUTI[V1.durata], 30);
+  // a 22 minuti parte il secondo tentativo, a 32 il terzo no
+  assert.deepEqual(f.chiamate.impronta, ["scrivania/scena", `${v2.stile}/${v2.gancio}`]);
+  assert.deepEqual(r.variante, v2);
+  assert.deepEqual(r.impronta, quasi);
+  assert.match(r.riga, /controllo interrotto: tempo finito \(32 min dall'inizio, limite 30 per una media\)/);
+  assert.match(r.riga, /tenuta la più lontana/);
+});
+
+test("una lunga ha meno tempo per i tentativi di una corta", async () => {
+  const lunga: Variante = { ...V1, durata: "lunga" };
+  const f = finto({ "*": VICINA });
+  const r = await scegliDiversa({ slug: "s", variante: lunga, recenti: [voce("prima", VICINA)], ...f, ora: () => 20 * 60_000 });
+  assert.equal(f.chiamate.impronta.length, 1);
+  assert.match(r.riga, /limite 19 per una lunga/);
+  const g = finto({ "*": VICINA });
+  await scegliDiversa({ slug: "s", variante: { ...V1, durata: "corta" }, recenti: [voce("prima", VICINA)], ...g, ora: () => 20 * 60_000 });
+  assert.equal(g.chiamate.impronta.length, MAX_TENTATIVI);
 });
 
 test("un errore a meta' dei tentativi ferma il controllo e tiene la piu' lontana gia' provata", async () => {

@@ -2,6 +2,7 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { pop } from "./anim";
 import { SU_CARTA } from "./editoriale/carta/stile";
+import { FINE_DETTAGLIO } from "./editoriale/ganci/dettaglio";
 import { coloriDiviso, pienoDiviso } from "./editoriale/ganci/diviso";
 import { useStile } from "./editoriale/stili";
 import { mescola } from "./editoriale/stili/colore";
@@ -30,7 +31,9 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
   const grafica = SU_CARTA.has(frase.scena.tipo) || gancio === "parola";
   const pienoBlocco = gancio === "diviso" ? pienoDiviso(f - linea.inizi[i]) : 0;
   const sotto = grafica ? stile.sottotitolo.sulleGrafiche : stile.sottotitolo.sulSet;
-  const { blocco, locale, ridondante } = sottotitoloAlFrame(storyboard, timing, linea, f);
+  const { blocco, locale, ridondante: scritto } = sottotitoloAlFrame(storyboard, timing, linea, f);
+  // a dettaglio il titolo aspetta che il primo piano si allarghi: fino ad allora la voce ha il sottotitolo
+  const ridondante = scritto && !(gancio === "dettaglio" && locale < FINE_DETTAGLIO);
   // anticipo di 2 frame: al cambio di blocco il sottotitolo non resta mai trasparente
   const entrata = pop(locale, blocco.da - 2, 16);
   return (

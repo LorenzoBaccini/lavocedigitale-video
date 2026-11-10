@@ -228,19 +228,25 @@ apertura (`agent-video.md`), le fixture con più ganci li provano tutti.
 - **parola** (`ganci/Parola.tsx`, `testate/parola.ts`): niente set, niente oggetto. La frase detta a tutta pagina
   sulla superficie delle grafiche dello stile (`Foglio`: carta, poster, griglia, scheda), centrata in verticale fra
   `TITOLO_TOP` e `FONDO_TITOLO`, ogni parola entra a tempo con la voce (gli stessi tempi del titolo di sempre). La
-  chiave è almeno 1,6 volte il resto e sottolineata. I corpi partono grandi e calano finché la stima delle righe
-  (`altezzaRighe`) sta nell'82 % della fascia; nessuna parola supera la riga da sola (`emDi`: 0,58 em a lettera,
-  0,74 le maiuscole, per la larghezza dello stile). L'oggetto non compare mai: lo spec ammette «o mai», e un oggetto
-  piccolo nell'ultimo terzo vorrebbe dire un secondo canvas 3D e un titolo che si sposta. Sopra la parola logo e
-  sottotitolo prendono l'inchiostro delle grafiche (`Overlay`).
-- **dettaglio** (`ganci/dettaglio.ts`): si apre su un primo piano stretto e si allarga fino alla scena del gancio.
-  Il dettaglio dipende dal contenuto: la notifica se arriverà un allarme (allora c'è già dal primo fotogramma, e alla
-  fine la camera ci torna come prima), il titolo della pagina, la barra del desktop, la scheda della schermata di
-  blocco, o il punto caldo dell'oggetto. Sul set la camera parte in asse sul dettaglio (`primoPiano` in
-  `set/inquadrature.ts`) e si allarga con `allarga` (distanza in proporzione, lo zoom sembra uniforme); a tutto quadro
-  il riquadro parte dall'alto del fotogramma e scende sotto il titolo mentre la ripresa si allarga. 6 frame fermi, 22
-  di allargamento: il titolo entra solo dopo (le parole dette prima arrivano insieme) e la spinta sulla chiave non
-  comincia prima, perché a primo piano lo schermo copre tutto il quadro.
+  chiave è almeno 1,6 volte il resto e sottolineata, e c'è già dal primo fotogramma: un fantasma della stessa riga
+  (`fantasmaChiave`, stessa impaginazione parola per parola, inchiostro al 20 %) sotto il titolo vero, che la riempie
+  quando la voce la dice. I corpi partono grandi e calano finché la stima (`lineeDi`, a capo a parole intere) sta nel
+  90 % della fascia; nessuna parola supera la riga da sola (`emDi`: 0,58 em a lettera, 0,74 le maiuscole, 0,92 m e w;
+  nella riga della chiave le minuscole a 0,54 em, perché venga davvero enorme: il controllo d'impaginazione misura quella
+  vera). L'oggetto non compare mai: lo spec ammette «o mai», e un oggetto piccolo nell'ultimo terzo vorrebbe dire un
+  secondo canvas 3D e un titolo che si sposta. Sopra la parola logo e sottotitolo prendono l'inchiostro delle grafiche
+  (`Overlay`).
+- **dettaglio** (`ganci/dettaglio.ts`): si apre su un primo piano e si allarga fino alla scena del gancio. Il dettaglio
+  dipende dal contenuto: la notifica se arriverà un allarme (allora c'è già dal primo fotogramma, il suo suono va sul
+  primo fotogramma, e alla fine la camera ci torna come prima), il titolo della pagina, la barra del desktop, la scheda
+  della schermata di blocco, o il punto caldo dell'oggetto. Il titolo della pagina viene dal disegno
+  (`riquadroTitoloPagina` accanto a `pagina` in `set/disegni.ts`) più un margine: non è mai tagliato. Sul set la camera
+  parte in asse sul dettaglio (`primoPiano` in `set/inquadrature.ts`) largo 820 px, così attorno restano cornice, set e
+  luce dello stile, e si allarga con `allarga` (distanza in proporzione, lo zoom sembra uniforme). A tutto quadro il
+  riquadro parte fra il logo e il sottotitolo (sopra e sotto la superficie dello stile) e sul sito stringe sulla scheda
+  del browser col titolo (`SCHEDA_BROWSER`): il titolo grande intero sarebbe largo quanto la scena. 6 frame fermi, 22 di
+  allargamento: il titolo entra solo dopo (le parole dette prima arrivano insieme) e la spinta sulla chiave non comincia
+  prima, perché a primo piano lo schermo starebbe sotto il titolo; fino ad allora la voce ha il sottotitolo (`Overlay`).
 - **diviso** (`ganci/diviso.ts`, `ganci/Blocco.tsx`): la metà alta è un blocco nell'accento dello stile col titolo
   nella sua posizione di sempre; titolo e logo ci stanno nel colore dello stile che sull'accento contrasta di più
   (fondo, velo, superficie, testo, inchiostro: oltre 3:1 in ogni stile e tinta, `ganci.test.ts`). Dopo 10 frame il

@@ -62,14 +62,17 @@ export const avvicina = ({ pos, look }: Camera, k: number): Camera => ({ pos: po
 /** Deriva quasi impercettibile: la camera non e' mai inchiodata, ma non si nota che si muove. */
 export const deriva = (cam: Camera, t: number, quanto = 0.04): Camera => avvicina(cam, 1 - quanto * Math.min(1, Math.max(0, t)));
 
+// il dettaglio non riempie il quadro: attorno restano la cornice, il set e la luce dello stile
+const LARGO_DETTAGLIO = 820;
+
 /**
  * Il primo piano d'apertura del gancio a dettaglio: in asse sullo schermo del portatile (`riquadro` in pixel dello schermo),
  * dall'alto sulla schermata del telefono, o l'inquadratura stretta dell'oggetto, ancora piu' vicina.
  */
 export function primoPiano(d: Dettaglio, riquadro: Rettangolo | undefined, nome: NomeOggetto | "nessuno"): Camera {
   if (d === "oggetto" || !riquadro) return avvicina(stretta(nome), 0.5);
-  if (d === "telefono") return sopraIlTelefono(riquadro.x + riquadro.w / 2, riquadro.y + riquadro.h / 2, distanzaPer((riquadro.w / TELEFONO_PX.w) * SCHERMO_TELEFONO.larghezza, 940), 1.2);
-  return inAsse(centroDi(riquadro), distanzaPer((riquadro.w / SCHERMO_PX.w) * SCHERMO.larghezza, 980), ALTEZZA / 2);
+  if (d === "telefono") return sopraIlTelefono(riquadro.x + riquadro.w / 2, riquadro.y + riquadro.h / 2, distanzaPer((riquadro.w / TELEFONO_PX.w) * SCHERMO_TELEFONO.larghezza, LARGO_DETTAGLIO), 1.2);
+  return inAsse(centroDi(riquadro), distanzaPer((riquadro.w / SCHERMO_PX.w) * SCHERMO.larghezza, LARGO_DETTAGLIO), ALTEZZA / 2);
 }
 
 /** Da un primo piano a un'inquadratura larga: il punto guardato in linea retta, la distanza in proporzione (lo zoom sembra uniforme). */

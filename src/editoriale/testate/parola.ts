@@ -14,8 +14,15 @@ const CRESCITA_MAX = 1.5;
 export const STACCO_CHIAVE = 1.6;
 const DURATA_SOTTOLINEATURA = 9;
 
-/** Quanti em occupa una parola in grassetto, stimata con prudenza: le maiuscole sono piu' larghe. Una parola non va mai a capo. */
-export const emDi = (parola: string): number => [...parola].reduce((em, c) => em + (c !== c.toLowerCase() ? 0.74 : 0.58), 0);
+const LARGHE = new Set([..."mwMW"]);
+
+/**
+ * Quanti em occupa una parola in grassetto, stimata con prudenza: le maiuscole e m, w sono piu' larghe. Una parola non va mai
+ * a capo. `chiave`: la stima piu' stretta per la riga della chiave, perche' diventi davvero enorme (il controllo
+ * d'impaginazione misura quella vera).
+ */
+export const emDi = (parola: string, chiave = false): number =>
+  [...parola].reduce((em, c) => em + (LARGHE.has(c) ? 0.92 : c !== c.toLowerCase() ? 0.74 : chiave ? 0.54 : 0.58), 0);
 
 /** Quante linee fa una riga del titolo: le parole vanno a capo intere, come nel `Titolo` (spazio fra parole 0,24 em). */
 export function lineeDi(parole: { t: string }[], size: number, larghezza: number): number {
@@ -42,8 +49,8 @@ export function titoloParola(piano: PianoGancio, stile: Stile): Riga[] {
     .map(([da, a], i) => ({ scelte: parole.slice(da, a), grossa: i === 1 }))
     .filter((r) => r.scelte.length > 0);
   const testo = (r: (typeof fasce)[number]) => r.scelte.map((p) => p.t).join(" ");
-  const tetto = (r: (typeof fasce)[number]) => LARGHEZZA_UTILE / (Math.max(...r.scelte.map((p) => emDi(p.t))) * L);
-  const chiave = Math.min(...fasce.filter((r) => r.grossa).map((r) => Math.min(tetto(r), corpo(testo(r), 240, 9, L))));
+  const tetto = (r: (typeof fasce)[number]) => LARGHEZZA_UTILE / (Math.max(...r.scelte.map((p) => emDi(p.t, r.grossa))) * L);
+  const chiave = Math.min(...fasce.filter((r) => r.grossa).map((r) => Math.min(tetto(r), corpo(testo(r), 300, 8, L))));
   const partenza = fasce.map((r) => (r.grossa ? chiave : Math.min(corpo(testo(r), 128, 26, L), chiave / STACCO_CHIAVE)));
   const corpi = (k: number) => {
     const sopra = Math.min(...fasce.filter((r) => r.grossa).map((r) => tetto(r)), chiave * k);
@@ -63,3 +70,11 @@ export function titoloParola(piano: PianoGancio, stile: Stile): Riga[] {
 
 /** Quanto e' alto il testo del gancio a parola secondo la stima: deve stare nella fascia. */
 export const altezzaParola = (righe: Riga[], stile: Stile): number => altezzaDi(righe, stile.larghezza);
+
+// la chiave e' entrata da un secondo (la molla del Titolo simula frame per frame: niente valori enormi); il resto non entra mai
+const GIA = -30;
+const MAI = 1e6;
+
+/** Le stesse righe con la sola chiave visibile, gia' intera e del colore dato: il fantasma che la voce poi riempie. */
+export const fantasmaChiave = (righe: Riga[], colore: string): Riga[] =>
+  righe.map((r) => ({ ...r, sottolinea: undefined, parole: r.parole.map((p) => ({ ...p, colore, da: r.sottolinea ? GIA : MAI })) }));

@@ -1,7 +1,9 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import type { PianoGancio } from "../piani/gancio.ts";
+import type { Effetto } from "../piano.ts";
 import { conPeso, fase } from "../regia.ts";
 import type { Rettangolo } from "../set/geometria.ts";
+import { riquadroTitoloPagina, SCHEDA_BROWSER } from "../set/disegni.ts";
 import { NOTIFICA_PX, SCHERMO_PX } from "../set/geometria.ts";
 
 /** Il primo piano resta fermo `fermo` frame, poi si allarga in `allarga`: da `FINE_DETTAGLIO` la scena e' quella del gancio. */
@@ -24,14 +26,34 @@ export function dettaglioDi(s: Pick<ScenaDi<"gancio">, "oggetto" | "schermata">,
  * Il dettaglio in pixel del disegno (schermo del portatile, `SCHERMO_PX`, o del telefono, `TELEFONO_PX`); l'oggetto non ne ha
  * uno: ogni resa stringe sul suo punto caldo.
  */
-export function riquadroDettaglio(d: Dettaglio, schermata: ScenaDi<"gancio">["schermata"]): Rettangolo | undefined {
+export function riquadroDettaglio(d: Dettaglio, s: Pick<ScenaDi<"gancio">, "schermata" | "titolo">): Rettangolo | undefined {
   if (d === "notifica") return NOTIFICA_PX;
-  // il titolo della pagina comincia a sinistra, sotto la barra del browser se c'e' (vedi `pagina` in set/disegni.ts)
-  if (d === "titolo") return { x: 110, y: (schermata === "sito" ? 120 : 0) + 260, w: 1000, h: 330 };
+  if (d === "titolo") {
+    const r = riquadroTitoloPagina(s.titolo, s.schermata === "app" ? "app" : "sito");
+    return { x: r.x - MARGINE_DETTAGLIO, y: r.y - MARGINE_DETTAGLIO, w: r.w + 2 * MARGINE_DETTAGLIO, h: r.h + 2 * MARGINE_DETTAGLIO };
+  }
   if (d === "barra") return { x: 0, y: SCHERMO_PX.h - 190, w: 780, h: 190 };
-  if (d === "telefono") return { x: 40, y: 600, w: 640, h: 210 };
+  if (d === "telefono") return { x: 50, y: 610, w: 520, h: 190 };
   return undefined;
 }
+
+const MARGINE_SCHEDA = 24;
+
+/**
+ * Il dettaglio a tutto quadro: sul sito la scheda del browser col titolo (il titolo grande, intero, sarebbe largo quanto la
+ * scena e il primo piano non si distinguerebbe), altrimenti lo stesso dettaglio del set.
+ */
+export function riquadroDettaglioSchermo(d: Dettaglio, s: Pick<ScenaDi<"gancio">, "schermata" | "titolo">): Rettangolo | undefined {
+  if (d !== "titolo" || s.schermata !== "sito") return riquadroDettaglio(d, s);
+  const m = MARGINE_SCHEDA;
+  return { x: SCHEDA_BROWSER.x - m, y: SCHEDA_BROWSER.y - m, w: SCHEDA_BROWSER.w + 2 * m, h: SCHEDA_BROWSER.h + 2 * m };
+}
+
+/** Lo spazio attorno al titolo della pagina nel primo piano: il titolo non e' mai tagliato. */
+export const MARGINE_DETTAGLIO = 70;
+
+/** Aperto sulla notifica, il suo suono va sul primo fotogramma: alla fine sembrerebbe una seconda notifica. */
+export const suoniDettaglio = (suoni: Effetto[]): Effetto[] => suoni.map((e) => (e.suono === "notifica" ? { ...e, da: 0 } : e));
 
 /** Quanto il primo piano si e' allargato al frame f (0 stretto, 1 la scena del gancio). */
 export const allargamento = (f: number): number => conPeso(fase(f, DETTAGLIO.fermo, FINE_DETTAGLIO));

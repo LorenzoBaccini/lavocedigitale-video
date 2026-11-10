@@ -1,5 +1,6 @@
 import { casuale } from "../tratto.ts";
 import { dataOrologio, iconaNotifica } from "./ambiente.ts";
+import type { Rettangolo } from "./geometria.ts";
 import { FINESTRA_PX, NOTIFICA_PX, NOTIFICA_SCALA, OROLOGIO_PX, PULSANTE_PX, SCHERMO_PX, TITOLO_FINESTRA_PX } from "./geometria.ts";
 
 // Texture dipinte su canvas per il set: scrivania, desktop, notifica, finestra, tastiera, usura dell'alluminio.
@@ -337,10 +338,14 @@ const ombraFinestra = (ctx: Ctx, x: number, y: number, w: number, h: number) => 
   ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.filter = "blur(18px)"; ctx.fillRect(x + 10, y + 24, w, h); ctx.filter = "none";
 };
 
+/** La scheda del browser col titolo della pagina, rispetto all'angolo della barra: il titolo ci sta sempre (`scriviEntro`). */
+export const SCHEDA_BROWSER = { x: 24, y: 12, w: 420, h: 48 };
+
 // barra del browser: la scheda con il titolo e la barra dell'indirizzo con il lucchetto, senza un dominio scritto
 const barraBrowser = (ctx: Ctx, x: number, y: number, w: number, titolo: string) => {
   ctx.fillStyle = "#d9dde2"; ctx.beginPath(); ctx.roundRect(x, y, w, 120, [14, 14, 0, 0]); ctx.fill();
-  ctx.fillStyle = "#f6f4f0"; ctx.beginPath(); ctx.roundRect(x + 24, y + 12, 420, 48, [12, 12, 0, 0]); ctx.fill();
+  const sc = SCHEDA_BROWSER;
+  ctx.fillStyle = "#f6f4f0"; ctx.beginPath(); ctx.roundRect(x + sc.x, y + sc.y, sc.w, sc.h, [12, 12, 0, 0]); ctx.fill();
   ctx.fillRect(x, y + 58, w, 62);
   ctx.fillStyle = "#3a3f46"; ctx.font = `500 24px ${SANS_SCHERMI}`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
   scriviEntro(ctx, titolo, x + 48, y + 37, 360, 18);
@@ -386,6 +391,24 @@ export const finestra = ({ titolo, pulsante, menu, tipo, orologio }: Finestra) =
   ctx.textAlign = "left";
 };
 
+/** Quanto e' alta la barra del browser sopra la pagina. */
+const ALTO_BARRA = 120;
+
+/** Il titolo grande della pagina: colonna, linea di base della prima riga (sotto la barra del browser, se c'e'), passo, corpo. */
+export const TITOLO_PAGINA = { x: 160, larghezza: SCHERMO_PX.w - 320, base: 400, passo: 140, corpo: 120 };
+
+/**
+ * Dove sta il titolo della pagina, in pixel dello schermo: largo quanto la stima del testo (a 0,62 em per carattere, prudente
+ * per il grassetto), su una o due righe come lo va a capo `pagina`.
+ */
+export function riquadroTitoloPagina(titolo: string, tipo: Exclude<TipoFinestra, "sistema">): Rettangolo {
+  const t = TITOLO_PAGINA;
+  const alto = (tipo === "sito" ? ALTO_BARRA : 0) + t.base;
+  const largo = titolo.length * t.corpo * 0.62;
+  const righe = largo > t.larghezza ? 2 : 1;
+  return { x: t.x, y: alto - t.corpo * 0.8, w: Math.min(largo, t.larghezza), h: t.corpo * 1.05 + (righe - 1) * t.passo };
+}
+
 /**
  * Una pagina web (o un'app) a tutto schermo, per l'inquadratura larga del gancio: si riconosce da lontano dal colore chiaro,
  * dalla barra del browser e dal titolo grande. Nessun marchio, nessun dominio.
@@ -396,14 +419,15 @@ export const pagina = (titolo: string, tipo: Exclude<TipoFinestra, "sistema">, o
   const basso = h - 72;
   ctx.fillStyle = "#f6f4f0"; ctx.fillRect(0, 0, w, basso);
   let alto = 0;
-  if (tipo === "sito") { barraBrowser(ctx, 0, 0, w, titolo); alto = 120; }
+  if (tipo === "sito") { barraBrowser(ctx, 0, 0, w, titolo); alto = ALTO_BARRA; }
   // testata del sito: fascia scura con un segno geometrico neutro e righe al posto delle voci
   ctx.fillStyle = "#24364d"; ctx.fillRect(0, alto, w, 150);
   ctx.fillStyle = "#e9edf2"; ctx.beginPath(); ctx.roundRect(80, alto + 45, 60, 60, 14); ctx.fill();
   ctx.fillStyle = "rgba(233,237,242,0.55)";
   for (const [x0, l] of [[1500, 160], [1700, 140], [1880, 180], [2100, 150]]) { ctx.beginPath(); ctx.roundRect(x0, alto + 68, l, 16, 8); ctx.fill(); }
   ctx.fillStyle = "#1f2328"; ctx.font = `700 120px ${SANS_SCHERMI}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-  aCapo(ctx, titolo, w - 320, 2).forEach((riga, i) => scriviEntro(ctx, riga, 160, alto + 400 + i * 140, w - 320));
+  const t = TITOLO_PAGINA;
+  aCapo(ctx, titolo, t.larghezza, 2).forEach((riga, i) => scriviEntro(ctx, riga, t.x, alto + t.base + i * t.passo, t.larghezza));
   ctx.fillStyle = "#c9c5bd";
   for (const [ry, rw] of [[620, 1300], [670, 1100]]) { ctx.beginPath(); ctx.roundRect(160, alto + ry, rw, 24, 12); ctx.fill(); }
   ctx.fillStyle = "#2f6fd1"; ctx.beginPath(); ctx.roundRect(160, alto + 760, 420, 110, 55); ctx.fill();

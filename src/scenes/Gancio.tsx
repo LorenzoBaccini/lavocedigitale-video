@@ -45,8 +45,8 @@ const GancioSulSet: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGancio, 
   const stile = useStile();
   const variante = useVariante();
   const { oggetto, durata, contesto } = props;
-  const base = pianoGancio(props, durata);
-  const piano = formato === "dettaglio" ? pianoDettaglio(base, durata) : base;
+  const pianoBase = pianoGancio(props, durata);
+  const piano = formato === "dettaglio" ? pianoDettaglio(pianoBase, durata) : pianoBase;
   const { righe, limite } = titoloGancio(piano, stile);
   const blocco = formato === "diviso" ? bloccoDiviso(f, limite) : undefined;
   // col blocco lo schermo sta sotto il suo bordo, e sale con lui fino alla quota sotto il titolo
@@ -59,7 +59,7 @@ const GancioSulSet: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGancio, 
   const mossa = avvicina(fraCamere(ferma, meta, conPeso(fase(f, piano.spinta.da, piano.spinta.a))), 0.88 ** piano.stacchi.filter((s) => f >= s).length);
   const scena = piano.notifica === undefined ? sotto(mossa) : mossa;
   const dettaglio = formato === "dettaglio" ? dettaglioDi(props, piano.notifica !== undefined) : undefined;
-  const cam = dettaglio && f < FINE_DETTAGLIO ? allarga(primoPiano(dettaglio, riquadroDettaglio(dettaglio, props.schermata), oggetto), scena, allargamento(f)) : scena;
+  const cam = dettaglio && f < FINE_DETTAGLIO ? allarga(primoPiano(dettaglio, riquadroDettaglio(dettaglio, props), oggetto), scena, allargamento(f)) : scena;
   // andando verso la notifica conta lei, non il bordo dello schermo che la camera taglia di tre quarti
   const versoLaNotifica = piano.notifica !== undefined && f >= piano.spinta.da;
   // aperta sulla notifica, la notifica c'e' gia' dal primo fotogramma

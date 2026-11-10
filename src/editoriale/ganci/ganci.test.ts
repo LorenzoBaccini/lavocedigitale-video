@@ -3,13 +3,14 @@ import assert from "node:assert/strict";
 
 import { ALTEZZA, LARGHEZZA_UTILE } from "../../impaginazione.ts";
 import type { PianoGancio } from "../piani/gancio.ts";
+import { riquadroTitoloPagina, SCHEDA_BROWSER, TITOLO_PAGINA } from "../set/disegni.ts";
 import { NOTTE } from "../stili/notte.ts";
 import { SCHERMO } from "../stili/schermo.ts";
 import { SCRIVANIA } from "../stili/scrivania.ts";
 import { NOMI_TINTE, studio } from "../stili/studio.ts";
 import { contrasto } from "../stili/colore.ts";
 import { altezzaParola, emDi, FASCIA_PAROLA, lineeDi, STACCO_CHIAVE, titoloParola } from "../testate/parola.ts";
-import { dettaglioDi, FINE_DETTAGLIO, pianoDettaglio, riquadroDettaglio } from "./dettaglio.ts";
+import { dettaglioDi, FINE_DETTAGLIO, MARGINE_DETTAGLIO, pianoDettaglio, riquadroDettaglio, riquadroDettaglioSchermo, suoniDettaglio } from "./dettaglio.ts";
 import { bloccoDiviso, coloriDiviso, FINE_DIVISO, tingiPerBlocco } from "./diviso.ts";
 
 const STILI = [SCRIVANIA, NOTTE, SCHERMO, ...NOMI_TINTE.map(studio)];
@@ -33,8 +34,31 @@ test("il dettaglio dipende dal contenuto: la notifica prima di tutto, poi cio' c
   assert.equal(dettaglioDi({ oggetto: "portatile", schermata: "sito" }, false), "titolo");
   assert.equal(dettaglioDi({ oggetto: "portatile" }, false), "barra");
   assert.equal(dettaglioDi({ oggetto: "nessuno" }, false), "barra");
-  assert.equal(riquadroDettaglio("oggetto", undefined), undefined);
-  assert.ok(riquadroDettaglio("titolo", "sito")!.y > riquadroDettaglio("titolo", "app")!.y, "sotto la barra del browser");
+  assert.equal(riquadroDettaglio("oggetto", { titolo: "x" }), undefined);
+  assert.ok(riquadroDettaglio("titolo", { titolo: "x", schermata: "sito" })!.y > riquadroDettaglio("titolo", { titolo: "x", schermata: "app" })!.y, "sotto la barra del browser");
+});
+
+test("il primo piano sul titolo della pagina contiene il titolo disegnato, con il margine: niente titolo tagliato", () => {
+  for (const titolo of ["Fascicolo sanitario", "Carta d'identità elettronica: prenota il rinnovo online dal portale", "SPID"]) {
+    for (const schermata of ["sito", "app"] as const) {
+      const r = riquadroDettaglio("titolo", { titolo, schermata })!;
+      const t = riquadroTitoloPagina(titolo, schermata);
+      assert.ok(r.x <= t.x - MARGINE_DETTAGLIO + 1e-9 && r.y <= t.y - MARGINE_DETTAGLIO + 1e-9, titolo);
+      assert.ok(r.x + r.w >= t.x + t.w + MARGINE_DETTAGLIO - 1e-9 && r.y + r.h >= t.y + t.h + MARGINE_DETTAGLIO - 1e-9, titolo);
+    }
+  }
+  const lungo = riquadroTitoloPagina("Carta d'identità elettronica: prenota il rinnovo online dal portale", "sito");
+  assert.equal(lungo.x + lungo.w, TITOLO_PAGINA.x + TITOLO_PAGINA.larghezza, "un titolo lungo va a capo nella colonna");
+});
+
+test("a tutto quadro, sul sito, il primo piano sta sulla scheda del browser e la contiene intera", () => {
+  const r = riquadroDettaglioSchermo("titolo", { titolo: "Fascicolo sanitario", schermata: "sito" })!;
+  assert.ok(r.x <= SCHEDA_BROWSER.x && r.y <= SCHEDA_BROWSER.y && r.x + r.w >= SCHEDA_BROWSER.x + SCHEDA_BROWSER.w && r.y + r.h >= SCHEDA_BROWSER.y + SCHEDA_BROWSER.h);
+  assert.deepEqual(riquadroDettaglioSchermo("titolo", { titolo: "x", schermata: "app" }), riquadroDettaglio("titolo", { titolo: "x", schermata: "app" }));
+});
+
+test("aperto sulla notifica, il suono della notifica va sul primo fotogramma", () => {
+  assert.deepEqual(suoniDettaglio([{ da: 70, suono: "notifica" }]), [{ da: 0, suono: "notifica" }]);
 });
 
 test("a dettaglio il titolo e la spinta aspettano che il primo piano si sia allargato", () => {
@@ -95,7 +119,7 @@ test("parola: una domanda da 64 caratteri con una chiave da 18 sta nella fascia 
           const grossa = righe.find((r) => r.sottolinea)!;
           for (const r of righe) {
             if (r !== grossa) assert.ok(grossa.size >= r.size * STACCO_CHIAVE - 1, "la chiave e' enorme rispetto al resto");
-            for (const p of r.parole) assert.ok(emDi(p.t) * r.size * s.larghezza <= LARGHEZZA_UTILE, `${p.t} a ${r.size}`);
+            for (const p of r.parole) assert.ok(emDi(p.t, r === grossa) * r.size * s.larghezza <= LARGHEZZA_UTILE, `${p.t} a ${r.size}`);
           }
         }
       }

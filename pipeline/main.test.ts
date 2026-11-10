@@ -223,8 +223,8 @@ test("il resoconto riporta slug, stato, voce, durata e tempi", async () => {
   assert.ok(testo.includes(SLUG));
   assert.match(testo, /Stato: prova/);
   assert.match(testo, /Voce: elevenlabs/);
-  // 8 clip da 3,5 s più 1,2 s di coda sulla chiusura
-  assert.match(testo, /Durata: 29\.2 s/);
+  // 8 clip da 3,5 s più 0,8 s di coda sulla chiusura
+  assert.match(testo, /Durata: 28\.8 s/);
   assert.match(testo, /storyboard \d+ s · voce \d+ s · render \d+ s/);
 });
 
@@ -402,7 +402,7 @@ test("la frase finale della variante sostituisce quella del copione prima della 
   const f = finte();
   const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
   assert.equal(esito.stato, "pubblicato");
-  const attesa = FRASI_CHIUSURA[esito.variante!.fraseFinale];
+  const attesa = FRASI_CHIUSURA[esito.variante!.fraseFinale].testo;
   const allaVoce = f.chiamate.voce[0][0] as Storyboard;
   assert.equal(allaVoce.frasi.at(-1)!.testo, attesa);
   assert.deepEqual(allaVoce.frasi.slice(0, -1), storyboard.frasi.slice(0, -1));

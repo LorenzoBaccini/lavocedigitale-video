@@ -37,7 +37,8 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
   const sotto = grafica ? stile.sottotitolo.sulleGrafiche : stile.sottotitolo.sulSet;
   const { blocco, locale, ridondante: scritto } = sottotitoloAlFrame(storyboard, timing, linea, f);
   // a dettaglio il titolo aspetta che il primo piano si allarghi: fino ad allora la voce ha il sottotitolo
-  const ridondante = scritto && !(gancio === "dettaglio" && locale < FINE_DETTAGLIO);
+  // con la chiusura integrata la frase sta nella fascia: niente sottotitolo
+  const ridondante = ferma !== undefined || (scritto && !(gancio === "dettaglio" && locale < FINE_DETTAGLIO));
   // anticipo di 2 frame: al cambio di blocco il sottotitolo non resta mai trasparente
   const entrata = pop(locale, blocco.da - 2, 16);
   return (

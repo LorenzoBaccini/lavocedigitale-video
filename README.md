@@ -264,36 +264,48 @@ domande da 64 caratteri con la chiave da 18 all'inizio, in mezzo e in fondo.
 
 ### Le chiusure
 
-La chiusura dura meno di prima: la frase finale parlata è corta e la scena finale è veloce.
+La chiusura dura circa la metà di prima: la frase finale parlata è corta, la coda pure, la scena finale è veloce.
 
-**La frase finale** (`variante.fraseFinale`, 0, 1 o 2) indicizza `FRASI_CHIUSURA` in `storyboard/tipi.ts`: «Il resto è su
-la voce digitale punto it.», «Link nel post: la voce digitale punto it.», «Trovi tutto su la voce digitale punto it.».
+**La frase finale** (`variante.fraseFinale`, 0, 1 o 2) indicizza `FRASI_CHIUSURA` in `storyboard/tipi.ts`, ognuna con
+la sua chiave: «Tutto su la voce digitale punto it.» (chiave l'indirizzo, a schermo `lavocedigitale.it`), «Link nel
+post.», «Il resto è nel link del post.». L'indirizzo non serve dirlo ogni volta: è scritto nella cartolina e nella fascia.
 La frase che Claude scrive oggi («Trovi tutto su la voce digitale punto it, il link è nel post.», `TESTO_CHIUSURA`) non è
 fra le tre: resta solo il testo che la validazione si aspetta, e il prompt non cambia. La pipeline sostituisce l'ultima
-frase dopo la validazione e prima della voce (`conFraseFinale`, puro e provato), con la chiave `la voce digitale punto it`
-(a schermo `lavocedigitale.it`): ElevenLabs legge la frase scelta, il sottotitolo dell'ultima scena la scrive, e testata e
-indirizzo della cartolina o della fascia sono gli stessi per tutte e tre. La frase base (2) è la più vicina a quella di
-prima.
-Con la voce di oggi le tre frasi durano circa 3,3–4,0 s parlate (la frase di prima 5,1–5,7; misurate sulle voci già pagate
-tagliate dopo «it», stimate per sillabe per le frasi 0 e 1), più la coda di 1,2 s che resta (`CODA_S` in `linea.ts`: ci
-esce la musica): la chiusura passa da 6,3–6,9 s a 4,5–5,2 s.
+frase dopo la validazione e prima della voce (`conFraseFinale`, puro e provato): ElevenLabs legge la frase scelta, il
+sottotitolo dell'ultima scena (con la cartolina) o la fascia (con l'integrata) la scrivono. Con la cartolina il
+sottotitolo di ogni frase resta visibile: la ridondanza lo nasconde solo se ripete parola per parola testata e indirizzo
+scritti (`fraseFinale.test.ts`).
+
+La coda dopo l'ultima parola è di 0,8 s (`CODA_S` in `linea.ts`, prima 1,2): la musica esce in tutta la coda, lineare,
+dopo l'ultima parola (`USCITA` in `mix.ts` ne è derivata; prima 1 s su una coda di 1,2). Stima con la voce di oggi
+(`out/durate-chiusure.ts`, fuori da git: il ritmo per sillaba della frase di oggi nelle voci già pagate, per le sillabe
+della frase nuova, più attacco e 0,35 s di silenzio finale): «Tutto su …» 3,2–3,5 s parlate, «Link nel post.» 1,1–1,2 s,
+«Il resto è nel link del post.» 2,2–2,4 s; con la coda la chiusura dura 4,0–4,3 s, 1,9–2,0 s e 3,0–3,2 s, contro 6,3–6,9 s
+di prima. Le sillabe chiuse di «Link nel post» si dicono più lente della media: quella stima è per difetto.
 
 **cartolina** (`scenes/Chiusura.tsx`): la scheda finale sulla superficie delle grafiche dello stile (`Foglio`: carta,
 poster, griglia, scheda). Marchio e testata entrano in 6 frame dal primo (`ENTRATA_CHIUSURA`), l'indirizzo è scritto
 entro 20 frame anche se la voce lo dice dopo, e la sottolineatura parte quando la voce lo dice (`piani/chiusura.ts`). Prima
 la testata partiva al frame 4 in 10 frame e l'indirizzo aspettava la voce (un secondo e mezzo). La cartolina quindi cambia:
-la regressione a pixel quasi identici vale per le scene prima della chiusura, non per lei.
+la regressione a pixel quasi identici vale per le scene prima della chiusura, non per lei. La testata è a
+`100 / larghezza` px: col mono della notte (1,2) sta su una riga, negli altri stili resta 100.
 
 **integrata**: nessuna scena finale. In `Notizia` l'ultima scena di contenuto resta montata anche per la durata della
 chiusura dentro `Ferma` (`editoriale/Ferma.tsx`): oltre la sua fine vede sempre il suo ultimo frame (lo stesso trucco della
 `Spinta`, una `Sequence` interna spostata di quanto si è oltre la fine; niente `<Freeze>`, che azzera l'origine della
 sequenza) e si avvicina piano del 2 % (`scalaFerma` in `editoriale/fermo.ts`). Non esce con la spinta, lo scorrimento o il
-lampo dello stile: la chiusura non è un cambio di scena. Sopra, la fascia (`scenes/ChiusuraIntegrata.tsx`) cresce da
-sinistra in 6 frame attorno al logo, che resta dove sta l'angolo di sempre, nel velo dello stile col filo dell'accento
-sotto, e porta testata e indirizzo coi tempi della cartolina (stesso piano: la ridondanza del sottotitolo è la stessa). Sta
-fra 200 e 366 px, sopra i titoli delle scene (da `TITOLO_TOP`); i testi stanno a destra della zona del logo. Niente
-fruscio della carta: non c'è un foglio. Sotto la fascia logo e sottotitolo seguono la scena ferma, non la chiusura
-(`Overlay`). Vale uguale in schermo: la fascia è 2D e `Ferma` non sa che cosa tiene fermo.
+lampo dello stile: la chiusura non è un cambio di scena. Sopra, la scena ferma si vela (il `velo` dello stile al 35 %) e
+la fascia (`scenes/ChiusuraIntegrata.tsx`) sale dal basso in 6 frame, nel velo dello stile col filo dell'accento in cima:
+il logo a 180 px, la frase detta (46 px, diviso per la `larghezza` dello stile) senza l'indirizzo («Tutto su», «Link nel post», «Il resto è nel link del post»,
+`attaccoChiusura`) e sotto l'indirizzo a 88 px, sottolineato quando la voce lo dice (tempi della cartolina). La fascia sta nel terzo basso, da
+`FONDO_UTILE - 10` (1350) per 290 px: sopra ci sono i titoli bassi delle scene, che finiscono prima di `FONDO_UTILE`, e
+una fascia più alta li coprirebbe in quasi ogni scena del set. Prende il posto del sottotitolo, che durante la chiusura
+integrata non c'è (`Overlay`): la fascia scrive la frase scelta e l'indirizzo, anche quando la frase non lo dice. I suoi testi si misurano come sottotitolo (nella sua zona,
+mai sopra), e la fascia pubblica il suo ingombro pieno (`data-ingombro="fascia"`): il controllo d'impaginazione segnala
+ogni testo della scena ferma che le finisse sotto. Niente fruscio della carta: non c'è un foglio. Sotto la fascia
+grana e vignettatura seguono la scena ferma, non la chiusura (`Overlay`). Vale uguale in schermo: la fascia è 2D e
+`Ferma` non sa che cosa tiene fermo; finché la scena dura `Ferma` non applica nessuna trasformazione, e i fotogrammi prima
+della chiusura sono identici a quelli con la cartolina.
 
 Il frame fermo è l'ultimo della scena: lì il piano ha già scritto tutti i testi. I piani tengono testi e segni dentro la durata
 (`Math.min(durata - …)`), e `fermo.test.ts` lo prova per ogni scena di ogni fixture

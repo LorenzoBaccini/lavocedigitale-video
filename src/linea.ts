@@ -6,7 +6,8 @@ export interface Linea {
   totale: number;
 }
 
-const CODA_S = 1.2; // la chiusura resta a schermo dopo l'ultima parola
+/** Quanto la chiusura resta a schermo dopo l'ultima parola; ci esce la musica (`mix.ts`). */
+export const CODA_S = 0.8;
 
 export function costruisciLinea(timing: Timing, fps: number): Linea {
   const frames = timing.clips.map((c) => Math.round(c.secondi * fps));

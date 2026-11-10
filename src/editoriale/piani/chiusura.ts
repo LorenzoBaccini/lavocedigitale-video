@@ -30,3 +30,12 @@ export function pianoChiusura(s: ScenaDi<"chiusura">, durata: number): PianoChiu
   ];
   return { testata, indirizzo, sottolinea, ...suCarta(testi, [], [testata, indirizzo, sottolinea], durata, s.contesto) };
 }
+
+/**
+ * Quello che la fascia scrive sopra l'indirizzo: la frase finale detta, senza l'indirizzo se lo dice
+ * («Tutto su», «Link nel post», «Il resto è nel link del post»).
+ */
+export const attaccoChiusura = (parole: { t: string }[]): string => {
+  const i = parole.findIndex((p) => p.t.toLowerCase().startsWith(INDIRIZZO));
+  return (i < 0 ? parole : parole.slice(0, i)).map((p) => p.t).join(" ");
+};

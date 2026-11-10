@@ -26,7 +26,7 @@ export const Chiusura: React.FC<ScenaDi<"chiusura">> = (props) => {
         <div style={{ opacity: t, transform: `translateY(${(1 - uscita(t)) * 14}px)` }}>
           <LogoMark size={300} color={stile.colori.inchiostro.testo} livello={livello} />
         </div>
-        <div data-impaginazione="titolo" style={{ marginTop: 40, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: 100, lineHeight: 1.1, color: stile.colori.inchiostro.testo, opacity: t }}>{TESTATA}</div>
+        <div data-impaginazione="titolo" style={{ marginTop: 40, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: 100 / stile.larghezza, lineHeight: 1.1, color: stile.colori.inchiostro.testo, opacity: t }}>{TESTATA}</div>
         <div style={{ width: 120, height: 3, background: stile.colori.inchiostro.testo, opacity: 0.6 * t, margin: "34px 0 30px" }} />
         <Titolo
           nome="indirizzo"

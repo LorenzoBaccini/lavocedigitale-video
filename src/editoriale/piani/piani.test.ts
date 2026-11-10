@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { costruisciLinea } from "../../linea.ts";
 import { propsFrase } from "../../scenes/propsFrase.ts";
 import type { Storyboard } from "../../storyboard/tipi.ts";
-import { CHIAVE_CHIUSURA, FRASI_CHIUSURA } from "../../storyboard/tipi.ts";
+import { FRASI_CHIUSURA } from "../../storyboard/tipi.ts";
 import type { Timing } from "../../timing.ts";
 import { pausaPiuLunga, PAUSA_MAX } from "../regia.ts";
 import { NOTIFICA_PX, rettangoloInQuadro } from "../set/geometria.ts";
@@ -13,7 +13,7 @@ import { CORPO_NOTIFICA } from "../set/disegni.ts";
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, rettangoloTelefono } from "../set/telefono.ts";
 import { cameraAllarme, cameraAllarmeTelefono, NOTIFICA_IN_QUADRO, pianoAllarme } from "./allarme.ts";
 import { pianoChecklist } from "./checklist.ts";
-import { pianoChiusura } from "./chiusura.ts";
+import { attaccoChiusura, pianoChiusura } from "./chiusura.ts";
 import { pianoData } from "./data.ts";
 import { FRECCIA, PASSO_NOTE, pianoDocumenti } from "./documenti.ts";
 import { pianoGancio } from "./gancio.ts";
@@ -109,10 +109,19 @@ test("la chiusura scrive subito testata e indirizzo, e sottolinea l'indirizzo qu
   assert.ok(piano.testi.every((t) => t.da <= 24), JSON.stringify(piano.testi));
 });
 
+test("la fascia integrata scrive la frase finale detta sopra l'indirizzo, senza ripeterlo", () => {
+  const attacchi = FRASI_CHIUSURA.map(({ testo, chiave }) => {
+    const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
+    return attaccoChiusura(senzaVoce(sb, 3)[0].voce.parole);
+  });
+  assert.deepEqual(attacchi, ["Tutto su", "Link nel post", "Il resto è nel link del post"]);
+  assert.equal(attaccoChiusura([{ t: "Trovi" }, { t: "tutto" }, { t: "su" }, { t: "lavocedigitale.it," }, { t: "il" }]), "Trovi tutto su");
+});
+
 test("con ogni frase finale, anche brevissima, la chiusura finisce i suoi segni prima della fine", () => {
-  for (const testo of FRASI_CHIUSURA) {
-    for (const secondi of [1.5, 2.2, 3]) {
-      const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave: CHIAVE_CHIUSURA, scena: { tipo: "chiusura" } }] };
+  for (const { testo, chiave } of FRASI_CHIUSURA) {
+    for (const secondi of [1, 1.5, 2.2, 3]) {
+      const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
       const [p] = senzaVoce(sb, secondi);
       if (p.tipo !== "chiusura") throw new Error("chiusura");
       const piano = pianoChiusura(p, p.durata);

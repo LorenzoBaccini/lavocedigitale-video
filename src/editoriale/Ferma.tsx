@@ -10,7 +10,7 @@ export const Ferma: React.FC<{ durata: number; chiusura: number; spinta: boolean
   const f = useCurrentFrame();
   const scala = spinta ? scalaFerma(f, durata, chiusura) : 1;
   return (
-    <AbsoluteFill style={{ transform: `scale(${scala})`, transformOrigin: "50% 45%" }}>
+    <AbsoluteFill style={scala === 1 ? undefined : { transform: `scale(${scala})`, transformOrigin: "50% 45%" }}>
       <Sequence from={f - frameScena(f, durata)} layout="none">
         {children}
       </Sequence>

@@ -16,10 +16,10 @@ test("le scene partono una dopo l'altra", () => {
   assert.deepEqual(costruisciLinea(timing, 30).inizi, [0, 84]);
 });
 
-test("il totale è la somma dei frame più 1,2 s di coda", () => {
+test("il totale è la somma dei frame più 0,8 s di coda", () => {
   const linea = costruisciLinea(timing, 30);
-  assert.deepEqual(linea.durate, [84, 55 + 36]);
-  assert.equal(linea.totale, 84 + 55 + 36);
+  assert.deepEqual(linea.durate, [84, 55 + 24]);
+  assert.equal(linea.totale, 84 + 55 + 24);
 });
 
 test("il livello della voce al frame 0 è il primo valore dell'inviluppo", () => {

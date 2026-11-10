@@ -40,8 +40,18 @@ export const VARIANTE_BASE: Variante = { musica: "caldo", luce: "calda", apertur
 /** Tutti i valori validi: le props e le opzioni del controllo d'impaginazione possono forzarne uno qualsiasi. */
 export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APERTURE, stile: NOMI_STILI, gancio: GANCI, chiusura: CHIUSURE, fraseFinale: FRASI_FINALI, durata: DURATE };
 
-// Solo i valori gia' costruiti: la pipeline non deve pubblicare uno stile, un gancio o una chiusura ancora segnaposto.
-export const ATTIVI: Valori = { ...DIMENSIONI, durata: ["media"] };
+// Solo i valori gia' costruiti, elencati a mano: un valore aggiunto a DIMENSIONI non va in produzione da solo.
+// La durata resta media finche' prompt e validazione non conoscono le altre.
+export const ATTIVI: Valori = {
+  musica: NOMI_TEMI,
+  luce: LUCI,
+  apertura: APERTURE,
+  stile: ["scrivania", "studio", "notte", "schermo"],
+  gancio: ["scena", "parola", "dettaglio", "diviso"],
+  chiusura: ["cartolina", "integrata"],
+  fraseFinale: [0, 1, 2],
+  durata: ["media"],
+};
 
 /** Quanti video recenti escludono i loro valori; musica, luce e apertura n-1: in n video di fila passano tutte. */
 export const PROFONDITA: { [K in Dimensione]: number } = {

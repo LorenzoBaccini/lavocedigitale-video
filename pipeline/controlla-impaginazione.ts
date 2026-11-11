@@ -6,7 +6,7 @@ import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 
 import type { Dettagli } from "../src/editoriale/dettagli.ts";
-import { DETTAGLI_BASE, OGGETTI_SCRIVANIA } from "../src/editoriale/dettagli.ts";
+import { DETTAGLI_BASE, OGGETTI_SCRIVANIA, SEGNI_NOTIFICA } from "../src/editoriale/dettagli.ts";
 import type { Valori, Variante } from "../src/editoriale/variante.ts";
 import { APERTURE, ATTIVI, DIMENSIONI, VARIANTE_BASE, varianteDi } from "../src/editoriale/variante.ts";
 import type { Misura } from "../src/impaginazione.ts";
@@ -138,11 +138,14 @@ export function varianteDaArgomenti(argomenti: string[], base: Variante | undefi
 export function dettagliDaArgomenti(argomenti: string[], base: Partial<Dettagli> | undefined): Partial<Dettagli> | undefined {
   const valore = (nome: string) => argomenti.find((a) => a.startsWith(`--${nome}=`))?.slice(nome.length + 3);
   const dettagli = valore("dettagli") === "base" ? { ...base, ...DETTAGLI_BASE } : base;
+  const segno = valore("segno");
+  if (segno !== undefined && !SEGNI_NOTIFICA.includes(segno as never)) throw new Error(`--segno=${segno}: valori ammessi ${SEGNI_NOTIFICA.join(", ")}`);
+  const conSegno = segno ? { ...dettagli, segnoNotifica: segno as Dettagli["segnoNotifica"] } : dettagli;
   const oggetti = valore("oggetti")?.split(",");
-  if (!oggetti) return dettagli;
+  if (!oggetti) return conSegno;
   const sconosciuti = oggetti.filter((o) => !OGGETTI_SCRIVANIA.includes(o as never));
   if (sconosciuti.length) throw new Error(`--oggetti: ${sconosciuti.join(", ")} sconosciuti, ammessi ${OGGETTI_SCRIVANIA.join(", ")}`);
-  return { ...dettagli, oggetti: oggetti as Dettagli["oggetti"] };
+  return { ...conSegno, oggetti: oggetti as Dettagli["oggetti"] };
 }
 
 /**
@@ -155,7 +158,7 @@ export function avvisiNonAttivi(v: Variante, attivi: Valori = ATTIVI): string[] 
 
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
 //        [--variante=musica:chiaro,luce:sera,apertura:alta] [--stile=…] [--gancio=…] [--chiusura=…] [--durata=…]
-//        [--ogni-apertura] [--passo=N] [--secondi=N] [--scene=gancio] [--dettagli=base] [--oggetti=taccuino,tazza,pianta]
+//        [--ogni-apertura] [--passo=N] [--secondi=N] [--scene=gancio] [--dettagli=base] [--segno=cerchio|sottolinea|nessuno] [--oggetti=taccuino,tazza,pianta]
 // --secondi: durata delle frasi di uno storyboard senza voce (3 di default). --scene: misura solo le scene di quel tipo.
 // Con --ogni-apertura il controllo gira una volta per ogni inquadratura d'apertura del gancio.
 if (èPrincipale(import.meta.url)) {

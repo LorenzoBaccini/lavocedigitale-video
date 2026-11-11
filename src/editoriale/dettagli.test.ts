@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { ALFA_ALONE, BUIO, DETTAGLI_BASE, dettagliDi, FINITURE, leggibile, NOMI_FINITURE, OGGETTI_SCRIVANIA, oraDi, sfondiBlocco } from "./dettagli.ts";
+import { ALFA_ALONE, BUIO, DETTAGLI_BASE, dettagliDi, FINITURE, leggibile, NOMI_FINITURE, OGGETTI_SCRIVANIA, oraDi, SEGNI_NOTIFICA, sfondiBlocco } from "./dettagli.ts";
 import { contrasto, sovrapponi } from "./stili/colore.ts";
 import { NOTTE } from "./stili/notte.ts";
 import { SCHERMO } from "./stili/schermo.ts";
@@ -89,7 +89,7 @@ test("sopra ogni sfondo di ogni stile il testo bianco della schermata di blocco 
 });
 
 test("i dettagli di base sono quelli del video approvato", () => {
-  assert.deepEqual(DETTAGLI_BASE, { ora: "10:24", finitura: "grafite", sfondo: { fondo: "#1b2230" }, oggetti: ["taccuino"] });
+  assert.deepEqual(DETTAGLI_BASE, { ora: "10:24", finitura: "grafite", sfondo: { fondo: "#1b2230" }, oggetti: ["taccuino"], segnoNotifica: "cerchio" });
 });
 
 const conTinte = (accento: string, superficie: string, timbro: string, segno: string, tenue = superficie) => ({
@@ -107,4 +107,15 @@ test("anche con tinte chiarissime lo sfondo si legge: il buio di ripiego regge e
     assert.ok(leggibile(fondo), fondo);
     if (alone) assert.ok(leggibile(sovrapponi(alone, ALFA_ALONE, fondo)), `${alone} su ${fondo}`);
   }
+});
+
+test("il segno della notifica: nel video approvato il cerchio, sugli altri tutti e tre fra il 20 e il 47 %, indipendente dalla finitura", () => {
+  assert.equal(DETTAGLI_BASE.segnoNotifica, "cerchio");
+  assert.deepEqual([...SEGNI_NOTIFICA], ["cerchio", "sottolinea", "nessuno"]);
+  const dettagli = SLUGS.slice(0, 300).map((s) => dettagliDi(s, SCRIVANIA));
+  const conta = new Map<string, number>();
+  for (const d of dettagli) conta.set(d.segnoNotifica, (conta.get(d.segnoNotifica) ?? 0) + 1);
+  assert.equal(conta.size, 3);
+  for (const [v, k] of conta) assert.ok(k / 300 >= 0.2 && k / 300 <= 0.47, `${v}: ${k}`);
+  assert.equal(new Set(dettagli.map((d) => `${d.finitura}|${d.segnoNotifica}`)).size, 12);
 });

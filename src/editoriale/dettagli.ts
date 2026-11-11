@@ -10,6 +10,10 @@ export const NOMI_FINITURE = Object.keys(FINITURE) as NomeFinitura[];
 export const OGGETTI_SCRIVANIA = ["taccuino", "tazza", "pianta"] as const;
 export type OggettoScrivania = (typeof OGGETTI_SCRIVANIA)[number];
 
+/** Come si annota la notifica dell'allarme: cerchio sull'app e sottolineature, solo le sottolineature, nessun segno. */
+export const SEGNI_NOTIFICA = ["cerchio", "sottolinea", "nessuno"] as const;
+export type SegnoNotifica = (typeof SEGNI_NOTIFICA)[number];
+
 /** Lo sfondo della schermata di blocco: tinta unita, con un alone al centro che si spegne prima dei bordi. */
 export interface SfondoBlocco {
   fondo: string;
@@ -25,10 +29,12 @@ export interface Dettagli {
   sfondo: SfondoBlocco;
   /** gli oggetti di scena sulla scrivania (solo il set scrivania) */
   oggetti: readonly OggettoScrivania[];
+  /** i segni a mano sulla notifica dell'allarme */
+  segnoNotifica: SegnoNotifica;
 }
 
 /** I dettagli del video approvato: la regressione a pixel e chi forza le props li usa. */
-export const DETTAGLI_BASE: Dettagli = { ora: "10:24", finitura: "grafite", sfondo: { fondo: "#1b2230" }, oggetti: ["taccuino"] };
+export const DETTAGLI_BASE: Dettagli = { ora: "10:24", finitura: "grafite", sfondo: { fondo: "#1b2230" }, oggetti: ["taccuino"], segnoNotifica: "cerchio" };
 
 /** Quanto e' forte l'alone al centro della schermata di blocco. */
 export const ALFA_ALONE = 0.26;
@@ -79,5 +85,6 @@ export function dettagliDi(slug: string, stile: Stile): Dettagli {
     sfondo: sfondi[scelta(slug, "blocco", sfondi.length)],
     // due su tre: si lascia fuori uno degli oggetti
     oggetti: OGGETTI_SCRIVANIA.filter((_, i) => i !== scelta(slug, "scrivania", OGGETTI_SCRIVANIA.length)),
+    segnoNotifica: SEGNI_NOTIFICA[scelta(slug, "segno", SEGNI_NOTIFICA.length)],
   };
 }

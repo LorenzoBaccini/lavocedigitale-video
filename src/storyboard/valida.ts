@@ -1,6 +1,6 @@
 import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
 import { contaParole, DISPOSITIVI, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
-import type { Storyboard } from "./tipi.ts";
+import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
 
@@ -260,6 +260,17 @@ export function somiglianza(a: string[], b: string[]): number {
   return uguali / n;
 }
 
+/** Le notifiche sono un'eccezione: una sola per video. */
+export const MASSIMO_ALLARMI = 1;
+/** Al massimo meta' delle scene (chiusura esclusa) su un dispositivo, il resto su carta. */
+export const massimoSuDispositivo = (scene: number) => Math.ceil(scene / 2);
+
+/** La scena mostra uno schermo di telefono o portatile. */
+export function suDispositivo(scena: Scena): boolean {
+  if (scena.tipo === "oggetto") return scena.oggetto === "portatile" || scena.oggetto === "smartphone";
+  return scena.tipo === "gancio" || scena.tipo === "allarme" || scena.tipo === "rischio" || scena.tipo === "telefono";
+}
+
 /**
  * La varieta' dello storyboard: mai lo stesso tipo due volte di fila (salvo due `data` con date diverse)
  * e mai una sequenza troppo simile a quella di uno degli ultimi video (`recenti`, dal piu' recente).
@@ -276,6 +287,15 @@ export function erroriVarieta(storyboard: Storyboard, recenti: string[][]): stri
     }
   });
   const sequenza = sequenzaDi(storyboard);
+  const allarmi = sequenza.filter((t) => t === "allarme").length;
+  if (allarmi > MASSIMO_ALLARMI) {
+    errori.push(`sequenza: ${allarmi} scene «allarme», al massimo ${MASSIMO_ALLARMI}: la notifica solo se l'articolo parla di un messaggio vero, per le altre frasi scegli un'altra scena`);
+  }
+  const sui = storyboard.frasi.filter((f) => suDispositivo(f.scena)).length;
+  const tetto = massimoSuDispositivo(sequenza.length);
+  if (sui > tetto) {
+    errori.push(`sequenza: ${sui} scene su un dispositivo (telefono o portatile) su ${sequenza.length}, al massimo ${tetto}: mostra le altre frasi su carta, con simboli, passi, flussi o mappe`);
+  }
   for (const recente of recenti.slice(0, VIDEO_CONFRONTATI)) {
     const quota = somiglianza(sequenza, recente);
     if (quota >= SOGLIA_SOMIGLIANZA) {

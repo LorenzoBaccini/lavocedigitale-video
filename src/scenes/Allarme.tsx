@@ -95,8 +95,8 @@ export const Allarme: React.FC<ScenaDi<"allarme">> = (props) => {
       )}
       <Velo alto={0.55} basso={0.72} />
       <Ingombro nome="notifica" angoli={d.notifica(cam)} pieno />
-      <SegnoInQuadro punti={cerchio} colore={stile.colori.testo} spessore={6} progresso={(f - piano.cerchio) / 15} />
-      {sottolineature.map((punti, i) => (
+      {dettagli.segnoNotifica === "cerchio" && <SegnoInQuadro punti={cerchio} colore={stile.colori.testo} spessore={6} progresso={(f - piano.cerchio) / 15} />}
+      {dettagli.segnoNotifica !== "nessuno" && sottolineature.map((punti, i) => (
         <SegnoInQuadro key={i} punti={punti} colore={stile.colori.accento} spessore={8} progresso={(f - piano.sottolinea - i * PER_RIGA) / PER_RIGA} />
       ))}
       <Titolo nome="sopra" f={f} righe={sopra} style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE }} />

@@ -34,8 +34,8 @@
   `--secondi=1.2 --chiusura=integrata --scene=chiusura --passo=5`. Come le altre fixture finisce con `TESTO_CHIUSURA`:
   la frase finale della variante la mette la pipeline (`conFraseFinale`).
 - `durata-corta.storyboard.json` e `durata-lunga.storyboard.json`: i due estremi di `LIMITI_DURATA` in parole dette.
-  La corta ha 4 frasi e 29 parole prima della chiusura (32 con «Link nel post.»: gancio, rischio e oggetto sul
-  telefono), la lunga 9 frasi e 81 (88 con le frasi finali da 7 parole, otto tipi di scena diversi). Sono copioni che
+  La corta ha 4 frasi e 29 parole prima della chiusura (32 con «Link nel post.»: gancio e oggetto sul telefono, in mezzo
+  un numero), la lunga 9 frasi e 81 (88 con le frasi finali da 7 parole, otto tipi di scena diversi). Sono copioni che
   la pipeline accetterebbe (varietà compresa) con ogni frase finale e passano solo nella loro durata
   (`src/storyboard/durata.test.ts`). Il controllo, in ogni stile e con le due chiusure:
   `controlla-impaginazione.ts fixtures/durata-corta.storyboard.json --stile=notte --chiusura=integrata --passo=5`.

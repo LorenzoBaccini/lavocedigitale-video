@@ -68,8 +68,8 @@ export const AllarmeSchermo: React.FC<ScenaDi<"allarme">> = (props) => {
         {c.strato}
         <NotificaSchermo r={d.r} disegna={disegna} chiave={JSON.stringify([piano.messaggio, props.mittente, props.azione])} entrata={entrata} raggio={d.raggio} />
       </Schermata>
-      <SegnoInQuadro punti={cerchio} colore={CERCHIO} spessore={6} progresso={(f - piano.cerchio) / 15} />
-      {sottolineature.map((punti, i) => (
+      {dettagli.segnoNotifica === "cerchio" && <SegnoInQuadro punti={cerchio} colore={CERCHIO} spessore={6} progresso={(f - piano.cerchio) / 15} />}
+      {dettagli.segnoNotifica !== "nessuno" && sottolineature.map((punti, i) => (
         <SegnoInQuadro key={i} punti={punti} colore={SOTTOLINEATURA} spessore={8} progresso={(f - piano.sottolinea - i * PER_RIGA) / PER_RIGA} />
       ))}
       <Titolo nome="sopra" f={f} righe={sopra} style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE }} />

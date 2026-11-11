@@ -11,6 +11,7 @@ import { pianoData } from "./data.ts";
 import { pianoGancio } from "./gancio.ts";
 import { pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
+import { pianoPassi } from "./passi.ts";
 import { pianoRischio } from "./rischio.ts";
 import { pianoSimbolo } from "./simbolo.ts";
 import { pianoTeaser } from "./teaser.ts";
@@ -41,6 +42,8 @@ export function pianoScena(p: PropsScena<Scena>, durata: number): Piano {
       return pianoConfronto(p, durata);
     case "citazione":
       return pianoCitazione(p, durata);
+    case "passi":
+      return pianoPassi(p, durata);
     case "simbolo":
       return pianoSimbolo(p, durata);
     case "teaser":

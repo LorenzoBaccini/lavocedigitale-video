@@ -43,10 +43,12 @@
   `rischio-portatile` e `ganci-lunghi` sono medie con ogni frase finale, `chiusura-corta` è corta. `matrice.py`
   aggiunge un teaser ai gruppi con meno di 47 parole prima della chiusura (`matrice-10`), perché restino medie anche
   con «Link nel post.».
-- `scene-nuove.storyboard.json`: le scene senza dispositivi. Per ora tre `simbolo`: uno con `barrato`, uno con il
-  titolo al limite (24 caratteri) e l'occhiello al limite (32), uno corto. Più la chiusura. Oggi è una corta con ogni
-  frase finale (`src/storyboard/valida.test.ts`); chi ci aggiunge scene ne aggiorna la durata. Il controllo, in ogni
-  stile: `controlla-impaginazione.ts fixtures/scene-nuove.storyboard.json --stile=notte --scene=simbolo --passo=5`.
+- `scene-nuove.storyboard.json`: le scene senza dispositivi. Per ora tre `simbolo` (uno con `barrato`, uno con il
+  titolo al limite di 24 caratteri e l'occhiello al limite di 32, uno corto) e due `passi` (uno da quattro passi con
+  testi al limite di 28 caratteri e pittogrammi, uno da due senza), alternati, più la chiusura. Oggi è una media con
+  ogni frase finale (`src/storyboard/valida.test.ts`); chi ci aggiunge scene ne aggiorna la durata. Il controllo, in
+  ogni stile: `controlla-impaginazione.ts fixtures/scene-nuove.storyboard.json --stile=notte --scene=passi --passo=5`
+  (o `--scene=simbolo`).
 - Nessuna fixture dichiara `variante`: hanno tutte l'aspetto di base. Le varianti si provano con
   `controlla-impaginazione.ts <fixture> --ogni-apertura` (le tre inquadrature d'apertura del gancio) o
   `--variante=musica:chiaro,luce:sera,apertura:alta`; stile, gancio, chiusura e durata con

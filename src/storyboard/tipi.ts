@@ -20,6 +20,12 @@ export const PEZZI: readonly Pezzo[] = ["tessera", "documento", "lettore", "pin"
 export type Simbolo = "lucchetto" | "batteria" | "wifi" | "segnale" | "posizione" | "altoparlante" | "documento" | "euro" | "calendario" | "scudo";
 export const SIMBOLI: readonly Simbolo[] = ["lucchetto", "batteria", "wifi", "segnale", "posizione", "altoparlante", "documento", "euro", "calendario", "scudo"];
 
+/** Un passo della scena `passi`: il testo e, se serve, un pittogramma piccolo. */
+export interface Passo {
+  testo: string;
+  simbolo?: Simbolo;
+}
+
 export interface Voce {
   grande: string;
   piccolo: string;
@@ -48,6 +54,7 @@ export type Scena =
   | { tipo: "numero"; etichetta: string; numero: string; unita?: string; nota?: string }
   | { tipo: "confronto"; etichetta: string; a: Confronto; b: Confronto }
   | { tipo: "citazione"; testo: string; fonte: string }
+  | { tipo: "passi"; etichetta: string; passi: Passo[] }
   | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
   | { tipo: "chiusura" };
 
@@ -113,6 +120,8 @@ export const LIMITI = {
   indica: 28,
   chiave: 18,
   voci: { min: 2, max: 3 },
+  passi: { min: 2, max: 4 },
+  passo: 28,
   grande: 18,
   piccolo: 34,
   numero: 8,

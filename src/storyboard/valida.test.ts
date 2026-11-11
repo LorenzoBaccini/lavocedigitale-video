@@ -236,12 +236,34 @@ test("simbolo: un pittogramma dell'elenco, titolo entro il limite, barrato vero 
   assert.ok(errori(sb).some((e) => e.startsWith("frasi[4].scena.simbolo: deve essere uno tra")), "il simbolo e' obbligatorio");
 });
 
-test("scene-nuove passa la validazione come corta con ogni frase finale", () => {
+test("passi: da 2 a 4 passi, testo entro 28 caratteri, simbolo facoltativo dell'elenco", () => {
+  const sb = leggi();
+  const passo = (testo: string) => ({ testo });
+  sb.frasi[4].scena = { tipo: "passi", etichetta: "Prima di iniziare", passi: [{ testo: "x".repeat(28), simbolo: "wifi" }, passo("Collega il caricatore")] };
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  sb.frasi[4].scena.passi = [passo("Uno")];
+  assert.ok(errori(sb).includes("frasi[4].scena.passi: da 2 a 4 passi"));
+  sb.frasi[4].scena.passi = ["a", "b", "c", "d", "e"].map(passo);
+  assert.ok(errori(sb).includes("frasi[4].scena.passi: da 2 a 4 passi"));
+  sb.frasi[4].scena.passi = [passo("x".repeat(29)), passo("Due")];
+  assert.ok(errori(sb).includes("frasi[4].scena.passi[0].testo: 29 caratteri, massimo 28"));
+  sb.frasi[4].scena.passi = [passo(""), passo("Due")];
+  assert.ok(errori(sb).includes("frasi[4].scena.passi[0].testo: testo obbligatorio"));
+  sb.frasi[4].scena.passi = [{ testo: "Uno", simbolo: "razzo" }, passo("Due")];
+  assert.ok(errori(sb).includes(`frasi[4].scena.passi[0].simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`));
+  sb.frasi[4].scena.passi = ["Uno", passo("Due")];
+  assert.ok(errori(sb).includes("frasi[4].scena.passi[0]: oggetto richiesto"));
+});
+
+test("scene-nuove passa la validazione come media con ogni frase finale", () => {
   const sb = fixture("scene-nuove.storyboard.json");
   for (const fraseFinale of [0, 1, 2] as const) {
-    const esito = validaStoryboard(sb, "corta", fraseFinale);
+    const esito = validaStoryboard(sb, "media", fraseFinale);
     assert.equal(esito.ok, true, `${fraseFinale}: ${esito.ok ? "" : esito.errori.join("; ")}`);
   }
   assert.ok(sb.frasi.some((f: any) => f.scena.tipo === "simbolo" && f.scena.barrato === true));
   assert.ok(sb.frasi.some((f: any) => f.scena.tipo === "simbolo" && f.scena.titolo.length === 24));
+  const passi = sb.frasi.filter((f: any) => f.scena.tipo === "passi").map((f: any) => f.scena.passi);
+  assert.ok(passi.some((p: any[]) => p.length === 4 && p.every((x) => x.testo.length === 28 && x.simbolo)));
+  assert.ok(passi.some((p: any[]) => p.length === 2 && p.every((x) => !x.simbolo)));
 });

@@ -67,6 +67,20 @@ function parole(o: Dict, campo: string, percorso: string, errori: string[]): voi
   if (lunga) errori.push(`${percorso}.${campo}: «${lunga}» ha ${lunga.length} lettere, massimo ${LIMITI.parolaNota} per parola`);
 }
 
+function passi(o: Dict, percorso: string, errori: string[]): void {
+  const v = o.passi;
+  if (!Array.isArray(v) || v.length < LIMITI.passi.min || v.length > LIMITI.passi.max) {
+    errori.push(`${percorso}.passi: da ${LIMITI.passi.min} a ${LIMITI.passi.max} passi`);
+    return;
+  }
+  v.forEach((passo, i) => {
+    const p = `${percorso}.passi[${i}]`;
+    if (!èDizionario(passo)) return void errori.push(`${p}: oggetto richiesto`);
+    testo(passo, "testo", p, LIMITI.passo, errori);
+    if (passo.simbolo !== undefined && !SIMBOLI.includes(passo.simbolo as never)) errori.push(`${p}.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`);
+  });
+}
+
 function pezzi(o: Dict, percorso: string, errori: string[]): void {
   const v = o.pezzi;
   if (!Array.isArray(v) || v.length < LIMITI.pezzi.min || v.length > LIMITI.pezzi.max) {
@@ -178,6 +192,10 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   citazione: (s, p, e) => {
     testo(s, "testo", p, LIMITI.testoCitazione, e);
     testo(s, "fonte", p, LIMITI.etichetta, e);
+  },
+  passi: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    passi(s, p, e);
   },
   simbolo: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);

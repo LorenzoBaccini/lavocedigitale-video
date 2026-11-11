@@ -1,7 +1,7 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import type { PianoCarta } from "./carta.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { fineDi, leggibile, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
+import { entroLettura, fineDi, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
 import { suCarta } from "./carta.ts";
 
 /** Quanti frame ci mette la mano a tracciare il pittogramma intero. */
@@ -30,7 +30,7 @@ export function pianoSimbolo(s: ScenaDi<"simbolo">, durata: number): PianoSimbol
   const tetto = Math.min(durata - 12 - (s.barrato ? DOPO_TITOLO : 0), ultimaEntro(s.titolo, durata));
   const titolo = Math.max(simbolo + 6, Math.min(tetto, Math.max(simbolo + 10, chiave)));
   const barra = s.barrato ? titolo + DOPO_TITOLO : undefined;
-  const parole = leggibile(paroleTitolo(s.titolo, voce, titolo), durata, durata - 12);
+  const parole = entroLettura(paroleTitolo(s.titolo, voce, titolo), durata, durata - 12);
   const testi = [
     { testo: s.etichetta, da: 4 },
     { testo: testoDi(parole), da: fineDi(parole) },

@@ -3,7 +3,7 @@ import type { Piano } from "../piano.ts";
 import { accentiMancanti } from "../regia.ts";
 import type { ParolaTitolo } from "../titoli.ts";
 import { inSequenza, interoEntro } from "../lettura.ts";
-import { fineDi, leggibile, paroleInAccento, paroleTitolo, testoDi } from "../titoli.ts";
+import { entroLettura, fineDi, paroleInAccento, paroleTitolo, testoDi } from "../titoli.ts";
 import { quandoDiceUna } from "../voce.ts";
 
 /** Fra una nota e la successiva passano almeno tanti frame: la freccia si traccia, la scritta entra. */
@@ -23,7 +23,7 @@ export interface PianoDocumenti extends Piano {
 // Ogni nota arriva con una freccia a pennarello quando la voce nomina il suo pezzo; in alto occhiello e titolo.
 export function pianoDocumenti(s: ScenaDi<"documenti">, durata: number): PianoDocumenti {
   const { voce } = s;
-  const titolo = leggibile(paroleTitolo(s.titolo, voce, 6), durata, Math.round(durata * 0.45));
+  const titolo = entroLettura(paroleTitolo(s.titolo, voce, 6), durata, Math.round(durata * 0.45));
   const accento = paroleInAccento(titolo, voce.parole.slice(voce.chiave).map((p) => p.t));
   const n = s.pezzi.length;
   // le note devono restare da leggere anche se la voce arriva tardi: la scritta e' intera `FRECCIA + 6` frame dopo la freccia

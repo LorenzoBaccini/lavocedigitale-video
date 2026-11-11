@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { CARTA_RITAGLIO } from "../editoriale/carta/stile";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoCitazione } from "../editoriale/piani/citazione";
+import { DISSOLVENZA_FONTE, pianoCitazione } from "../editoriale/piani/citazione";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
 import { allineaTesto, useStile } from "../editoriale/stili";
@@ -41,7 +41,7 @@ export const Citazione: React.FC<ScenaDi<"citazione">> = (props) => {
       <div style={{ position: "absolute", top: ALTO, left: RITAGLIO.x, width: RITAGLIO.w, padding: "120px 60px 60px", ...ritaglio }}>
         <div style={{ position: "absolute", top: 10, left: 0, right: 0, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: 130, lineHeight: 1, color: stile.colori.accentoSuChiaro, opacity: 0.9 }}>«</div>
         <Titolo nome="citazione" f={f} tinta="grafica" righe={[{ parole: piano.parole, size, peso: 500, corsivo: true }]} style={{ position: "relative" }} />
-        <div data-impaginazione="fonte" style={{ marginTop: 34, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.testo, fontWeight: 600, fontSize: 34, letterSpacing: "0.08em", textTransform: "uppercase", color: stile.colori.inchiostro.tenue, opacity: fase(f, piano.fonte, piano.fonte + 8) }}>— {fonte}</div>
+        <div data-impaginazione="fonte" style={{ marginTop: 34, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.testo, fontWeight: 600, fontSize: 34, letterSpacing: "0.08em", textTransform: "uppercase", color: stile.colori.inchiostro.tenue, opacity: fase(f, piano.fonte, piano.fonte + DISSOLVENZA_FONTE) }}>— {fonte}</div>
       </div>
       <SegnoInQuadro punti={margine} colore={stile.colori.accentoSuChiaro} spessore={8} progresso={(f - piano.sottolinea) / 12} />
     </Foglio>

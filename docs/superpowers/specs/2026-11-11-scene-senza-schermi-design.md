@@ -100,4 +100,6 @@ cause:
 - **Tempo di lettura** (`lettura.ts`): ogni testo a schermo resta intero almeno `lettura(testo)` prima dello stacco,
   da 1,2 s (fino a 12 caratteri) a 1,8 s (0,6 s + 0,05 s a carattere), al più metà scena sotto i 3,6 s; se la voce lo
   porterebbe più tardi il testo la anticipa, mai il contrario. Vale in tutti i piani; nelle sequenze (`inSequenza`)
-  ogni elemento lascia la sua distanza minima a quelli dopo, e sotto i 2,3 s possono vincere le distanze.
+  ogni elemento lascia la sua distanza minima a quelli dopo, e sotto i 2,6 s possono vincere le distanze. Il testo
+  conta come intero a dissolvenza finita (costanti `DISSOLVENZA_*` condivise fra piano e scena); nel gancio la frase
+  detta resta sulla voce, tranne le ultime parole che anticipano quanto basta perché l'ultima si legga (`codaInTempo`).

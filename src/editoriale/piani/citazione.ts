@@ -16,6 +16,8 @@ export interface PianoCitazione extends PianoCarta {
 
 const INIZIO = 6;
 const PASSO = 2;
+/** In quanti frame la fonte entra in dissolvenza: da li' e' intera. */
+export const DISSOLVENZA_FONTE = 8;
 /** Quota delle parole della citazione che la voce deve dire, in ordine, perche' la citazione segua la voce. */
 export const QUOTA_LETTA = 0.7;
 
@@ -53,8 +55,8 @@ export function paroleCitazione(testo: string, voce: Voce): ParolaTitolo[] {
 // (con la voce solo se la voce la legge dall'inizio), poi la fonte; il pennarello sottolinea l'ultima riga.
 export function pianoCitazione(s: ScenaDi<"citazione">, durata: number): PianoCitazione {
   const parole = paroleCitazione(s.testo, s.voce);
-  // la fonte (intera 4 frame dopo) e la citazione prima di lei restano da leggere prima dello stacco
-  const tettoFonte = Math.min(durata - 16, interoEntro(s.fonte, durata) - 4);
+  // la fonte (intera a dissolvenza finita) e la citazione prima di lei restano da leggere prima dello stacco
+  const tettoFonte = Math.min(durata - 16, interoEntro(s.fonte, durata) - DISSOLVENZA_FONTE);
   const limite = Math.min(durata - 24, interoEntro(testoDi(parole), durata), tettoFonte - 6);
   const fine = Math.min(limite, fineDi(parole));
   // se la frase e' lunga si compone piu' in fretta: deve essere intera in tempo per leggerla
@@ -64,7 +66,7 @@ export function pianoCitazione(s: ScenaDi<"citazione">, durata: number): PianoCi
   const sottolinea = Math.min(durata - 10, fonte + 8);
   const testi = [
     { testo: testoDi(tempi), da: fineDi(tempi) },
-    { testo: s.fonte, da: fonte + 4 },
+    { testo: s.fonte, da: fonte + DISSOLVENZA_FONTE },
   ];
   return { parole: tempi, fonte, sottolinea, ...suCarta(testi, [], [...tempi.map((p) => p.da), fonte, sottolinea], durata, s.contesto) };
 }

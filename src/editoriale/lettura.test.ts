@@ -8,6 +8,8 @@ import type { Storyboard } from "../storyboard/tipi.ts";
 import type { Timing } from "../timing.ts";
 import { inSequenza, interoEntro, lettura, letturaIn, SCENA_PIENA } from "./lettura.ts";
 import { pianoScena } from "./piani/index.ts";
+import type { ParolaTitolo } from "./titoli.ts";
+import { codaInTempo, intera } from "./titoli.ts";
 
 test("la lettura va da 1,2 s per i testi brevi a 1,8 s per le righe lunghe, crescendo coi caratteri", () => {
   assert.equal(lettura(""), 36);
@@ -47,34 +49,47 @@ const cartella = new URL("../../fixtures/", import.meta.url);
 const fixture = readdirSync(cartella).filter((f) => f.endsWith(".storyboard.json"));
 const leggi = <T>(nome: string): T => JSON.parse(readFileSync(new URL(nome, cartella), "utf8"));
 
-/** Sotto questa durata (frame, 2,3 s) nelle scene a sequenza (checklist, passi, flusso…) possono vincere le distanze minime. */
-const CORTISSIMA = 69;
-
+// Ogni testo dichiarato dal piano e, nel gancio, l'ultima parola della frase scritta parola per parola (il testo intero
+// e' dichiarato al frame 0 perche' segue la voce): quelli che non restano a schermo la loro lettura.
 const mancanti = (sb: Storyboard, timing: Timing) => {
   const linea = costruisciLinea(timing, 30);
   return sb.frasi.flatMap((frase, k) => {
     if (frase.scena.tipo === "chiusura") return [];
     const p = propsFrase(sb, timing, linea, k);
-    return pianoScena(p, p.durata)
-      .testi.filter((t) => p.durata - t.da < letturaIn(t.testo, p.durata))
+    const piano = pianoScena(p, p.durata);
+    const ultima = p.tipo === "gancio" && "parole" in piano ? (piano.parole as ParolaTitolo[]).at(-1) : undefined;
+    const testi = [...piano.testi, ...(ultima ? [{ testo: ultima.t, da: intera(ultima) }] : [])];
+    return testi
+      .filter((t) => p.durata - t.da < letturaIn(t.testo, p.durata))
       .map((t) => `frase ${k + 1} (${p.tipo}, ${p.durata} frame): «${t.testo}» intero al ${t.da}, resta ${p.durata - t.da} frame su ${letturaIn(t.testo, p.durata)}`);
   });
 };
 
 // Il difetto: un testo che la voce porta a fine frase compariva e spariva subito con lo stacco. Ogni testo a schermo resta
 // intero almeno la sua lettura (piena dai 3,6 s di scena, meta' scena sotto), con ogni tipo di scena e la voce stimata.
-test("ogni testo a schermo resta da leggere prima dello stacco, con frasi da 2,3 a 7 secondi", () => {
+// Sotto i 2,6 s, nelle scene a sequenza (checklist, passi, flusso…) possono vincere le distanze minime fra gli elementi.
+test("ogni testo a schermo resta da leggere prima dello stacco, con frasi da 2,6 a 7 secondi", () => {
   let casi = 0;
   for (const nome of fixture) {
     const sb = leggi<Storyboard>(nome);
-    for (const secondi of [2.3, 2.6, 3, 3.6, 4.3, 5, 7]) {
-      assert.ok(Math.round(secondi * 30) >= CORTISSIMA);
+    for (const secondi of [2.6, 3, 3.6, 4.3, 5, 7]) {
       const timing: Timing = { voce: "elevenlabs", clips: sb.frasi.map(() => ({ file: "x.wav", secondi, inviluppo: Array(Math.round(secondi * 30)).fill(0.5) })) };
       assert.deepEqual(mancanti(sb, timing), [], `${nome} a ${secondi} s`);
       casi += sb.frasi.length;
     }
   }
   assert.ok(casi > 500, `${casi} casi`);
+});
+
+test("la frase detta del gancio anticipa solo le ultime parole, in ordine, perche' l'ultima resti da leggere", () => {
+  // una parola ogni 8 frame in una scena di 90: «router?» detta al frame 70, a un terzo di secondo dallo stacco
+  const parole = "Hai provato a spegnere il router?".split(" ").map((t, i) => ({ t, da: i * 8 + 30 }));
+  const fuori = codaInTempo(parole, 90);
+  assert.ok(90 - intera(fuori.at(-1)!) >= letturaIn("router?", 90));
+  assert.deepEqual(fuori.slice(0, 3), parole.slice(0, 3), "le prime restano sulla voce");
+  assert.notDeepEqual(fuori.slice(3), parole.slice(3));
+  for (let i = 1; i < fuori.length; i++) assert.ok(fuori[i].da >= fuori[i - 1].da);
+  assert.deepEqual(codaInTempo(parole, 300), parole, "in una scena lunga nessuna si sposta");
 });
 
 test("con la voce vera di windows10 ogni testo resta da leggere prima dello stacco", () => {

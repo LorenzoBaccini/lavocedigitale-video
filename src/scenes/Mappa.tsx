@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { coloreFoglio, Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoMappa } from "../editoriale/piani/mappa";
+import { DISSOLVENZA_LUOGO, pianoMappa } from "../editoriale/piani/mappa";
 import { piantina, Pittogramma } from "../editoriale/pittogrammi";
 import { improntaMescolata } from "../editoriale/impronta";
 import { conPeso, fase, uscita } from "../editoriale/regia";
@@ -151,7 +151,7 @@ export const Mappa: React.FC<ScenaDi<"mappa">> = (props) => {
             const w = largo(e.testo);
             const sinistra = e.ancora === "centro" ? e.x - w / 2 : e.ancora === "destra" ? e.x - w : e.x;
             const x = Math.min(lato - ARIA - w, Math.max(ARIA, sinistra));
-            const p = fase(f, e.da, e.da + 6);
+            const p = fase(f, e.da, e.da + DISSOLVENZA_LUOGO);
             return (
               <div key={i} style={{ position: "absolute", left: x, width: w, ...(e.sopra ? { bottom: lato - e.y } : { top: e.y }), display: "flex", justifyContent: e.ancora === "centro" ? "center" : e.ancora === "destra" ? "flex-end" : "flex-start", opacity: p, transform: `translateY(${(1 - uscita(p)) * (e.sopra ? 8 : -8)}px) rotate(${i ? 1.2 : -1.5}deg)` }}>
                 <div data-impaginazione="luogo" style={{ maxWidth: w, boxSizing: "border-box", padding: "4px 14px 6px", borderRadius: 10, background: conAlfa(carta, 0.92), fontFamily: stile.caratteri.testo, fontWeight: 650, fontSize: corpoLuogo, lineHeight: 1.15, textAlign: e.ancora === "centro" ? "center" : e.ancora === "destra" ? "right" : "left", color: stile.colori.inchiostro.testo }}>

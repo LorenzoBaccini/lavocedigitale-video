@@ -1,5 +1,6 @@
 import { corpo } from "../../anim";
 import { ALTEZZA, MARGINE } from "../../impaginazione";
+import { TESTO_CONFERMA } from "../piani/oggetto";
 import { fase } from "../regia";
 import { Pennarello } from "../Segno";
 import { useStile } from "../stili";
@@ -17,7 +18,7 @@ export const ConfermaSchermo: React.FC<{ testo: string; da: number; f: number; f
   const stile = useStile();
   const entra = fase(f, da, da + 6);
   if (entra <= 0) return null;
-  const ok = fase(f, da + 6, da + 14);
+  const ok = fase(f, da + TESTO_CONFERMA.da, da + TESTO_CONFERMA.a);
   return (
     <div style={{ position: "absolute", left: MARGINE, right: MARGINE, bottom: ALTEZZA - fondo, display: "flex", alignItems: "center", gap: 18, padding: "18px 28px", background: SCHEDA, borderRadius: 26, boxShadow: "0 14px 36px rgba(20,24,30,0.22)", opacity: entra, transform: `translateY(${(1 - entra) * 24}px)` }}>
       <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>

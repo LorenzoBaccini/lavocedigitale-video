@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoChecklist, RITARDO_SPUNTA } from "../editoriale/piani/checklist";
+import { DISSOLVENZA_VOCE, pianoChecklist, RITARDO_SPUNTA } from "../editoriale/piani/checklist";
 import { fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
@@ -34,7 +34,7 @@ export const Checklist: React.FC<ScenaDi<"checklist">> = (props) => {
         <div data-impaginazione="titolo" style={{ maxWidth: "100%", textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(etichetta, 84, 20, stile.larghezza, 58), lineHeight: 1.12, color: stile.colori.inchiostro.testo, opacity: entrata, transform: `translateY(${(1 - uscita(entrata)) * 16}px)` }}>{etichetta}</div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 84, maxWidth: "100%", paddingBottom: 20 }}>
           {voci.map((v, i) => {
-            const p = fase(f, piano.voci[i], piano.voci[i] + 7);
+            const p = fase(f, piano.voci[i], piano.voci[i] + DISSOLVENZA_VOCE);
             const segno = spunta(4, 6, CASELLA - 10, 31 + i);
             return (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 30, opacity: p, transform: `translateX(${(1 - uscita(p)) * -14}px)` }}>

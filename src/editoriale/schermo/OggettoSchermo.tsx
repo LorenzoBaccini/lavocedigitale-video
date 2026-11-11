@@ -4,7 +4,7 @@ import { ALTEZZA, FONDO_UTILE, LARGHEZZA, RESPIRO } from "../../impaginazione";
 import type { ScenaDi } from "../../scenes/props";
 import type { Dettagli } from "../dettagli";
 import { useDettagli } from "../DettagliVideo";
-import { pianoOggetto } from "../piani/oggetto";
+import { pianoOggetto, RICHIAMO_INDICA } from "../piani/oggetto";
 import { conPeso, fase, mix } from "../regia";
 import { Richiamo } from "../Segno";
 import { FINESTRA_PX } from "../set/geometria";
@@ -79,7 +79,7 @@ export const OggettoSchermo: React.FC<ScenaDi<"oggetto">> = (props) => {
       </Schermata>
       {tocca && partenza && bersaglio && <Puntatore f={f} arrivo={piano.indica!} da={partenza} a={bersaglio} vista={v} dito={c.tipo === "telefono"} />}
       {richiamo && sulCaldo && (
-        <Richiamo nome="indica" testo={indica!} x={sulCaldo.x} daY={Math.min(sulCaldo.y + 14, basso - 10)} aY={basso + 4} progresso={(f - piano.indica! - 10) / 10} />
+        <Richiamo nome="indica" testo={indica!} x={sulCaldo.x} daY={Math.min(sulCaldo.y + 14, basso - 10)} aY={basso + 4} progresso={(f - piano.indica! - RICHIAMO_INDICA.da) / (RICHIAMO_INDICA.a - RICHIAMO_INDICA.da)} />
       )}
       <Testata f={f} etichetta={etichetta} righe={righe} />
       {conferma && piano.conferma !== undefined && f >= piano.conferma && <ConfermaSchermo testo={conferma} da={piano.conferma} f={f} fondo={fondoConferma} />}

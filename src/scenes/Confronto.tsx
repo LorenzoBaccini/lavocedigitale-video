@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoConfronto } from "../editoriale/piani/confronto";
+import { DISSOLVENZA_COLONNA, pianoConfronto } from "../editoriale/piani/confronto";
 import { fase, uscita } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
 import { allineaFlesso, useStile } from "../editoriale/stili";
@@ -46,8 +46,8 @@ export const Confronto: React.FC<ScenaDi<"confronto">> = (props) => {
         <Occhiello testo={etichetta} opacita={fase(f, 0, 6)} />
       </div>
       <div style={{ position: "absolute", top: ALTO - 10, height: 340, left: LARGHEZZA / 2 - FILETTO / 2, width: FILETTO, background: stile.colori.inchiostro.testo, opacity: 0.35 * fase(f, piano.a, piano.a + 10) }} />
-      <Colonna lato={a} p={fase(f, piano.a, piano.a + 8)} accento={false} x={xa} />
-      <Colonna lato={b} p={fase(f, piano.b, piano.b + 8)} accento x={xb} />
+      <Colonna lato={a} p={fase(f, piano.a, piano.a + DISSOLVENZA_COLONNA)} accento={false} x={xa} />
+      <Colonna lato={b} p={fase(f, piano.b, piano.b + DISSOLVENZA_COLONNA)} accento x={xb} />
       <SegnoInQuadro punti={cerchiatura(xb + COLONNA / 2, yValore, largo, 64, 13)} colore={stile.colori.accentoSuChiaro} spessore={7} progresso={(f - piano.cerchio) / 15} />
     </Foglio>
   );

@@ -9,6 +9,8 @@ import { suCarta } from "./carta.ts";
 
 /** Dopo quanti frame dalla comparsa della voce la penna la spunta. */
 export const RITARDO_SPUNTA = 6;
+/** In quanti frame una voce della lista entra in dissolvenza: da li' le sue due righe sono intere. */
+export const DISSOLVENZA_VOCE = 7;
 
 /**
  * Quando la voce comincia a nominare la voce della lista: la prima parola piena (o cifra) di `grande` o di `piccolo`
@@ -30,15 +32,15 @@ export interface PianoChecklist extends PianoCarta {
 export function pianoChecklist(s: ScenaDi<"checklist">, durata: number): PianoChecklist {
   const n = s.voci.length;
   const passo = (durata - 40) / n;
-  // la riga grande e' intera 4 frame dopo la comparsa, la piccola 6; fra una voce e l'altra almeno 14 frame, se la scena
-  // ci sta (nelle cortissime le voci si raccolgono 20 frame prima della fine, come sempre)
-  const tetti = inSequenza(s.voci.map((v) => Math.min(interoEntro(v.grande, durata) - 4, interoEntro(v.piccolo, durata) - 6)), 14, 0);
+  // le due righe sono intere a dissolvenza finita; fra una voce e l'altra almeno 14 frame, se la scena ci sta (nelle
+  // cortissime le voci si raccolgono 20 frame prima della fine, come sempre)
+  const tetti = inSequenza(s.voci.map((v) => Math.min(interoEntro(v.grande, durata), interoEntro(v.piccolo, durata)) - DISSOLVENZA_VOCE), 14, 0);
   const voci: number[] = [];
   s.voci.forEach((v, i) => {
     const regolare = Math.round(10 + i * passo);
     const minimo = i ? voci[i - 1] + 14 : 8;
     voci.push(Math.min(durata - 20, tetti[i], Math.max(minimo, quandoNomina(s.voce, v, minimo, regolare))));
   });
-  const testi: TestoAschermo[] = [{ testo: s.etichetta, da: 4 }, ...s.voci.flatMap((v, i) => [{ testo: v.grande, da: voci[i] + 4 }, { testo: v.piccolo, da: voci[i] + 6 }])];
+  const testi: TestoAschermo[] = [{ testo: s.etichetta, da: 4 }, ...s.voci.flatMap((v, i) => [{ testo: v.grande, da: voci[i] + DISSOLVENZA_VOCE }, { testo: v.piccolo, da: voci[i] + DISSOLVENZA_VOCE }])];
   return { voci, ...suCarta(testi, [], [4, ...voci, ...voci.map((v) => v + RITARDO_SPUNTA)], durata, s.contesto) };
 }

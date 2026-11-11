@@ -60,8 +60,23 @@ const paroleScritte = (testo: string) => testoAschermo(testo).split(/\s+/).filte
 export const ultimaEntro = (testo: string, durata: number) => interoEntro(paroleScritte(testo).join(" "), durata) + ANTICIPO - 3;
 
 /** Come `entroIl`, col limite anche della lettura: il titolo e' intero in tempo per leggerlo prima dello stacco. */
-export const leggibile = (parole: ParolaTitolo[], durata: number, limite = Infinity): ParolaTitolo[] =>
+export const entroLettura = (parole: ParolaTitolo[], durata: number, limite = Infinity): ParolaTitolo[] =>
   entroIl(parole, Math.min(limite, ultimaEntro(testoDi(parole), durata)));
+
+/**
+ * Parole che seguono la voce una a una (la frase detta del gancio): l'ultima resta da leggere prima dello stacco. Se la
+ * voce la dice tardi, lei e quelle subito prima anticipano quanto basta, `passo` frame l'una dall'altra; le altre restano
+ * sulla voce.
+ */
+export function codaInTempo(parole: ParolaTitolo[], durata: number, passo = 2): ParolaTitolo[] {
+  let tetto = parole.length ? ultimaEntro(parole[parole.length - 1].t, durata) : 0;
+  const fuori = [...parole];
+  for (let i = fuori.length - 1; i >= 0 && fuori[i].da > tetto; i--) {
+    fuori[i] = { ...fuori[i], da: Math.max(0, tetto) };
+    tetto = fuori[i].da - passo;
+  }
+  return fuori;
+}
 
 /** Se l'ultima parola entrerebbe oltre `limite`, i tempi si comprimono verso l'inizio: il titolo e' intero prima dello stacco. */
 export function entroIl(parole: ParolaTitolo[], limite: number): ParolaTitolo[] {

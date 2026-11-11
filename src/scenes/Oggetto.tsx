@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
 import { useDettagli } from "../editoriale/DettagliVideo";
-import { pianoOggetto } from "../editoriale/piani/oggetto";
+import { pianoOggetto, RICHIAMO_INDICA, TESTO_CONFERMA } from "../editoriale/piani/oggetto";
 import { fase } from "../editoriale/regia";
 import { Pennarello, Richiamo, SegnoInQuadro } from "../editoriale/Segno";
 import type { Camera } from "../editoriale/set/geometria";
@@ -63,7 +63,7 @@ function cerchioSu(oggetto: Exclude<ScenaDi<"oggetto">["oggetto"], "nessuno">, c
 /** La conferma in basso, sopra i sottotitoli: la spunta a penna, poi il testo. `suChiaro` la scrive scura sulla pagina chiara. */
 export const Conferma: React.FC<{ testo: string; da: number; f: number; suChiaro: boolean }> = ({ testo, da, f, suChiaro }) => {
   const stile = useStile();
-  const ok = fase(f, da + 6, da + 14);
+  const ok = fase(f, da + TESTO_CONFERMA.da, da + TESTO_CONFERMA.a);
   return (
     <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile), alignItems: "center", gap: 18 }}>
       <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
@@ -124,7 +124,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
             <NotaAccanto nome="indica" testo={indica} x={segno.cx + segno.rx} y={segno.cy} sinistra={Math.max(NOTA_DA, segno.cx + segno.rx + 60)} da={piano.indica - 3} f={f} seme={23} />
           )}
           {!suPulsante && !telefono && indica && (
-            <Richiamo nome="indica" testo={indica} x={segno.cx} daY={richiamoSotto ? segno.cy + segno.ry + 10 : segno.cy - segno.ry - 10} aY={richiamoSotto ? segno.cy + segno.ry + 70 : segno.cy - segno.ry - 70} progresso={(f - piano.indica - 10) / 10} />
+            <Richiamo nome="indica" testo={indica} x={segno.cx} daY={richiamoSotto ? segno.cy + segno.ry + 10 : segno.cy - segno.ry - 10} aY={richiamoSotto ? segno.cy + segno.ry + 70 : segno.cy - segno.ry - 70} progresso={(f - piano.indica - RICHIAMO_INDICA.da) / (RICHIAMO_INDICA.a - RICHIAMO_INDICA.da)} />
           )}
         </>
       )}

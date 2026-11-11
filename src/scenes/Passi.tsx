@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoPassi } from "../editoriale/piani/passi";
+import { DISSOLVENZA_PASSO, pianoPassi } from "../editoriale/piani/passi";
 import { Pittogramma } from "../editoriale/pittogrammi";
 import { fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
@@ -36,7 +36,7 @@ export const Passi: React.FC<ScenaDi<"passi">> = (props) => {
         <div style={{ maxWidth: "100%" }}>
           {passi.map((passo, i) => {
             const da = piano.passi[i];
-            const p = fase(f, da, da + 7);
+            const p = fase(f, da, da + DISSOLVENZA_PASSO);
             const giro = cerchiatura(CERCHIO / 2, CERCHIO / 2, CERCHIO / 2 - 10, CERCHIO / 2 - 10, 23 + i);
             return (
               <div key={i} style={{ height: altezza, maxWidth: "100%", display: "flex", alignItems: "center", gap: 26, opacity: p, transform: `translateX(${(1 - uscita(p)) * -14}px)` }}>

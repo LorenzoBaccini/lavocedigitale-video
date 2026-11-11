@@ -2,7 +2,7 @@ import type { ScenaDi } from "../../scenes/props.ts";
 import type { Piano } from "../piano.ts";
 import { accentiMancanti } from "../regia.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { entroIl, fineDi, leggibile, paroleInAccento, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
+import { entroIl, entroLettura, fineDi, paroleInAccento, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
 
 export interface PianoRischio extends Piano {
   sopra: ParolaTitolo[];
@@ -20,7 +20,7 @@ export function pianoRischio(s: ScenaDi<"rischio">, durata: number): PianoRischi
   const { voce } = s;
   // sopratitolo e titolo restano da leggere prima dello stacco; il sopratitolo lascia il posto al titolo dopo di lui
   const tetto = Math.min(durata - 16, ultimaEntro(s.titolo, durata));
-  const sopra = leggibile(paroleTitolo(s.sopra, voce, 2), durata, Math.min(durata - 30, tetto - 3));
+  const sopra = entroLettura(paroleTitolo(s.sopra, voce, 2), durata, Math.min(durata - 30, tetto - 3));
   const titolo = entroIl(paroleTitolo(s.titolo, voce, fineDi(sopra) + 2), tetto);
   const accento = paroleInAccento(titolo, voce.parole.slice(voce.chiave).map((p) => p.t));
   const colpo = Math.min(durata - 6, Math.max(titolo[accento[0]]?.da ?? 0, voce.parole[voce.chiave]?.da ?? 0));

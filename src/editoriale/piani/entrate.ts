@@ -7,13 +7,15 @@ const PRIMO = 2;
 
 // Gli elementi di una colonna o di una catena (passi, nodi): il primo subito, gli altri quando la voce dice una parola del
 // loro testo (o a intervalli regolari fino al 70 % della scena), mai meno di `distanza` frame l'uno dall'altro e sempre
-// in tempo per leggerli: il testo (3 frame dopo l'entrata) resta intero la sua `lettura` prima della fine, anche
-// anticipando la voce, e ogni elemento lascia lo spazio per quelli che seguono; solo con una scena cortissima vince la
-// distanza minima.
-export function entrateConVoce(voce: Voce, testi: string[], durata: number, distanza: number): number[] {
+// in tempo per leggerli: il testo (intero `intero` frame dopo l'entrata, a dissolvenza finita) resta la sua `lettura`
+// prima della fine, anche anticipando la voce, e ogni elemento lascia lo spazio per quelli che seguono; solo con una scena
+// cortissima vince la distanza minima.
+export function entrateConVoce(voce: Voce, testi: string[], durata: number, distanza: number, intero: number): number[] {
   const n = testi.length;
   const regolare = (i: number) => Math.round(PRIMO + (i * (durata * 0.7 - PRIMO)) / Math.max(1, n - 1));
-  const tetti = inSequenza(testi.map((t) => interoEntro(t, durata) - 3), distanza, PRIMO);
+  // sotto il secondo e poco piu' la distanza si accorcia: anche l'ultimo testo e' intero sul fotogramma fermo
+  const passo = Math.max(1, Math.min(distanza, Math.floor((durata - 1 - intero - PRIMO) / Math.max(1, n - 1))));
+  const tetti = inSequenza(testi.map((t) => interoEntro(t, durata) - intero), passo, PRIMO);
   const entrate: number[] = [];
   testi.forEach((testo, i) => {
     const tetto = tetti[i];

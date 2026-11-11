@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoNumero } from "../editoriale/piani/numero";
+import { DISSOLVENZA_SOTTO, pianoNumero } from "../editoriale/piani/numero";
 import { fase, uscita } from "../editoriale/regia";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
@@ -17,8 +17,8 @@ export const Numero: React.FC<ScenaDi<"numero">> = (props) => {
   const stile = useStile();
   const { durata, etichetta, numero, unita, nota } = props;
   const piano = pianoNumero(props, durata);
-  const pu = piano.unita === undefined ? 0 : fase(f, piano.unita, piano.unita + 8);
-  const pn = piano.nota === undefined ? 0 : fase(f, piano.nota, piano.nota + 8);
+  const pu = piano.unita === undefined ? 0 : fase(f, piano.unita, piano.unita + DISSOLVENZA_SOTTO);
+  const pn = piano.nota === undefined ? 0 : fase(f, piano.nota, piano.nota + DISSOLVENZA_SOTTO);
   return (
     <Foglio tipo="giornale" spinta={spintaFoglio(f, durata, piano.stacchi)}>
       <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile) }}>

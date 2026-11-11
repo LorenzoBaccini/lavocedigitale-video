@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoFlusso } from "../editoriale/piani/flusso";
+import { pianoFlusso, TESTO_NODO } from "../editoriale/piani/flusso";
 import { Pittogramma } from "../editoriale/pittogrammi";
 import { fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
@@ -54,7 +54,7 @@ export const Flusso: React.FC<ScenaDi<"flusso">> = (props) => {
             const ultimo = i === nodi.length - 1;
             const giro = riquadro(LARGHEZZA_RIQUADRO, altezza, 31 + i);
             const top = i * (altezza + FRA_RIQUADRI);
-            const p = fase(f, da + 3, da + 9);
+            const p = fase(f, da + TESTO_NODO.da, da + TESTO_NODO.a);
             const asta = freccia({ x: LARGHEZZA_RIQUADRO / 2, y: 0 }, { x: LARGHEZZA_RIQUADRO / 2, y: FRA_RIQUADRI - 2 * ARIA_FRECCIA }, 41 + i);
             return (
               <div key={i}>

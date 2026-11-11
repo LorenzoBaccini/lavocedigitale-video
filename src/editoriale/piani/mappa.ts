@@ -2,7 +2,7 @@ import type { ScenaDi } from "../../scenes/props.ts";
 import type { FormaMappa } from "../../storyboard/tipi.ts";
 import type { PianoCarta } from "./carta.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { fineDi, leggibile, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
+import { entroLettura, fineDi, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
 import { inSequenza, interoEntro } from "../lettura.ts";
 import { suCarta } from "./carta.ts";
 import { quandoDiceUna } from "../voce.ts";
@@ -17,6 +17,8 @@ const DOPO_SEGNO: Record<FormaMappa, number> = { punto: 6, area: 10, percorso: 0
 const FRA_LUOGHI = 8;
 /** Senza la voce, il tragitto ci mette tanto ad arrivare. */
 const TRAGITTO = 18;
+/** In quanti frame l'etichetta di un luogo entra in dissolvenza: da li' e' intera. */
+export const DISSOLVENZA_LUOGO = 6;
 
 export interface PianoMappa extends PianoCarta {
   /** la piantina comincia ad apparire */
@@ -37,8 +39,7 @@ export interface PianoMappa extends PianoCarta {
 export function pianoMappa(s: ScenaDi<"mappa">, durata: number): PianoMappa {
   const { voce, forma } = s;
   const n = s.luoghi.length;
-  // l'etichetta di un luogo e' intera 3 frame dopo il suo arrivo
-  const tetti = inSequenza(s.luoghi.map((l) => interoEntro(l, durata) - 3), FRA_LUOGHI);
+  const tetti = inSequenza(s.luoghi.map((l) => interoEntro(l, durata) - DISSOLVENZA_LUOGO), FRA_LUOGHI);
   const tettoSegno = (tetti[0] ?? durata - 13) - DOPO_SEGNO[forma];
   const detto = quandoDiceUna(voce, s.luoghi[0], Math.round(durata * 0.25)) - DOPO_SEGNO[forma];
   const segno = Math.max(PIANTINA + DOPO_PIANTINA, Math.min(tettoSegno, detto));
@@ -51,7 +52,7 @@ export function pianoMappa(s: ScenaDi<"mappa">, durata: number): PianoMappa {
   }
   const chiave = voce.parole[voce.chiave]?.da ?? Math.round(durata * 0.6);
   const titolo = Math.max(segno, Math.min(ultimaEntro(s.titolo, durata), Math.max(segno + 4, chiave)));
-  const parole = leggibile(paroleTitolo(s.titolo, voce, titolo), durata, durata - 12);
-  const testi = [{ testo: s.etichetta, da: 4 }, ...s.luoghi.map((testo, i) => ({ testo, da: luoghi[i] + 3 })), { testo: testoDi(parole), da: fineDi(parole) }];
+  const parole = entroLettura(paroleTitolo(s.titolo, voce, titolo), durata, durata - 12);
+  const testi = [{ testo: s.etichetta, da: 4 }, ...s.luoghi.map((testo, i) => ({ testo, da: luoghi[i] + DISSOLVENZA_LUOGO })), { testo: testoDi(parole), da: fineDi(parole) }];
   return { piantina: PIANTINA, segno, luoghi, titolo, parole, ...suCarta(testi, [], [PIANTINA, segno, ...luoghi, titolo], durata, s.contesto) };
 }

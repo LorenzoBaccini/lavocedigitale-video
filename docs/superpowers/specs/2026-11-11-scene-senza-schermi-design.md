@@ -87,6 +87,13 @@ cause:
   lasciando sempre il posto a due righe di titolo, così un titolo che va a capo non scende sul sottotitolo. La colonna
   segue `allineaFlesso`: centrata negli stili centrati, al margine sinistro negli altri. Le etichette dei luoghi stanno su
   una pillola del colore del foglio, dentro la cornice.
+- **Titolo di `simbolo` e `mappa` dal piano**: le parole del titolo si costruiscono nel piano (`paroleTitolo` + `entroIl`
+  a `durata − 12`, come `rischio` e `allarme`) e la scena le mostra così come sono, perché il testo dichiarato intero
+  sia quello che si vede sul fotogramma fermo. In `mappa` i tempi non si invertono nemmeno sotto i 22 frame
+  (`luoghi[1] ≥ luoghi[0]`, `titolo ≥ segno`). `passi` e `flusso` condividono l'algoritmo delle entrate
+  (`entrateConVoce`), che differisce solo per la distanza minima.
+- **Limite noto, `segnoNotifica`**: il piano dell'`allarme` conta gli eventi di cerchio e sottolineatura anche quando il
+  segno manca, perché non vede i `Dettagli`; con `nessuno` un allarme può avere uno stacco di camera in meno.
 - **Gli esempi del prompt**: in Windows lo scudo barrato va sulla frase «nasce senza difese» (il `rischio` passa alla
   frase del problema) e la `checklist` resta, perché dice cosa serve; i `passi` vanno alla procedura dei Consensi nel
   Fascicolo medio, l'unico con `allarme`. Il test degli esempi resta in `durata.test.ts`, che già li estraeva.

@@ -1,6 +1,8 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import type { FormaMappa } from "../../storyboard/tipi.ts";
 import type { PianoCarta } from "./carta.ts";
+import type { ParolaTitolo } from "../titoli.ts";
+import { entroIl, fineDi, paroleTitolo, testoDi } from "../titoli.ts";
 import { suCarta } from "./carta.ts";
 import { quandoDiceUna } from "../voce.ts";
 
@@ -22,7 +24,10 @@ export interface PianoMappa extends PianoCarta {
   segno: number;
   /** frame in cui arriva l'etichetta di ciascun luogo; con `percorso` la seconda e' l'arrivo del tragitto */
   luoghi: number[];
+  /** il titolo comincia a entrare */
   titolo: number;
+  /** le parole del titolo, con i loro tempi: la scena le mostra cosi' come sono */
+  parole: ParolaTitolo[];
 }
 
 // La piantina appare in dissolvenza, poi la mano segna il luogo quando la voce lo nomina (o a un quarto della scena);
@@ -39,10 +44,12 @@ export function pianoMappa(s: ScenaDi<"mappa">, durata: number): PianoMappa {
   if (n > 1) {
     const da = Math.max(0, voce.parole.findIndex((w) => w.da > luoghi[0]));
     const arrivo = quandoDiceUna(voce, s.luoghi[1], luoghi[0] + TRAGITTO, da);
-    luoghi.push(Math.min(ultimo, Math.max(luoghi[0] + FRA_LUOGHI, arrivo)));
+    // sotto i 22 frame il tetto scende sotto il primo luogo: l'arrivo non lo precede mai
+    luoghi.push(Math.max(luoghi[0], Math.min(ultimo, Math.max(luoghi[0] + FRA_LUOGHI, arrivo))));
   }
   const chiave = voce.parole[voce.chiave]?.da ?? Math.round(durata * 0.6);
-  const titolo = Math.min(ultimo, Math.max(segno + 4, chiave));
-  const testi = [{ testo: s.etichetta, da: 4 }, ...s.luoghi.map((testo, i) => ({ testo, da: luoghi[i] + 3 })), { testo: s.titolo, da: titolo + 3 }];
-  return { piantina: PIANTINA, segno, luoghi, titolo, ...suCarta(testi, [], [PIANTINA, segno, ...luoghi, titolo], durata, s.contesto) };
+  const titolo = Math.max(segno, Math.min(ultimo, Math.max(segno + 4, chiave)));
+  const parole = entroIl(paroleTitolo(s.titolo, voce, titolo), durata - 12);
+  const testi = [{ testo: s.etichetta, da: 4 }, ...s.luoghi.map((testo, i) => ({ testo, da: luoghi[i] + 3 })), { testo: testoDi(parole), da: fineDi(parole) }];
+  return { piantina: PIANTINA, segno, luoghi, titolo, parole, ...suCarta(testi, [], [PIANTINA, segno, ...luoghi, titolo], durata, s.contesto) };
 }

@@ -57,3 +57,27 @@ test("i testi a schermo sono l'occhiello, i luoghi e il titolo", () => {
   const piano = pianoMappa(scena(240, voce(DETTA, 12), "percorso"), 240);
   assert.deepEqual(piano.testi.map((t) => t.testo), ["Dove succede", "La stazione", "Il porto", "Tutto in un quartiere"]);
 });
+
+test("un titolo di 7 parole in una scena di un secondo e' intero prima dello stacco, parola per parola", () => {
+  for (const forma of ["punto", "area", "percorso"] as const) {
+    const lungo = { ...scena(30, voce(DETTA, 12), forma), titolo: "Una a una tutte le sette parole" };
+    const piano = pianoMappa(lungo, 30);
+    assert.equal(piano.parole.length, 7, forma);
+    for (const p of piano.parole) assert.ok(p.da - 2 + 3 <= 30 - 10, `${forma}: ${p.t} a ${p.da}`);
+    assert.ok(piano.testi.at(-1)!.da <= 30 - 10, forma);
+  }
+});
+
+test("con 18 o 20 frame i tempi non si invertono: segno <= luoghi[0] <= luoghi[1] e segno <= titolo", () => {
+  for (const forma of ["punto", "area", "percorso"] as const) {
+    for (const durata of [18, 20]) {
+      for (const v of [voce(DETTA, 12), SENZA]) {
+        const piano = pianoMappa(scena(durata, v, forma), durata);
+        const dove = `${forma}/${durata}: ${piano.segno} ${piano.luoghi.join(",")} ${piano.titolo}`;
+        assert.ok(piano.segno <= piano.luoghi[0], dove);
+        if (forma === "percorso") assert.ok(piano.luoghi[0] <= piano.luoghi[1], dove);
+        assert.ok(piano.segno <= piano.titolo, dove);
+      }
+    }
+  }
+});

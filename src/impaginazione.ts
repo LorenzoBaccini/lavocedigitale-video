@@ -7,6 +7,8 @@ export const LARGHEZZA_UTILE = LARGHEZZA - 2 * MARGINE;
 // le barre del logo hanno 8/128 di vuoto a sinistra: a 70 px il segno visibile cade sul margine
 export const LOGO = { x: 70, y: 260, lato: 120 };
 export const TITOLO_TOP = 380;
+// le scene su carta mettono il contenuto sotto l'occhiello (36 px su una riga) e un po' di aria
+export const SOTTO_OCCHIELLO = TITOLO_TOP + 90;
 export const SOTTOTITOLO_BASSO = 400;
 export const FONDO_SCENA = 560;
 export const FONDO_UTILE = ALTEZZA - FONDO_SCENA;

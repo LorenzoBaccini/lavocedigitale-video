@@ -4,6 +4,8 @@ import { Griglia } from "../griglia/Griglia";
 import { Poster } from "../poster/Poster";
 import { Scheda } from "../scheda/Scheda";
 import { useStile } from "../stili";
+import { SCHEDA } from "../stili/schermo";
+import type { Stile } from "../stili/tipi";
 import type { TipoCarta } from "./stile";
 
 // fibre della carta: rumore fisso, moltiplicato sul colore
@@ -16,6 +18,9 @@ export const COLORE_CARTA: Record<TipoCarta, string> = {
   agenda: "#F2EEE3",
   liscia: "#F1ECE1",
 };
+
+/** Il colore del foglio sotto il disegno nello stile dato: la carta, la scheda bianca, o la tinta piena di poster e griglia. */
+export const coloreFoglio = (stile: Stile, tipo: TipoCarta) => (stile.grafiche === "carta" ? COLORE_CARTA[tipo] : stile.grafiche === "scheda" ? SCHEDA : stile.colori.superficie);
 
 const disegno = (tipo: TipoCarta): React.CSSProperties => {
   if (tipo === "quadretti") {

@@ -1,5 +1,7 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import type { PianoCarta } from "./carta.ts";
+import type { ParolaTitolo } from "../titoli.ts";
+import { entroIl, fineDi, paroleTitolo, testoDi } from "../titoli.ts";
 import { suCarta } from "./carta.ts";
 
 /** Quanti frame ci mette la mano a tracciare il pittogramma intero. */
@@ -10,7 +12,10 @@ const DOPO_TITOLO = 8;
 export interface PianoSimbolo extends PianoCarta {
   /** il pittogramma comincia a tracciarsi */
   simbolo: number;
+  /** il titolo comincia a entrare */
   titolo: number;
+  /** le parole del titolo, con i loro tempi: la scena le mostra cosi' come sono */
+  parole: ParolaTitolo[];
   /** la diagonale a pennarello sopra il pittogramma, solo con `barrato` */
   barra?: number;
 }
@@ -25,10 +30,11 @@ export function pianoSimbolo(s: ScenaDi<"simbolo">, durata: number): PianoSimbol
   const tetto = durata - 12 - (s.barrato ? DOPO_TITOLO : 0);
   const titolo = Math.max(simbolo + 6, Math.min(tetto, Math.max(simbolo + 10, chiave)));
   const barra = s.barrato ? titolo + DOPO_TITOLO : undefined;
+  const parole = entroIl(paroleTitolo(s.titolo, voce, titolo), durata - 12);
   const testi = [
     { testo: s.etichetta, da: 4 },
-    { testo: s.titolo, da: titolo + 3 },
+    { testo: testoDi(parole), da: fineDi(parole) },
   ];
   const eventi = [simbolo, titolo, ...(barra !== undefined ? [barra] : [])];
-  return { simbolo, titolo, barra, ...suCarta(testi, [], eventi, durata, s.contesto) };
+  return { simbolo, titolo, parole, barra, ...suCarta(testi, [], eventi, durata, s.contesto) };
 }

@@ -10,14 +10,13 @@ import { fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
 import { allineaFlesso, useStile } from "../editoriale/stili";
 import { avanzamento, cerchiatura, lunghezza, percorso } from "../editoriale/tratto";
-import { ALTEZZA, FONDO_UTILE, MARGINE, TITOLO_TOP } from "../impaginazione";
+import { ALTEZZA, FONDO_UTILE, MARGINE, SOTTO_OCCHIELLO, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
 const CERCHIO = 112;
 const SIMBOLO = 96;
 const ALTEZZA_MASSIMA = 240;
-/** sotto l'occhiello (36 px su una riga) e un po' di aria */
-const RIGHE_TOP = TITOLO_TOP + 90;
+const RIGHE_TOP = SOTTO_OCCHIELLO;
 
 // I passi su un quaderno a quadretti: ogni numero si cerchia a penna quando la voce arriva al passo, con il suo
 // pittogramma piccolo e il testo. Le righe si dividono la zona utile, qualunque sia il loro numero.

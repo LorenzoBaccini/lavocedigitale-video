@@ -11,11 +11,11 @@ import { SegnoInQuadro } from "../editoriale/Segno";
 import { allineaFlesso, useStile } from "../editoriale/stili";
 import { avanzamento, trattoFra } from "../editoriale/tratto";
 import { Titolo } from "../editoriale/Titolo";
-import { LARGHEZZA, MARGINE, TITOLO_TOP } from "../impaginazione";
+import { LARGHEZZA, MARGINE, SOTTO_OCCHIELLO, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
 const LATO = 520;
-const SIMBOLO_TOP = TITOLO_TOP + 90;
+const SIMBOLO_TOP = SOTTO_OCCHIELLO;
 const TITOLO_SOTTO = SIMBOLO_TOP + LATO + 50;
 
 // Il simbolo: un pittogramma grande tracciato a mano sul foglio, sotto il titolo con la chiave; se la cosa manca o non
@@ -26,7 +26,6 @@ export const Simbolo: React.FC<ScenaDi<"simbolo">> = (props) => {
   const { durata, etichetta, simbolo, titolo } = props;
   const piano = pianoSimbolo(props, durata);
   const x = allineaFlesso(stile) === "center" ? (LARGHEZZA - LATO) / 2 : MARGINE;
-  const parole = titolo.split(/\s+/).map((t, i) => ({ t, da: piano.titolo + 2 * i }));
   return (
     <Foglio tipo="liscia" spinta={spintaFoglio(f, durata, piano.stacchi)}>
       <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile) }}>
@@ -47,7 +46,7 @@ export const Simbolo: React.FC<ScenaDi<"simbolo">> = (props) => {
         nome="titolo"
         f={f}
         tinta="grafica"
-        righe={[{ parole, size: corpo(titolo, 116, 16, stile.larghezza), peso: 700 }]}
+        righe={[{ parole: piano.parole, size: corpo(titolo, 116, 16, stile.larghezza), peso: 700 }]}
         style={{ position: "absolute", top: TITOLO_SOTTO, left: MARGINE, right: MARGINE }}
       />
     </Foglio>

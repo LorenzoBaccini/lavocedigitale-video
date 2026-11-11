@@ -10,7 +10,7 @@ import { fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
 import { allineaFlesso, useStile } from "../editoriale/stili";
 import { avanzamento, freccia, lunghezza, percorso, riquadro } from "../editoriale/tratto";
-import { ALTEZZA, FONDO_UTILE, LARGHEZZA, MARGINE, TITOLO_TOP } from "../impaginazione";
+import { ALTEZZA, FONDO_UTILE, LARGHEZZA, MARGINE, SOTTO_OCCHIELLO, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
 /** i riquadri vanno da margine a margine, in ogni stile */
@@ -22,11 +22,10 @@ const FRA_RIQUADRI = 130;
 const ARIA_FRECCIA = 10;
 const PADDING = 44;
 const GAP = 26;
-/** larghezza media di una lettera in rapporto al corpo: per centrare il blocco, non per misurare */
+/** larghezza media di una lettera del testo grassetto in rapporto al corpo (non il serif dei titoli, `CARATTERE`): per centrare il blocco, non per misurare */
 const LARGHEZZA_LETTERA = 0.56;
 const SIMBOLO = 88;
-/** sotto l'occhiello (36 px su una riga) e un po' di aria */
-const NODI_TOP = TITOLO_TOP + 90;
+const NODI_TOP = SOTTO_OCCHIELLO;
 
 // Il flusso su un foglio liscio: i riquadri incolonnati dall'alto in basso, uniti da frecce a pennarello che si
 // tracciano quando arriva il nodo dopo; l'ultimo, il punto d'arrivo, ha il riquadro nel colore d'accento.

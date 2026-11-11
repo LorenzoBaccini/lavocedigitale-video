@@ -1,29 +1,25 @@
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
-import { COLORE_CARTA, Foglio } from "../editoriale/carta/Foglio";
+import { coloreFoglio, Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
 import { pianoMappa } from "../editoriale/piani/mappa";
-import { Pittogramma } from "../editoriale/pittogrammi";
-import { piantina } from "../editoriale/pittogrammi/piantina";
+import { piantina, Pittogramma } from "../editoriale/pittogrammi";
 import { improntaMescolata } from "../editoriale/impronta";
 import { conPeso, fase, uscita } from "../editoriale/regia";
 import { Pennarello } from "../editoriale/Segno";
 import { allineaFlesso, useStile } from "../editoriale/stili";
 import { conAlfa } from "../editoriale/stili/alfa";
-import { SCHEDA } from "../editoriale/stili/schermo";
-import type { Stile } from "../editoriale/stili/tipi";
 import { Titolo } from "../editoriale/Titolo";
 import type { Punto } from "../editoriale/tratto";
 import { avanzamento, casuale, cerchiatura, lunghezza, percorso, riquadro, smussa, tratteggio } from "../editoriale/tratto";
-import { ALTEZZA, FONDO_TITOLO, LARGHEZZA_UTILE, MARGINE, TITOLO_TOP } from "../impaginazione";
+import { ALTEZZA, FONDO_TITOLO, LARGHEZZA_UTILE, MARGINE, SOTTO_OCCHIELLO, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
 /** Le etichette dei luoghi restano almeno a tanto dal bordo del riquadro. */
 const ARIA = 28;
-/** sotto l'occhiello (36 px su una riga) e un po' di aria */
-const MAPPA_TOP = TITOLO_TOP + 90;
+const MAPPA_TOP = SOTTO_OCCHIELLO;
 /** Dove stanno piantina e titolo, uno sopra l'altro: dall'occhiello al fondo dei titoli. */
 const SPAZIO = ALTEZZA - FONDO_TITOLO - MAPPA_TOP;
 /** Fra la piantina e il titolo. */
@@ -36,16 +32,13 @@ const FRA_RIGHE = 4;
 const SPILLO = 150;
 /** La punta dello spillo nel riquadro 100×100 del pittogramma `posizione`. */
 const PUNTA = { x: 0.5, y: 0.88 };
-/** Larghezza media di una lettera in rapporto al corpo, per eccesso: per tenere l'etichetta nel riquadro, non per misurare. */
+/** Larghezza media di una lettera del testo in grassetto in rapporto al corpo (piu' larga di quella del `Flusso`: qui si stima per eccesso), per tenere l'etichetta nel riquadro, non per misurare. */
 const LARGHEZZA_LETTERA = 0.6;
 /** In rapporto al lato: ci sta un luogo di 20 caratteri su una riga, anche col monospazio della notte. */
 const LARGHEZZA_ETICHETTA = 0.72;
 const CORPO_LUOGO = 36;
 /** Il tragitto a trattini: pieno, vuoto. */
 const TRATTINO = [24, 15] as const;
-
-// La carta sotto il disegno: le etichette se ne staccano con lo stesso fondo, sopra le linee della piantina.
-const cartaDi = (stile: Stile) => (stile.grafiche === "carta" ? COLORE_CARTA.liscia : stile.grafiche === "scheda" ? SCHEDA : stile.colori.superficie);
 
 /** Un'etichetta nel riquadro: `x` e' il bordo da cui parte (o il centro), `y` la cima o, con `sopra`, il fondo. */
 interface Etichetta {
@@ -77,7 +70,8 @@ export const Mappa: React.FC<ScenaDi<"mappa">> = (props) => {
   const scosta = (ampiezza: number) => (r() - 0.5) * ampiezza * lato;
   const accento = stile.colori.accentoSuChiaro;
   const tenue = stile.colori.inchiostro.tenue;
-  const carta = cartaDi(stile);
+  // le etichette si staccano dalle linee della piantina con lo stesso fondo del foglio
+  const carta = coloreFoglio(stile, "liscia");
   // mai sotto il corpo minimo leggibile su telefono; 28 e' l'imbottitura dell'etichetta, a destra e a sinistra
   const corpoLuogo = Math.max(34, Math.round(CORPO_LUOGO / stile.larghezza));
   const largo = (testo: string) => Math.min(larghezzaEtichetta, testo.length * LARGHEZZA_LETTERA * corpoLuogo * stile.larghezza + 28);
@@ -171,7 +165,7 @@ export const Mappa: React.FC<ScenaDi<"mappa">> = (props) => {
           nome="titolo"
           f={f}
           tinta="grafica"
-          righe={[{ parole: titolo.split(/\s+/).map((t, i) => ({ t, da: piano.titolo + 2 * i })), size: corpoTitolo, peso: 700 }]}
+          righe={[{ parole: piano.parole, size: corpoTitolo, peso: 700 }]}
           style={{ alignSelf: "stretch", width: LARGHEZZA_UTILE }}
         />
       </div>

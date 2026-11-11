@@ -56,3 +56,11 @@ test("senza barrato niente barra; i testi a schermo sono etichetta e titolo", ()
   assert.equal(piano.barra, undefined);
   assert.deepEqual(piano.testi.map((t) => t.testo), ["Dal 14 ottobre", "Niente più sicurezza"]);
 });
+
+test("un titolo di 7 parole in una scena di un secondo e' intero prima dello stacco, parola per parola", () => {
+  const lungo = { ...scena(30, voce(DETTA, 9)), titolo: "Una a una tutte le sette parole" };
+  const piano = pianoSimbolo(lungo, 30);
+  assert.equal(piano.parole.length, 7);
+  for (const p of piano.parole) assert.ok(p.da - 2 + 3 <= 30 - 10, `${p.t} a ${p.da}`);
+  assert.ok(piano.testi[1].da <= 30 - 10, `testo a ${piano.testi[1].da}`);
+});

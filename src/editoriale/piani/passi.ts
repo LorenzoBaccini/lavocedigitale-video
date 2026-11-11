@@ -5,7 +5,7 @@ import { quandoDiceUna } from "../voce.ts";
 
 /** Frame minimi fra un passo e il successivo: il tempo di leggere il numero prima che arrivi l'altro. */
 const FRA_PASSI = 8;
-/** Il primo passo entra subito, in apertura. */
+/** Il primo passo entra subito, in apertura, senza aspettare la voce: con 4 passi in una frase di 1 s non ci sarebbe posto per gli altri. */
 const PRIMO = 2;
 
 export interface PianoPassi extends PianoCarta {

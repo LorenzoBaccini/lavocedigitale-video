@@ -264,6 +264,6 @@ test("scene-nuove passa la validazione come media con ogni frase finale", () => 
   assert.ok(sb.frasi.some((f: any) => f.scena.tipo === "simbolo" && f.scena.barrato === true));
   assert.ok(sb.frasi.some((f: any) => f.scena.tipo === "simbolo" && f.scena.titolo.length === 24));
   const passi = sb.frasi.filter((f: any) => f.scena.tipo === "passi").map((f: any) => f.scena.passi);
-  assert.ok(passi.some((p: any[]) => p.length === 4 && p.every((x) => x.testo.length === 28 && x.simbolo)));
+  assert.ok(passi.some((p: any[]) => p.length === 4 && p.every((x) => x.testo.length === 28) && p.some((x) => x.simbolo) && p.some((x) => !x.simbolo)));
   assert.ok(passi.some((p: any[]) => p.length === 2 && p.every((x) => !x.simbolo)));
 });

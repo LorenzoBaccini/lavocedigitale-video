@@ -45,7 +45,7 @@
   con «Link nel post.».
 - `scene-nuove.storyboard.json`: le scene senza dispositivi. Per ora tre `simbolo` (uno con `barrato`, uno con il
   titolo al limite di 24 caratteri e l'occhiello al limite di 32, uno corto) e due `passi` (uno da quattro passi con
-  testi al limite di 28 caratteri e pittogrammi, uno da due senza), alternati, più la chiusura. Oggi è una media con
+  testi al limite di 28 caratteri, tre con pittogramma e uno senza per provare l'allineamento, uno da due senza), alternati, più la chiusura. Oggi è una media con
   ogni frase finale (`src/storyboard/valida.test.ts`); chi ci aggiunge scene ne aggiorna la durata. Il controllo, in
   ogni stile: `controlla-impaginazione.ts fixtures/scene-nuove.storyboard.json --stile=notte --scene=passi --passo=5`
   (o `--scene=simbolo`).

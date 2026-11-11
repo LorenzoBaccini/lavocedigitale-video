@@ -2,11 +2,11 @@
   "slug": "scene-nuove",
   "frasi": [
     { "testo": "Dal quattordici ottobre Windows 10 non riceve più le patch di sicurezza.", "chiave": "sicurezza", "scena": { "tipo": "simbolo", "etichetta": "Dal 14 ottobre", "simbolo": "scudo", "titolo": "Niente più sicurezza", "barrato": true } },
-    { "testo": "Prima fai il backup, poi controlla lo spazio, scarica l'installer e riavvia.", "chiave": "backup", "scena": { "tipo": "passi", "etichetta": "Prima di aggiornare", "passi": [
+    { "testo": "Prima fai il backup, poi collega il caricatore, scarica il file e riavvia.", "chiave": "backup", "scena": { "tipo": "passi", "etichetta": "Prima di aggiornare", "passi": [
       { "testo": "Salva tutti i tuoi documenti", "simbolo": "documento" },
-      { "testo": "Libera 64 gigabyte di spazio", "simbolo": "batteria" },
-      { "testo": "Scarica il file di Microsoft", "simbolo": "wifi" },
-      { "testo": "Riavvia e segui la procedura", "simbolo": "calendario" }
+      { "testo": "Collega il caricatore subito", "simbolo": "batteria" },
+      { "testo": "Scarica il file dal sito web", "simbolo": "wifi" },
+      { "testo": "Riavvia e segui la procedura" }
     ] } },
     { "testo": "Per passare a Windows 11 serve un wifi che non cade mai.", "chiave": "wifi", "scena": { "tipo": "simbolo", "etichetta": "Per tutta la durata del download", "simbolo": "wifi", "titolo": "Un wifi che non cade mai" } },
     { "testo": "Poi apri le impostazioni e premi aggiorna, senza altro da fare.", "chiave": "impostazioni", "scena": { "tipo": "passi", "etichetta": "Poi", "passi": [

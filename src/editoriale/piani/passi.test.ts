@@ -22,7 +22,7 @@ const DETTA = "Prima collega il caricatore poi apri le impostazioni controlla lo
 test("il primo passo entra subito, gli altri quando la voce dice una parola del loro testo", () => {
   const v = voce(DETTA);
   const piano = pianoPassi(scena(240, v), 240);
-  assert.ok(piano.passi[0] <= 8);
+  assert.equal(piano.passi[0], 2);
   assert.equal(piano.passi[1], v.parole[5].da);
   assert.equal(piano.passi[2], v.parole[8].da);
   assert.equal(piano.passi[3], v.parole[13].da);

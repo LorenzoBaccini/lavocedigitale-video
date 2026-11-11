@@ -8,10 +8,10 @@
       { "testo": "Scarica il file dal sito web", "simbolo": "wifi" },
       { "testo": "Riavvia e segui la procedura" }
     ] } },
-    { "testo": "La richiesta parte, il sistema controlla tutto e risponde.", "chiave": "controlla", "scena": { "tipo": "flusso", "etichetta": "Cosa succede dopo", "nodi": [
-      { "testo": "Invii la richiesta", "simbolo": "segnale" },
+    { "testo": "La richiesta parte, il sistema controlla tutto e ti dà una risposta.", "chiave": "controlla", "scena": { "tipo": "flusso", "etichetta": "Cosa succede dopo", "nodi": [
+      { "testo": "Invii la richiesta", "simbolo": "documento" },
       { "testo": "Si controlla tutto", "simbolo": "scudo" },
-      { "testo": "Ricevi la risposta", "simbolo": "documento" }
+      { "testo": "Ricevi la risposta", "simbolo": "altoparlante" }
     ] } },
     { "testo": "Serve un wifi che non cade mai.", "chiave": "wifi", "scena": { "tipo": "simbolo", "etichetta": "Per tutta la durata del download", "simbolo": "wifi", "titolo": "Un wifi che non cade mai" } },
     { "testo": "Poi apri le impostazioni e premi aggiorna.", "chiave": "impostazioni", "scena": { "tipo": "passi", "etichetta": "Poi", "passi": [

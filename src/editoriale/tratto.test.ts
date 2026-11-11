@@ -60,6 +60,12 @@ test("il riquadro gira intorno al rettangolo, a mano, e chiude scavalcando l'ini
   const [x0, y0] = punti[0];
   const [x1, y1] = punti[punti.length - 1];
   assert.ok(Math.hypot(x1 - x0, y1 - y0) > 3);
+  // lo scavalco e' un attimo di penna, non un tratto ripassato lungo il lato
+  for (const seme of [1, 2, 3, 4, 5]) {
+    const largo = riquadro(900, 200, seme);
+    const dx = largo[largo.length - 1][0] - largo[0][0];
+    assert.ok(Math.abs(dx) < 40, `seme ${seme}: fine a ${dx} px dall'inizio`);
+  }
 });
 
 test("la freccia ha asta e punta: parte da a, arriva in z e le due alette tornano indietro", () => {

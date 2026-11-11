@@ -48,7 +48,7 @@
   testi al limite di 28 caratteri, tre con pittogramma e uno senza per provare l'allineamento, uno da due senza) e due
   `flusso` (uno da tre nodi con testi al limite di 18 caratteri e tutti i pittogrammi, uno da due nodi con il
   pittogramma solo sul primo), alternati, più la chiusura. Oggi è una media con ogni frase finale
-  (`src/storyboard/valida.test.ts`); con 8 frasi è al tetto di `media` e ha 57 parole prima della chiusura (65 al
+  (`src/storyboard/valida.test.ts`); con 8 frasi è al tetto di `media` e ha 60 parole prima della chiusura (65 al
   massimo con le frasi finali da 7 parole): chi ci aggiunge scene (le tre `mappa`) deve passare a `lunga` o
   spezzare in un secondo file, e accorciare i testi detti. Il controllo, in ogni stile:
   `controlla-impaginazione.ts fixtures/scene-nuove.storyboard.json --stile=notte --scene=flusso --passo=5`

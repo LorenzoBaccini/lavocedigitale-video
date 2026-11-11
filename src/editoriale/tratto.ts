@@ -76,7 +76,7 @@ export function riquadro(larghezza: number, altezza: number, seme: number): Punt
     angolo(larghezza, altezza),
     angolo(0, altezza),
     angolo(0, 0),
-    [larghezza * 0.12 + r() * 14, 3 + r() * 2],
+    [10 + r() * 18, 2 + r() * 2],
   ];
   const punti: Punto[] = [vertici[0]];
   vertici.slice(1).forEach((q, k) => {

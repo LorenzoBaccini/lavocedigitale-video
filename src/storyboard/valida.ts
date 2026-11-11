@@ -1,5 +1,6 @@
-import { DISPOSITIVI, LIMITI, OGGETTI, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
-import type { Storyboard } from "./tipi.ts";
+import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
+import { contaParole, DISPOSITIVI, FORME_MAPPA, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
+import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
 
@@ -64,6 +65,21 @@ function parole(o: Dict, campo: string, percorso: string, errori: string[]): voi
   if (typeof v !== "string") return;
   const lunga = v.split(/\s+/).find((p) => p.length > LIMITI.parolaNota);
   if (lunga) errori.push(`${percorso}.${campo}: «${lunga}» ha ${lunga.length} lettere, massimo ${LIMITI.parolaNota} per parola`);
+}
+
+/** Una colonna di voci con testo e pittogramma facoltativo (i `passi`, i `nodi`): da `min` a `max`, testo entro `lung`. */
+function colonna(o: Dict, campo: "passi" | "nodi", percorso: string, limiti: { min: number; max: number }, lung: number, errori: string[]): void {
+  const v = o[campo];
+  if (!Array.isArray(v) || v.length < limiti.min || v.length > limiti.max) {
+    errori.push(`${percorso}.${campo}: da ${limiti.min} a ${limiti.max} ${campo}`);
+    return;
+  }
+  v.forEach((voce, i) => {
+    const p = `${percorso}.${campo}[${i}]`;
+    if (!èDizionario(voce)) return void errori.push(`${p}: oggetto richiesto`);
+    testo(voce, "testo", p, lung, errori);
+    if (voce.simbolo !== undefined && !SIMBOLI.includes(voce.simbolo as never)) errori.push(`${p}.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`);
+  });
 }
 
 function pezzi(o: Dict, percorso: string, errori: string[]): void {
@@ -178,6 +194,30 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "testo", p, LIMITI.testoCitazione, e);
     testo(s, "fonte", p, LIMITI.etichetta, e);
   },
+  passi: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    colonna(s, "passi", p, LIMITI.passi, LIMITI.passo, e);
+  },
+  flusso: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    colonna(s, "nodi", p, LIMITI.nodi, LIMITI.nodo, e);
+  },
+  mappa: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    testo(s, "titolo", p, LIMITI.titolo, e);
+    if (!FORME_MAPPA.includes(s.forma as never)) e.push(`${p}.forma: deve essere uno tra ${FORME_MAPPA.join(", ")}`);
+    if (!Array.isArray(s.luoghi)) return void e.push(`${p}.luoghi: elenco richiesto`);
+    // un luogo per lo spillo o la zona, due per il tragitto: partenza e arrivo
+    const n = s.forma === "percorso" ? 2 : 1;
+    if (FORME_MAPPA.includes(s.forma as never) && s.luoghi.length !== n) e.push(`${p}.luoghi: ${n} ${n === 1 ? "luogo" : "luoghi"} con ${s.forma}`);
+    elenco(s, "luoghi", p, { min: 0, max: Infinity }, LIMITI.luogo, e);
+  },
+  simbolo: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    if (!SIMBOLI.includes(s.simbolo as never)) e.push(`${p}.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`);
+    testo(s, "titolo", p, LIMITI.titolo, e);
+    if (s.barrato !== undefined && typeof s.barrato !== "boolean") e.push(`${p}.barrato: vero o falso`);
+  },
   chiusura: () => {},
 };
 
@@ -202,10 +242,15 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
   } else {
     CONTROLLI[scena.tipo](scena, `${p}.scena`, errori);
   }
-  return typeof frase.testo === "string" ? frase.testo.trim().split(/\s+/).filter(Boolean).length : 0;
+  return typeof frase.testo === "string" ? contaParole(frase.testo) : 0;
 }
 
-export function validaStoryboard(input: unknown): EsitoValidazione {
+/**
+ * `durata` e `fraseFinale`: quelle della variante. Le parole sono quelle dette: le frasi prima della chiusura piu' la
+ * frase finale scelta; l'ultima frase del copione resta comunque `TESTO_CHIUSURA`, la sostituzione viene dopo.
+ */
+export function validaStoryboard(input: unknown, durata: NomeDurata, fraseFinale: FraseFinale): EsitoValidazione {
+  const limiti = LIMITI_DURATA[durata];
   const errori: string[] = [];
   if (!èDizionario(input)) return { ok: false, errori: ["storyboard: oggetto richiesto"] };
 
@@ -214,13 +259,16 @@ export function validaStoryboard(input: unknown): EsitoValidazione {
 
   const frasi = input.frasi;
   if (!Array.isArray(frasi)) return { ok: false, errori: [...errori, "frasi: elenco richiesto"] };
-  if (frasi.length < LIMITI.frasi.min || frasi.length > LIMITI.frasi.max) {
-    errori.push(`frasi: ${frasi.length} frasi, servono da ${LIMITI.frasi.min} a ${LIMITI.frasi.max}`);
+  if (frasi.length < limiti.frasi.min || frasi.length > limiti.frasi.max) {
+    errori.push(`frasi: ${frasi.length} frasi, la durata ${durata} ne vuole da ${limiti.frasi.min} a ${limiti.frasi.max}`);
   }
 
-  const parole = frasi.reduce<number>((tot, f, i) => tot + validaFrase(f, i, errori), 0);
-  if (parole < LIMITI.paroleCopione.min || parole > LIMITI.paroleCopione.max) {
-    errori.push(`copione: ${parole} parole, servono da ${LIMITI.paroleCopione.min} a ${LIMITI.paroleCopione.max}`);
+  const conteggi = frasi.map((f, i) => validaFrase(f, i, errori));
+  const prima = conteggi.slice(0, -1).reduce((a, b) => a + b, 0);
+  const dette = prima + contaParole(FRASI_CHIUSURA[fraseFinale].testo);
+  if (dette < limiti.parole.min || dette > limiti.parole.max) {
+    const ammesse = paroleContenuto(durata, fraseFinale);
+    errori.push(`copione: ${prima} parole prima della chiusura (${dette} dette con la frase finale), la durata ${durata} ne vuole da ${ammesse.min} a ${ammesse.max} prima della chiusura`);
   }
 
   const ultima = frasi.at(-1);
@@ -251,6 +299,17 @@ export function somiglianza(a: string[], b: string[]): number {
   return uguali / n;
 }
 
+/** Le notifiche sono un'eccezione: una sola per video. */
+export const MASSIMO_ALLARMI = 1;
+/** Al massimo meta' delle scene (chiusura esclusa) su un dispositivo, il resto su carta. */
+export const massimoSuDispositivo = (scene: number) => Math.ceil(scene / 2);
+
+/** La scena mostra uno schermo di telefono o portatile. */
+export function suDispositivo(scena: Scena): boolean {
+  if (scena.tipo === "oggetto") return scena.oggetto === "portatile" || scena.oggetto === "smartphone";
+  return scena.tipo === "gancio" || scena.tipo === "allarme" || scena.tipo === "rischio" || scena.tipo === "telefono";
+}
+
 /**
  * La varieta' dello storyboard: mai lo stesso tipo due volte di fila (salvo due `data` con date diverse)
  * e mai una sequenza troppo simile a quella di uno degli ultimi video (`recenti`, dal piu' recente).
@@ -267,6 +326,15 @@ export function erroriVarieta(storyboard: Storyboard, recenti: string[][]): stri
     }
   });
   const sequenza = sequenzaDi(storyboard);
+  const allarmi = sequenza.filter((t) => t === "allarme").length;
+  if (allarmi > MASSIMO_ALLARMI) {
+    errori.push(`sequenza: ${allarmi} scene «allarme», al massimo ${MASSIMO_ALLARMI}: la notifica solo se l'articolo parla di un messaggio vero, per le altre frasi scegli un'altra scena`);
+  }
+  const sui = storyboard.frasi.filter((f) => suDispositivo(f.scena)).length;
+  const tetto = massimoSuDispositivo(sequenza.length);
+  if (sui > tetto) {
+    errori.push(`sequenza: ${sui} scene su un dispositivo (telefono o portatile) su ${sequenza.length}, al massimo ${tetto}: mostra le altre frasi su carta, con simboli, passi, flussi o mappe`);
+  }
   for (const recente of recenti.slice(0, VIDEO_CONFRONTATI)) {
     const quota = somiglianza(sequenza, recente);
     if (quota >= SOGLIA_SOMIGLIANZA) {

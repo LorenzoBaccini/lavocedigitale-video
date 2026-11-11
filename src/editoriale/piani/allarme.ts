@@ -6,7 +6,7 @@ import type { Camera } from "../set/geometria.ts";
 import { NOTIFICA_TELEFONO_PX, SCHERMO_TELEFONO, sopraIlTelefono, TELEFONO_PX } from "../set/telefono.ts";
 import { centroDi, distanzaPer, inAsse, NOTIFICA_PX, SCHERMO, SCHERMO_PX } from "../set/geometria.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { entroIl, fineDi, paroleInAccento, paroleTitolo, testoDi } from "../titoli.ts";
+import { entroIl, entroLettura, fineDi, paroleInAccento, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
 import type { Voce } from "../voce.ts";
 
 export interface PianoAllarme extends Piano {
@@ -55,8 +55,10 @@ export function pianoAllarme(s: ScenaDi<"allarme">, durata: number): PianoAllarm
   const messaggio = messaggioAllarme(s.notifica, voce);
   const dispositivo = s.dispositivo ?? "portatile";
   const arrivo = s.contesto.precedente === "gancio" && dispositivo === "portatile" ? -30 : 3;
-  const sopra = entroIl(paroleTitolo(s.sopra, voce, Math.max(2, arrivo + 4)), durata - 30);
-  const titolo = entroIl(paroleTitolo(s.titolo, voce, fineDi(sopra) + 2), durata - 16);
+  // sopratitolo e titolo restano da leggere prima dello stacco; il sopratitolo lascia il posto al titolo dopo di lui
+  const tetto = Math.min(durata - 16, ultimaEntro(s.titolo, durata));
+  const sopra = entroLettura(paroleTitolo(s.sopra, voce, Math.max(2, arrivo + 4)), durata, Math.min(durata - 30, tetto - 3));
+  const titolo = entroIl(paroleTitolo(s.titolo, voce, fineDi(sopra) + 2), tetto);
   const nellaChiave = paroleInAccento(titolo, voce.parole.slice(voce.chiave).map((p) => p.t));
   const colpo = Math.min(durata - 6, Math.max(titolo[nellaChiave[0]]?.da ?? 0, voce.parole[voce.chiave]?.da ?? 0));
   const cerchio = Math.min(colpo - 14, Math.max(arrivo + 8, voce.parole[Math.floor(voce.parole.length * 0.3)]?.da ?? 10));

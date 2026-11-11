@@ -1,10 +1,13 @@
 import { Vector3 } from "three";
 
+import { ALTEZZA } from "../../impaginazione.ts";
 import type { Vec } from "../../three/proiezione.ts";
-import type { Camera } from "./geometria.ts";
-import { sferica } from "./geometria.ts";
+import type { Dettaglio } from "../ganci/dettaglio.ts";
 import type { NomeApertura } from "../variante.ts";
+import type { Camera, Rettangolo } from "./geometria.ts";
+import { centroDi, distanzaPer, inAsse, SCHERMO, SCHERMO_PX, sferica } from "./geometria.ts";
 import type { NomeOggetto } from "./oggetti/posti.ts";
+import { SCHERMO_TELEFONO, sopraIlTelefono, TELEFONO_PX } from "./telefono.ts";
 
 // Le inquadrature del set: per ogni oggetto una larga (la scrivania, l'oggetto nel suo posto) e una stretta (l'oggetto in primo piano).
 // Le scene si muovono fra queste, con un solo movimento per inquadratura; gli stacchi in asse si fanno con `avvicina`.
@@ -58,3 +61,26 @@ export const avvicina = ({ pos, look }: Camera, k: number): Camera => ({ pos: po
 
 /** Deriva quasi impercettibile: la camera non e' mai inchiodata, ma non si nota che si muove. */
 export const deriva = (cam: Camera, t: number, quanto = 0.04): Camera => avvicina(cam, 1 - quanto * Math.min(1, Math.max(0, t)));
+
+// il dettaglio non riempie il quadro: attorno restano la cornice, il set e la luce dello stile
+const LARGO_DETTAGLIO = 820;
+
+/**
+ * Il primo piano d'apertura del gancio a dettaglio: in asse sullo schermo del portatile (`riquadro` in pixel dello schermo),
+ * dall'alto sulla schermata del telefono, o l'inquadratura stretta dell'oggetto, ancora piu' vicina.
+ */
+export function primoPiano(d: Dettaglio, riquadro: Rettangolo | undefined, nome: NomeOggetto | "nessuno"): Camera {
+  if (d === "oggetto" || !riquadro) return avvicina(stretta(nome), 0.5);
+  if (d === "telefono") return sopraIlTelefono(riquadro.x + riquadro.w / 2, riquadro.y + riquadro.h / 2, distanzaPer((riquadro.w / TELEFONO_PX.w) * SCHERMO_TELEFONO.larghezza, LARGO_DETTAGLIO), 1.2);
+  return inAsse(centroDi(riquadro), distanzaPer((riquadro.w / SCHERMO_PX.w) * SCHERMO.larghezza, LARGO_DETTAGLIO), ALTEZZA / 2);
+}
+
+/** Da un primo piano a un'inquadratura larga: il punto guardato in linea retta, la distanza in proporzione (lo zoom sembra uniforme). */
+export function allarga(da: Camera, a: Camera, t: number): Camera {
+  const look = da.look.map((v, i) => v + (a.look[i] - v) * t) as Vec;
+  const verso = (c: Camera) => new Vector3(...c.pos).sub(new Vector3(...c.look));
+  const [u, w] = [verso(da), verso(a)];
+  const distanza = u.length() * (w.length() / u.length()) ** t;
+  const dir = u.clone().normalize().lerp(w.clone().normalize(), t).normalize();
+  return { pos: new Vector3(...look).addScaledVector(dir, distanza).toArray() as Vec, look };
+}

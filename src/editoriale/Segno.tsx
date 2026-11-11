@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-import { SANS } from "../theme";
+import { useStile } from "./stili";
 import type { Punto } from "./tratto";
 import { lunghezza, percorso } from "./tratto";
 
@@ -45,7 +45,9 @@ export const CORPO_RICHIAMO = 36;
 // Richiamo da infografica: un filetto verticale scende (o sale) dal punto indicato fino al testo sans maiuscolo.
 // (x, daY) e' il punto indicato, aY la fine del filetto; il testo e' centrato su `centro` (di norma x),
 // gia' riportato dentro i margini da chi lo dispone.
-export const Richiamo: React.FC<{ testo: string; x: number; daY: number; aY: number; progresso: number; nome: string; centro?: number; colore?: string; larghezza?: number }> = ({ testo, x, daY, aY, progresso, nome, centro = x, colore = "#FAFAF7", larghezza = 760 }) => {
+export const Richiamo: React.FC<{ testo: string; x: number; daY: number; aY: number; progresso: number; nome: string; centro?: number; larghezza?: number }> = ({ testo, x, daY, aY, progresso, nome, centro = x, larghezza = 760 }) => {
+  const stile = useStile();
+  const colore = stile.colori.testo;
   const p = eased(progresso);
   if (p <= 0) return null;
   const testoP = eased((progresso - 0.4) / 0.6);
@@ -55,7 +57,7 @@ export const Richiamo: React.FC<{ testo: string; x: number; daY: number; aY: num
     <>
       <div style={{ position: "absolute", left: x - 1.5, top: giu ? daY : daY - (daY - aY) * p, width: 3, height: Math.abs(aY - daY) * p, background: colore, opacity: 0.9 }} />
       <div style={{ position: "absolute", left: sinistra, width: larghezza, display: "flex", justifyContent: "center", ...(giu ? { top: aY + 10 } : { bottom: 1920 - aY + 10 }) }}>
-        <div data-impaginazione={nome} style={{ fontFamily: SANS, fontWeight: 650, fontSize: CORPO_RICHIAMO, lineHeight: 1.2, letterSpacing: "0.06em", textTransform: "uppercase", textAlign: "center", color: colore, textShadow: colore === "#FAFAF7" ? "0 2px 12px rgba(0,0,0,0.6)" : "none", opacity: testoP, transform: `translateY(${(1 - testoP) * (giu ? -8 : 8)}px)` }}>
+        <div data-impaginazione={nome} style={{ fontFamily: stile.caratteri.testo, fontWeight: 650, fontSize: CORPO_RICHIAMO, lineHeight: 1.2, letterSpacing: "0.06em", textTransform: "uppercase", textAlign: "center", color: colore, textShadow: stile.ombra(12, 0.6), opacity: testoP, transform: `translateY(${(1 - testoP) * (giu ? -8 : 8)}px)` }}>
           {testo}
         </div>
       </div>

@@ -52,8 +52,11 @@ export const puntoSchermo = (u: number, v: number, z = 0.04): Vector3 =>
 
 export const centroDi = (r: Rettangolo) => puntoSchermo(r.x + r.w / 2, r.y + r.h / 2);
 
-// ——— Taccuino (gli oggetti della scena stanno in oggetti/posti.ts) ———
+// ——— Oggetti di scena: taccuino, tazza, pianta (gli oggetti della scena stanno in oggetti/posti.ts) ———
 export const TACCUINO = { posizione: [-3.55, 0, 1.55] as Vec, rotazione: 0.32 };
+/** `manico`: quanto sporge il manico oltre il corpo */
+export const TAZZA = { posizione: [-5.2, 0, 3.0] as Vec, giro: 0.2, raggio: 0.5, altezza: 1.05, manico: 0.35 };
+export const PIANTA = { posizione: [-6.0, 0, -2.4] as Vec, raggio: 0.6, vaso: 1.0 };
 
 // ——— Camera ———
 const MEZZA_ALTEZZA = Math.tan(((FOV / 2) * Math.PI) / 180);
@@ -88,6 +91,13 @@ export function proietta(p: Vector3, { pos, look }: Camera) {
 }
 
 export type Punto2 = { x: number; y: number };
+
+/** I punti del mondo portati nel fotogramma; nessuno se anche uno solo sta dietro la camera. */
+export function davanti(punti: Vector3[], { pos, look }: Camera): Punto2[] | undefined {
+  const dir = new Vector3(...look).sub(new Vector3(...pos)).normalize();
+  if (punti.some((p) => p.clone().sub(new Vector3(...pos)).dot(dir) <= 0.1)) return undefined;
+  return punti.map((p) => proietta(p, { pos, look }));
+}
 
 /** Il rettangolo allineato agli assi che contiene i punti. */
 export function rettangoloDi(punti: Punto2[]): Rettangolo {

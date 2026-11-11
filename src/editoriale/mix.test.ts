@@ -20,3 +20,12 @@ test("sotto la voce scende di 6 dB, e comincia a scendere prima della parola", (
   assert.ok(volumeSottofondo(27, timing, linea) < 1);
   assert.equal(volumeSottofondo(20, timing, linea), 1);
 });
+
+test("esce solo nella coda della chiusura, dopo l'ultima parola, e in modo lineare", () => {
+  const fineVoce = 2 * 30;
+  // fino all'ultimo frame della voce la musica non ha ancora cominciato a uscire (resta sotto la voce)
+  assert.ok(Math.abs(volumeSottofondo(fineVoce - 1, timing, linea) - (1 - DUCKING)) < 1e-9);
+  assert.equal(linea.totale - fineVoce, 24);
+  const meta = volumeSottofondo(fineVoce + 12, timing, linea);
+  assert.ok(meta > 0.45 && meta < 0.55, String(meta));
+});

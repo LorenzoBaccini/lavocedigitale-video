@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 import { bundle } from "@remotion/bundler";
 import { openBrowser, renderStill, selectComposition } from "@remotion/renderer";
 
-import type { Variante } from "../src/editoriale/variante.ts";
-import { APERTURE, varianteDi } from "../src/editoriale/variante.ts";
+import type { Dettagli } from "../src/editoriale/dettagli.ts";
+import { DETTAGLI_BASE, OGGETTI_SCRIVANIA, SEGNI_NOTIFICA } from "../src/editoriale/dettagli.ts";
+import type { Valori, Variante } from "../src/editoriale/variante.ts";
+import { APERTURE, ATTIVI, DIMENSIONI, VARIANTE_BASE, varianteDi } from "../src/editoriale/variante.ts";
 import type { Misura } from "../src/impaginazione.ts";
 import { PREFISSO_MISURA, problemiImpaginazione, ZONE } from "../src/impaginazione.ts";
 import { costruisciLinea } from "../src/linea.ts";
@@ -14,6 +16,7 @@ import type { PropsNotizia } from "../src/Notizia.tsx";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import { èPrincipale } from "./principale.ts";
+import { fotogrammiFissi } from "./somiglianza.ts";
 
 const GL_PREDEFINITO = "swangle";
 
@@ -28,21 +31,53 @@ export function momentiDi(inizio: number, durata: number, passo?: number): [stri
   return [...fitti, ...base].sort((a, b) => a[1] - b[1]).filter((m, i, tutti) => i === 0 || m[1] !== tutti[i - 1][1]);
 }
 
+// Un bundle per processo: i tentativi della somiglianza cambiano solo le props. I suoni in public/ devono esserci gia'.
+let bundleInCorso: Promise<string> | undefined;
+
+async function apri() {
+  // un bundle fallito non resta in cache: la chiamata dopo ci riprova
+  bundleInCorso ??= bundle({ entryPoint: resolve("src/index.ts") }).catch((e) => {
+    bundleInCorso = undefined;
+    throw e;
+  });
+  const serveUrl = await bundleInCorso;
+  const chromiumOptions = { gl: (process.env.RENDER_GL ?? GL_PREDEFINITO) as "angle" };
+  const browser = await openBrowser("chrome", { chromiumOptions, logLevel: "error" });
+  return { serveUrl, chromiumOptions, browser };
+}
+
+/** I png dei sei fotogrammi fissi del controllo di somiglianza, con lo stesso bundle e lo stesso GL del controllo d'impaginazione. */
+export async function renderFotogrammi(props: PropsNotizia): Promise<Buffer[]> {
+  const { serveUrl, chromiumOptions, browser } = await apri();
+  try {
+    const composition = await selectComposition({ serveUrl, id: "notizia", inputProps: props, puppeteerInstance: browser, chromiumOptions, logLevel: "error" });
+    const png: Buffer[] = [];
+    for (const frame of fotogrammiFissi(composition.durationInFrames, FPS)) {
+      const { buffer } = await renderStill({ composition, serveUrl, frame, inputProps: props, chromiumOptions, puppeteerInstance: browser, output: null, logLevel: "error" });
+      if (!buffer) throw new Error(`fotogramma ${frame}: nessun png`);
+      png.push(buffer);
+    }
+    return png;
+  } finally {
+    await browser.close({ silent: true });
+  }
+}
+
 /**
  * Via scelta: `renderStill` con la prop `misuraImpaginazione`, che fa scrivere in console a `MisuraImpaginazione`
  * i rettangoli dei nodi `data-impaginazione`; qui li si legge con `onBrowserLog`.
- * Va lanciato con la radice del repo come cwd. Con `cartellaStill` salva il fotogramma di fine frase di ogni scena.
+ * Va lanciato con la radice del repo come cwd. Con `cartellaStill` salva il fotogramma di fine frase di ogni scena; con `solo`
+ * misura solo le scene di quel tipo.
  */
-export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?: string, passo?: number): Promise<string[]> {
-  const serveUrl = await bundle({ entryPoint: resolve("src/index.ts") });
-  const chromiumOptions = { gl: (process.env.RENDER_GL ?? GL_PREDEFINITO) as "angle" };
-  const browser = await openBrowser("chrome", { chromiumOptions, logLevel: "error" });
+export async function controllaImpaginazione(props: PropsNotizia, cartellaStill?: string, passo?: number, solo?: string): Promise<string[]> {
+  const { serveUrl, chromiumOptions, browser } = await apri();
   const inputProps = { ...props, misuraImpaginazione: true };
   const linea = costruisciLinea(props.timing, FPS);
   const problemi: string[] = [];
   try {
     const composition = await selectComposition({ serveUrl, id: "notizia", inputProps, puppeteerInstance: browser, chromiumOptions, logLevel: "error" });
     for (const [i, frase] of props.storyboard.frasi.entries()) {
+      if (solo && frase.scena.tipo !== solo) continue;
       const momenti = momentiDi(linea.inizi[i], linea.durate[i], passo);
       for (const [momento, frame] of momenti) {
         let misure: Misura[] | undefined;
@@ -77,31 +112,73 @@ function propsDa(file: string, secondi = 3): PropsNotizia {
   return { storyboard: letto, timing: { voce: "elevenlabs", clips }, audioBase: "audio/fixture" };
 }
 
-/** `--variante=luce:sera,apertura:alta` sovrascrive i campi della variante delle props. */
-export function varianteDaArgomento(argomento: string | undefined, base: Variante | undefined): Variante {
-  const campi = Object.fromEntries((argomento ?? "").split(",").filter(Boolean).map((c) => c.split(":")));
+const FORZABILI = ["stile", "gancio", "chiusura", "durata"] as const;
+
+/**
+ * La variante da controllare: quella delle props, con i campi di `--variante=luce:sera,apertura:alta` (valori sconosciuti
+ * ignorati) e di `--stile= --gancio= --chiusura= --durata=` (un valore sconosciuto e' un errore: si controllerebbe altro).
+ */
+export function varianteDaArgomenti(argomenti: string[], base: Variante | undefined): Variante {
+  const valore = (nome: string) => argomenti.find((a) => a.startsWith(`--${nome}=`))?.slice(nome.length + 3);
+  const campi: Record<string, unknown> = Object.fromEntries((valore("variante") ?? "").split(",").filter(Boolean).map((c) => c.split(":")));
+  if (campi.fraseFinale !== undefined) campi.fraseFinale = Number(campi.fraseFinale);
+  for (const k of FORZABILI) {
+    const v = valore(k);
+    if (v === undefined) continue;
+    if (!DIMENSIONI[k].includes(v as never)) throw new Error(`--${k}=${v}: valori ammessi ${DIMENSIONI[k].join(", ")}`);
+    campi[k] = v;
+  }
   return varianteDi({ ...base, ...campi });
 }
 
+/**
+ * I dettagli forzati sopra quelli delle props (il resto viene dallo slug): `--dettagli=base` quelli del video approvato,
+ * `--oggetti=taccuino,tazza,pianta` gli oggetti di scena; tutti e tre controllano in un giro ogni coppia possibile.
+ */
+export function dettagliDaArgomenti(argomenti: string[], base: Partial<Dettagli> | undefined): Partial<Dettagli> | undefined {
+  const valore = (nome: string) => argomenti.find((a) => a.startsWith(`--${nome}=`))?.slice(nome.length + 3);
+  const dettagli = valore("dettagli") === "base" ? { ...base, ...DETTAGLI_BASE } : base;
+  const segno = valore("segno");
+  if (segno !== undefined && !SEGNI_NOTIFICA.includes(segno as never)) throw new Error(`--segno=${segno}: valori ammessi ${SEGNI_NOTIFICA.join(", ")}`);
+  const conSegno = segno ? { ...dettagli, segnoNotifica: segno as Dettagli["segnoNotifica"] } : dettagli;
+  const oggetti = valore("oggetti")?.split(",");
+  if (!oggetti) return conSegno;
+  const sconosciuti = oggetti.filter((o) => !OGGETTI_SCRIVANIA.includes(o as never));
+  if (sconosciuti.length) throw new Error(`--oggetti: ${sconosciuti.join(", ")} sconosciuti, ammessi ${OGGETTI_SCRIVANIA.join(", ")}`);
+  return { ...conSegno, oggetti: oggetti as Dettagli["oggetti"] };
+}
+
+/**
+ * I valori forzati ma non ancora costruiti: il fotogramma mostra quello di base, un controllo pulito non vale per loro.
+ * `attivi` e' per i test: oggi ogni valore forzabile e' attivo.
+ */
+export function avvisiNonAttivi(v: Variante, attivi: Valori = ATTIVI): string[] {
+  return FORZABILI.filter((k) => !attivi[k].includes(v[k] as never)).map((k) => `${k} ${v[k]} non ancora attivo: si vede ${VARIANTE_BASE[k]}`);
+}
+
 // Uso: node --experimental-strip-types pipeline/controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still]
-//        [--variante=musica:chiaro,luce:sera,apertura:alta] [--ogni-apertura] [--passo=N] [--secondi=N]
-// --secondi: durata delle frasi di uno storyboard senza voce (3 di default).
+//        [--variante=musica:chiaro,luce:sera,apertura:alta] [--stile=…] [--gancio=…] [--chiusura=…] [--durata=…]
+//        [--ogni-apertura] [--passo=N] [--secondi=N] [--scene=gancio] [--dettagli=base] [--segno=cerchio|sottolinea|nessuno] [--oggetti=taccuino,tazza,pianta]
+// --secondi: durata delle frasi di uno storyboard senza voce (3 di default). --scene: misura solo le scene di quel tipo.
 // Con --ogni-apertura il controllo gira una volta per ogni inquadratura d'apertura del gancio.
 if (èPrincipale(import.meta.url)) {
   const argomenti = process.argv.slice(2);
   const [file, cartellaStill] = argomenti.filter((a) => !a.startsWith("--")).map((a) => resolve(a));
-  if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--ogni-apertura]");
+  if (!file) throw new Error("uso: controlla-impaginazione.ts <props.json|storyboard.json> [cartella-still] [--variante=…] [--stile=…] [--ogni-apertura]");
   const props = propsDa(file, Number(argomenti.find((a) => a.startsWith("--secondi="))?.slice("--secondi=".length)) || undefined);
-  const variante = varianteDaArgomento(argomenti.find((a) => a.startsWith("--variante="))?.slice("--variante=".length), props.variante);
+  const variante = varianteDaArgomenti(argomenti, props.variante);
+  const dettagli = dettagliDaArgomenti(argomenti, props.dettagli);
+  for (const avviso of avvisiNonAttivi(variante)) console.warn(`attenzione: ${avviso}`);
   const aperture = argomenti.includes("--ogni-apertura") ? APERTURE : [variante.apertura];
   const passo = Number(argomenti.find((a) => a.startsWith("--passo="))?.slice("--passo=".length)) || undefined;
+  const solo = argomenti.find((a) => a.startsWith("--scene="))?.slice("--scene=".length);
   process.chdir(fileURLToPath(new URL("..", import.meta.url)));
   const problemi: string[] = [];
   for (const apertura of aperture) {
     const v = { ...variante, apertura };
-    const trovati = await controllaImpaginazione({ ...props, variante: v }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo);
+    const trovati = await controllaImpaginazione({ ...props, variante: v, dettagli }, cartellaStill && aperture.length > 1 ? join(cartellaStill, apertura) : cartellaStill, passo, solo);
     problemi.push(...trovati.map((p) => (aperture.length > 1 ? `apertura ${apertura}: ${p}` : p)));
-    console.log(`variante ${v.musica}/${v.luce}/${v.apertura}: ${trovati.length ? `${trovati.length} problemi` : "pulita"}`);
+    console.log(`variante ${v.stile}/${v.gancio}/${v.chiusura}/${v.durata} ${v.musica}/${v.luce}/${v.apertura}: ${trovati.length ? `${trovati.length} problemi` : "pulita"}`);
   }
   console.log(problemi.length ? problemi.join("\n") : "impaginazione pulita");
   if (problemi.length) process.exitCode = 1;

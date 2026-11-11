@@ -1,10 +1,11 @@
 import { useLayoutEffect } from "react";
 import { continueRender, delayRender, useCurrentFrame } from "remotion";
 
+import { caricaFaccia, FACCE } from "./caratteri";
 import type { Misura } from "./impaginazione";
 import { PREFISSO_MISURA } from "./impaginazione";
 
-const FONT = ["800 100px Inter", "500 100px Inter", "700 100px Lora", "italic 700 100px Lora"];
+const FONT = FACCE.map(caricaFaccia);
 
 const opacita = (el: Element | null) => {
   let o = 1;

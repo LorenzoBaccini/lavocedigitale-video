@@ -2,26 +2,15 @@ import { RoundedBox } from "@react-three/drei";
 import { RepeatWrapping } from "three";
 
 import { useCanvasTexture } from "../../three/useCanvasTexture";
-import type { Ctx } from "./disegni";
-import type { Finestra, TipoFinestra } from "./disegni";
-import { alluminioRuvido, desktop, finestra, notifica, pagina, tastiera } from "./disegni";
+import type { Orologio } from "./disegni";
+import { alluminioRuvido, notifica, tastiera } from "./disegni";
 import { BASE, CENTRO_SCHERMO_LOCALE, CERNIERA, INCLINAZIONE, NOTIFICA_PX, NOTIFICA_SCALA, PORTA_USB, SCHERMO, SCHERMO_PX } from "./geometria";
+import type { Notifica, Schermo } from "./schermata";
+import { disegnoSchermo } from "./schermata";
+
+export type { Notifica, Schermo } from "./schermata";
 
 const unita = SCHERMO.larghezza / SCHERMO_PX.w;
-
-/** Cosa mostra lo schermo: il desktop, una finestra (impostazioni, pagina web, app) con titolo e pulsante, una pagina intera. */
-export type Schermo =
-  | { tipo: "desktop" }
-  | ({ tipo: "finestra" } & Omit<Finestra, "tipo" | "orologio"> & { schermata: TipoFinestra })
-  | { tipo: "pagina"; titolo: string; schermata: Exclude<TipoFinestra, "sistema"> };
-/** La notifica: messaggio, intestazione, opacita' (0..1) e quanto manca ad arrivare (pixel dello schermo). */
-export type Notifica = { messaggio: string; mittente?: string; azione?: string; visibile: number; scarto: number };
-
-const disegnoSchermo = (s: Schermo, orologio?: string): ((ctx: Ctx) => void) => {
-  if (s.tipo === "finestra") return finestra({ titolo: s.titolo, pulsante: s.pulsante, menu: s.menu, tipo: s.schermata, orologio });
-  if (s.tipo === "pagina") return pagina(s.titolo, s.schermata, orologio);
-  return desktop(orologio);
-};
 
 const Toast: React.FC<Notifica> = ({ messaggio, mittente, azione, visibile, scarto }) => {
   const toast = useCanvasTexture(NOTIFICA_PX.w * NOTIFICA_SCALA, NOTIFICA_PX.h * NOTIFICA_SCALA, notifica(messaggio, mittente, azione), [messaggio, mittente, azione]);
@@ -36,7 +25,7 @@ const Toast: React.FC<Notifica> = ({ messaggio, mittente, azione, visibile, scar
 };
 
 // Portatile da 14" grigio scuro, con usura: lo schermo mostra un'interfaccia vera, la notifica sta su un piano a parte.
-export const Portatile: React.FC<{ schermo?: Schermo; notifica?: Notifica; orologio?: string }> = ({ schermo = { tipo: "desktop" }, notifica: toast, orologio }) => {
+export const Portatile: React.FC<{ schermo?: Schermo; notifica?: Notifica; orologio: Orologio }> = ({ schermo = { tipo: "desktop" }, notifica: toast, orologio }) => {
   const chiave = JSON.stringify([schermo, orologio]);
   const immagine = useCanvasTexture(SCHERMO_PX.w, SCHERMO_PX.h, disegnoSchermo(schermo, orologio), [chiave]);
   const tasti = useCanvasTexture(1024, 360, tastiera);

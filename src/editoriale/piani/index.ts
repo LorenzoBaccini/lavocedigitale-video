@@ -8,10 +8,14 @@ import { pianoDocumenti } from "./documenti.ts";
 import { pianoCitazione } from "./citazione.ts";
 import { pianoConfronto } from "./confronto.ts";
 import { pianoData } from "./data.ts";
+import { pianoFlusso } from "./flusso.ts";
 import { pianoGancio } from "./gancio.ts";
+import { pianoMappa } from "./mappa.ts";
 import { pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
+import { pianoPassi } from "./passi.ts";
 import { pianoRischio } from "./rischio.ts";
+import { pianoSimbolo } from "./simbolo.ts";
 import { pianoTeaser } from "./teaser.ts";
 import { pianoTelefono } from "./telefono.ts";
 
@@ -40,6 +44,14 @@ export function pianoScena(p: PropsScena<Scena>, durata: number): Piano {
       return pianoConfronto(p, durata);
     case "citazione":
       return pianoCitazione(p, durata);
+    case "flusso":
+      return pianoFlusso(p, durata);
+    case "mappa":
+      return pianoMappa(p, durata);
+    case "passi":
+      return pianoPassi(p, durata);
+    case "simbolo":
+      return pianoSimbolo(p, durata);
     case "teaser":
       return pianoTeaser(p, durata);
     case "chiusura":

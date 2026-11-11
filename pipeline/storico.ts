@@ -2,6 +2,8 @@ import { dispositivoDi, schermataDi } from "../src/editoriale/set/ambiente.ts";
 import type { Variante } from "../src/editoriale/variante.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { VIDEO_CONFRONTATI } from "../src/storyboard/valida.ts";
+import type { Impronta } from "./somiglianza.ts";
+import { èImpronta } from "./somiglianza.ts";
 
 /** Chiave nel bucket delle immagini. Fuori da `video/`: la scadenza degli mp4 non deve toccarla. */
 export const CHIAVE_STORICO = "video-storico.json";
@@ -20,8 +22,10 @@ export interface VoceStorico {
   /** AAAA-MM-GG della pubblicazione */
   data: string;
   scene: ScenaStorico[];
-  /** parziale solo se il file e' stato toccato a mano: i campi mancanti non escludono niente */
+  /** parziale nelle voci di prima degli stili o toccate a mano: un campo mancante non esclude niente, `stile` mancante vale scrivania */
   variante: Partial<Variante>;
+  /** sei fotogrammi fissi del video pubblicato (somiglianza.ts); assente nelle voci vecchie o se il controllo e' saltato */
+  impronta?: Impronta;
 }
 
 /** Tutto dal piu' recente. */
@@ -51,19 +55,23 @@ export function analizzaStorico(testo: string | null): Storico {
   }
   if (!Array.isArray(json?.pubblicati) || !Array.isArray(json.recenti)) throw new Error("storico illeggibile: mancano recenti o pubblicati");
   return {
-    recenti: json.recenti.filter(èVoce).map((v) => ({ ...v, variante: typeof v.variante === "object" && v.variante !== null ? v.variante : {} })),
+    recenti: json.recenti.filter(èVoce).map(({ impronta, ...v }) => ({
+      ...v,
+      variante: typeof v.variante === "object" && v.variante !== null ? v.variante : {},
+      ...(èImpronta(impronta) && { impronta }),
+    })),
     pubblicati: json.pubblicati.filter((s): s is string => typeof s === "string"),
   };
 }
 
 /** Il riassunto di un video: sequenza delle scene con dispositivo e schermata decisi come nel render, e la variante. */
-export function riassunto(storyboard: Storyboard, variante: Variante, data: string): VoceStorico {
+export function riassunto(storyboard: Storyboard, variante: Variante, data: string, impronta?: Impronta): VoceStorico {
   const scene = storyboard.frasi.map(({ scena, testo }): ScenaStorico => {
     if (scena.tipo === "allarme" || scena.tipo === "rischio") return { tipo: scena.tipo, dispositivo: dispositivoDi(scena, testo) };
     if (scena.tipo === "gancio" || scena.tipo === "oggetto") return { tipo: scena.tipo, schermata: schermataDi(scena, testo) };
     return { tipo: scena.tipo };
   });
-  return { slug: storyboard.slug, data, scene, variante };
+  return { slug: storyboard.slug, data, scene, variante, ...(impronta && { impronta }) };
 }
 
 export function aggiungi(storico: Storico, voce: VoceStorico): Storico {

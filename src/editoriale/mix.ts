@@ -1,9 +1,10 @@
 import type { Linea } from "../linea.ts";
-import { livelloVoce } from "../linea.ts";
+import { CODA_S, livelloVoce } from "../linea.ts";
 import type { Timing } from "../timing.ts";
 
 const ENTRATA = 15; // 0,5 s
-const USCITA = 30; // 1 s, dentro la coda della chiusura
+// la musica esce in tutta la coda, dopo l'ultima parola: un'uscita piu' lunga scenderebbe sotto la voce
+const USCITA = Math.round(CODA_S * 30);
 /** Quanto scende il sottofondo mentre si parla: -6 dB. */
 export const DUCKING = 0.5;
 

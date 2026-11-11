@@ -1,7 +1,6 @@
 import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
-import { corpo } from "../anim";
 import { pianoDocumenti } from "../editoriale/piani/documenti";
 import { fase, mix, uscita } from "../editoriale/regia";
 import type { Camera, Punto2 } from "../editoriale/set/geometria";
@@ -13,12 +12,12 @@ import { CENTRO_PEZZI, MEZZA_LARGHEZZA, MEZZA_PROFONDITA, postiPezzi } from "../
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
 import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { Velo } from "../editoriale/set/Velo";
-import type { Riga } from "../editoriale/Titolo";
+import { allineaFlesso, useStile } from "../editoriale/stili";
+import { titoloDocumenti } from "../editoriale/testate/documenti";
 import { Titolo } from "../editoriale/Titolo";
 import { MARGINE, TITOLO_TOP } from "../impaginazione";
-import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
 const GUARDA = new Vector3(CENTRO_PEZZI[0], 0, CENTRO_PEZZI[2] - 0.22);
@@ -28,6 +27,7 @@ const NOTA_DA = 600;
 // che arrivano quando la voce li nomina. Occhiello e titolo in alto.
 export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
   const f = useCurrentFrame();
+  const stile = useStile();
   const { durata, etichetta, pezzi } = props;
   const piano = pianoDocumenti(props, durata);
   const base: Camera = { pos: sferica(GUARDA, mix(11.4, 10.8, uscita(fase(f, 0, durata))), 0.07, 1.2), look: GUARDA.toArray() as Camera["look"] };
@@ -46,25 +46,18 @@ export const Documenti: React.FC<ScenaDi<"documenti">> = (props) => {
     return [[-mx, -mz], [mx, -mz], [mx, mz], [-mx, mz]].map(([u, v]) => proietta(new Vector3(x + u * Math.cos(giro) + v * Math.sin(giro), 0.1, z - u * Math.sin(giro) + v * Math.cos(giro)), cam));
   });
 
-  const righe: Riga[] = [
-    {
-      parole: piano.titolo.map((p, i) => (piano.accento.includes(i) ? { ...p, colore: C.amber } : p)),
-      size: corpo(props.titolo, 104, 16),
-      font: SERIF,
-      peso: 700,
-    },
-  ];
+  const righe = titoloDocumenti(props, piano, stile);
   return (
     <>
-      <Scrivania camera={cam} orologio={props.contesto.orologio}>
+      <Set3D camera={cam} orologio={props.contesto.orologio}>
         <PezziSulTavolo pezzi={sulTavolo} />
-      </Scrivania>
+      </Set3D>
       <Velo alto={0.62} basso={0.5} />
       {impronte.map((angoli, i) => <Ingombro key={i} nome={pezzi[i].oggetto} angoli={angoli} pieno />)}
       {pezzi.map((p, i) => (
         <NotaAccanto key={p.oggetto} nome={`nota-${i + 1}`} testo={p.nota} x={punti[i].destra.x} y={punti[i].destra.y} sinistra={Math.max(NOTA_DA, punti[i].destra.x + 70)} da={piano.note[i]} f={f} seme={41 + i} />
       ))}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile), gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>

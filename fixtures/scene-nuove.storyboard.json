@@ -1,0 +1,28 @@
+{
+  "slug": "scene-nuove",
+  "frasi": [
+    { "testo": "Dal quattordici ottobre non arrivano più patch di sicurezza.", "chiave": "sicurezza", "scena": { "tipo": "simbolo", "etichetta": "Dal 14 ottobre", "simbolo": "scudo", "titolo": "Niente più sicurezza", "barrato": true } },
+    { "testo": "Fai il backup, collega il caricatore, scarica e riavvia.", "chiave": "backup", "scena": { "tipo": "passi", "etichetta": "Prima di aggiornare", "passi": [
+      { "testo": "Salva tutti i tuoi documenti", "simbolo": "documento" },
+      { "testo": "Collega il caricatore subito", "simbolo": "batteria" },
+      { "testo": "Scarica il file dal sito web", "simbolo": "wifi" },
+      { "testo": "Riavvia e segui la procedura" }
+    ] } },
+    { "testo": "La richiesta parte, il sistema controlla tutto e ti dà una risposta.", "chiave": "controlla", "scena": { "tipo": "flusso", "etichetta": "Cosa succede dopo", "nodi": [
+      { "testo": "Invii la richiesta", "simbolo": "documento" },
+      { "testo": "Si controlla tutto", "simbolo": "scudo" },
+      { "testo": "Ricevi la risposta", "simbolo": "altoparlante" }
+    ] } },
+    { "testo": "Serve un wifi che non cade mai.", "chiave": "wifi", "scena": { "tipo": "simbolo", "etichetta": "Per tutta la durata del download", "simbolo": "wifi", "titolo": "Un wifi che non cade mai" } },
+    { "testo": "Poi apri le impostazioni e premi aggiorna.", "chiave": "impostazioni", "scena": { "tipo": "passi", "etichetta": "Poi", "passi": [
+      { "testo": "Apri le impostazioni" },
+      { "testo": "Premi su aggiorna" }
+    ] } },
+    { "testo": "Scegli la data e poi ricevi un avviso.", "chiave": "avviso", "scena": { "tipo": "flusso", "etichetta": "Per non dimenticare", "nodi": [
+      { "testo": "Scegli la data", "simbolo": "calendario" },
+      { "testo": "Ricevi un avviso" }
+    ] } },
+    { "testo": "E tieni il portatile attaccato alla corrente.", "chiave": "corrente", "scena": { "tipo": "simbolo", "etichetta": "Prima di iniziare", "simbolo": "batteria", "titolo": "Sempre in carica" } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+  ]
+}

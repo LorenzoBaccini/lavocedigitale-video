@@ -4,9 +4,10 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { Variante } from "../src/editoriale/variante.ts";
-import { scegliVariante } from "../src/editoriale/variante.ts";
+import { scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
+import { conFraseFinale } from "../src/storyboard/fraseFinale.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import type { Timing } from "../src/timing.ts";
@@ -17,9 +18,12 @@ import type { FacebookResult } from "./canali/facebook.ts";
 import type { TelegramResult } from "./canali/telegram.ts";
 import { buildVideoPost } from "./post-video.ts";
 import { èPrincipale } from "./principale.ts";
+import type { Impronta } from "./somiglianza.ts";
+import { scegliDiversa } from "./somiglianza.ts";
 import type { Storico } from "./storico.ts";
 import { argomentiElenco, chiavePresente } from "./s3.ts";
 import { aggiungi, analizzaStorico, CHIAVE_STORICO, riassunto, sequenzeRecenti, STORICO_VUOTO } from "./storico.ts";
+import type { Misura } from "./storyboard.ts";
 import { StoryboardScartato } from "./storyboard.ts";
 
 const URL_VIDEO = "https://lavocedigitale.it/images/video";
@@ -32,14 +36,16 @@ export interface Dipendenze {
   scriviStorico: (testo: string) => Promise<void>;
   /** Lancia un errore se manca la chiave di ElevenLabs: va saputo prima di spendere la chiamata a Claude. */
   verificaChiave: () => void;
-  /** `recenti`: le sequenze di scene degli ultimi video, che lo storyboard non deve ripetere. */
-  scriviStoryboard: (a: ArticoloVideo, recenti: string[][]) => Promise<Storyboard>;
+  /** `recenti`: le sequenze di scene degli ultimi video, che lo storyboard non deve ripetere; `misura`: durata e frase finale della variante. */
+  scriviStoryboard: (a: ArticoloVideo, recenti: string[][], misura: Misura) => Promise<Storyboard>;
   /** ElevenLabs: un wav per frase e `timing.json` nella cartella. Lancia un errore se la voce non arriva. */
   voce: (storyboard: Storyboard, cartella: string) => Promise<Timing>;
   /** Genera i suoni in `public/suoni` (fuori da git): servono già ai fotogrammi del controllo d'impaginazione. */
   generaSuoni: () => void;
   /** Restituisce i problemi d'impaginazione trovati sui fotogrammi di controllo; vuoto se è tutto a posto. */
   controllaImpaginazione: (props: PropsNotizia) => Promise<string[]>;
+  /** L'impronta dei sei fotogrammi fissi (somiglianza.ts). Un errore salta il controllo, non la pubblicazione. */
+  impronta: (props: PropsNotizia) => Promise<Impronta>;
   render: (props: PropsNotizia, uscita: string) => Promise<void>;
   /** Restituisce l'URL pubblico del video caricato. */
   caricaVideo: (file: string, slug: string) => Promise<string>;
@@ -55,7 +61,7 @@ export interface Esito {
   variante?: Variante;
   righe: string[];
   durata?: number;
-  tempi: { storyboard?: number; voce?: number; render?: number };
+  tempi: { storyboard?: number; voce?: number; somiglianza?: number; render?: number };
   file?: string;
 }
 
@@ -90,11 +96,15 @@ async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postI
   }
 }
 
+export const rigaVariante = (v: Variante): string =>
+  [`stile ${v.stile}`, `gancio ${v.gancio}`, `chiusura ${v.chiusura}`, `frase finale ${v.fraseFinale + 1}`, `durata ${v.durata}`, `musica ${v.musica}`, `luce ${v.luce}`, `apertura ${v.apertura}`].join(" · ");
+
 export function resoconto(slug: string, esito: Esito): string {
   const t = esito.tempi;
   const tempi = [
     t.storyboard !== undefined && `storyboard ${t.storyboard} s`,
     t.voce !== undefined && `voce ${t.voce} s`,
+    t.somiglianza !== undefined && `somiglianza ${t.somiglianza} s`,
     t.render !== undefined && `render ${t.render} s`,
   ].filter(Boolean);
   return [
@@ -102,7 +112,7 @@ export function resoconto(slug: string, esito: Esito): string {
     `Stato: ${esito.stato}`,
     esito.motivo && `Motivo: ${esito.motivo}`,
     esito.voce && `Voce: ${esito.voce}`,
-    esito.variante && `Variante: musica ${esito.variante.musica} · luce ${esito.variante.luce} · apertura ${esito.variante.apertura}`,
+    esito.variante && `Variante: ${rigaVariante(esito.variante)}`,
     esito.durata !== undefined && `Durata: ${esito.durata.toFixed(1)} s`,
     tempi.length > 0 && `Tempi: ${tempi.join(" · ")}`,
     esito.file && `File: ${esito.file}`,
@@ -125,6 +135,7 @@ function riassumiProblemi(problemi: string[]): string {
 }
 
 async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, esito: Esito): Promise<void> {
+  const inizio = Date.now();
   if (!slugValido(slug)) {
     Object.assign(esito, { stato: "errore", motivo: "slug non valido" });
     return;
@@ -164,10 +175,15 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
     return;
   }
 
+  // Dipende solo dallo slug e dallo storico: prima dello storyboard, che ne riceve la durata.
+  let variante = scegliVariante(slug, storico.recenti.map((v) => v.variante));
+  esito.variante = variante;
+
   let storyboard: Storyboard;
   try {
-    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico)));
-    storyboard = { ...storyboard, slug };
+    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), { durata: variante.durata, fraseFinale: variante.fraseFinale }));
+    // la validazione ha visto la frase del copione: la frase finale della variante la sostituisce prima della voce
+    storyboard = conFraseFinale({ ...storyboard, slug }, variante.fraseFinale);
   } catch (e) {
     if (!(e instanceof StoryboardScartato)) throw e;
     Object.assign(esito, { stato: "saltato", motivo: e.motivo });
@@ -187,15 +203,39 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   }
   esito.voce = timing.voce;
 
-  const variante = scegliVariante(slug, storico.recenti.map((v) => v.variante));
-  esito.variante = variante;
-  const props: PropsNotizia = { storyboard, timing, audioBase: p.audioBase, variante };
+  const conVariante = (v: Variante): PropsNotizia => ({ storyboard, timing, audioBase: p.audioBase, variante: v });
   dip.generaSuoni();
-  const problemi = await dip.controllaImpaginazione(props);
+  const problemi = await dip.controllaImpaginazione(conVariante(variante));
   if (problemi.length > 0) {
-    Object.assign(esito, { stato: "saltato", motivo: `impaginazione: ${riassumiProblemi(problemi)}` });
-    return;
+    // la voce e' gia' pagata: prima di saltare si riprova con l'aspetto del video approvato, stessa durata e frase finale
+    const sicura: Variante = { ...variante, stile: VARIANTE_BASE.stile, gancio: VARIANTE_BASE.gancio, chiusura: VARIANTE_BASE.chiusura };
+    const aspetto = (v: Variante) => `${v.stile}/${v.gancio}/${v.chiusura}`;
+    const diversa = aspetto(sicura) !== aspetto(variante);
+    if (!diversa || (await dip.controllaImpaginazione(conVariante(sicura))).length > 0) {
+      const ripiego = diversa ? `, anche ${aspetto(sicura)} non passa` : "";
+      Object.assign(esito, { stato: "saltato", motivo: `impaginazione: ${riassumiProblemi(problemi)}${ripiego}` });
+      return;
+    }
+    esito.righe.push(`Impaginazione: ${aspetto(variante)} scartata (${riassumiProblemi(problemi)}), ripiego su ${aspetto(sicura)}`);
+    variante = sicura;
+    esito.variante = sicura;
   }
+
+  // voce e storyboard sono gia' pagati: la somiglianza cambia solo stile e gancio
+  const [scelta, secondiSomiglianza] = await cronometra(() =>
+    scegliDiversa({
+      slug,
+      variante,
+      recenti: storico.recenti,
+      impronta: (v) => dip.impronta(conVariante(v)),
+      controllaImpaginazione: (v) => dip.controllaImpaginazione(conVariante(v)),
+      inizio,
+    }),
+  );
+  esito.tempi.somiglianza = secondiSomiglianza;
+  esito.righe.push(scelta.riga);
+  esito.variante = scelta.variante;
+  const props = conVariante(scelta.variante);
 
   [, esito.tempi.render] = await cronometra(() => dip.render(props, p.video));
   esito.durata = costruisciLinea(timing, FPS).totale / FPS;
@@ -210,7 +250,7 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   const testo = buildVideoPost(articolo, storyboard);
   const aMano = `Il post va fatto a mano con l'URL dell'mp4: ${url}\nTesto: ${testo}`;
   // Prima dei post: senza lo slug nello storico, dopo la scadenza dell'mp4 un nuovo lancio ripubblicherebbe.
-  const errStorico = await scriviConUnRitentativo(() => dip.scriviStorico(JSON.stringify(aggiungi(storico, riassunto(storyboard, variante, oggi())))));
+  const errStorico = await scriviConUnRitentativo(() => dip.scriviStorico(JSON.stringify(aggiungi(storico, riassunto(storyboard, scelta.variante, oggi(), scelta.impronta)))));
   if (errStorico) {
     esito.righe.push(`✗ Storico: ${errStorico}`, `Nessun post: senza lo storico un nuovo lancio fra 7 giorni ripubblicherebbe. ${aMano}`);
     Object.assign(esito, { stato: "errore", motivo: "storico non scritto, post non fatti per non rischiare un doppio post" });
@@ -322,7 +362,8 @@ async function esisteChiave(chiave: string): Promise<boolean> {
 async function dipendenzeVere(articolo: ArticoloVideo): Promise<Dipendenze> {
   const { scriviStoryboard, chiediAClaude } = await import("./storyboard.ts");
   const { renderVideo } = await import("./render.ts");
-  const { controllaImpaginazione } = await import("./controlla-impaginazione.ts");
+  const { controllaImpaginazione, renderFotogrammi } = await import("./controlla-impaginazione.ts");
+  const { improntaFotogramma } = await import("./somiglianza.ts");
   const { voceElevenLabs, chiaveElevenLabs } = await import("./voce-elevenlabs.ts");
   const { generaFoley } = await import("../suoni/foley.ts");
   const { postReelToFacebook } = await import("./canali/facebook.ts");
@@ -346,8 +387,8 @@ async function dipendenzeVere(articolo: ArticoloVideo): Promise<Dipendenze> {
     },
     verificaChiave: () => void chiaveElevenLabs(),
     // ogni risposta di Claude resta su disco prima dei controlli: finisce nell'artifact anche se scartata
-    scriviStoryboard: (a, recenti) =>
-      scriviStoryboard(a, chiediAClaude, recenti, (risposta, n) => writeFileSync(join(percorsi(a.slug).cartellaLavoro, `storyboard-claude-${n}.txt`), risposta)),
+    scriviStoryboard: (a, recenti, misura) =>
+      scriviStoryboard(a, chiediAClaude, misura, recenti, (risposta, n) => writeFileSync(join(percorsi(a.slug).cartellaLavoro, `storyboard-claude-${n}.txt`), risposta)),
     voce: (storyboard, cartella) => {
       writeFileSync(join(percorsi(storyboard.slug).cartellaLavoro, "storyboard.json"), JSON.stringify(storyboard, null, 2));
       return voceElevenLabs(storyboard, cartella);
@@ -357,6 +398,11 @@ async function dipendenzeVere(articolo: ArticoloVideo): Promise<Dipendenze> {
     controllaImpaginazione: (props) => {
       writeFileSync(join(percorsi(props.storyboard.slug).cartellaLavoro, "props.json"), JSON.stringify(props));
       return controllaImpaginazione(props);
+    },
+    impronta: async (props) => {
+      const impronta: string[] = [];
+      for (const png of await renderFotogrammi(props)) impronta.push(await improntaFotogramma(png));
+      return impronta;
     },
     render: async (props, uscita) => {
       const file = join(dirname(uscita), "props.json");

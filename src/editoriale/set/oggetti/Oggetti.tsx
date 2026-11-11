@@ -3,6 +3,8 @@ import { RepeatWrapping } from "three";
 
 import type { Schermata } from "../../../storyboard/tipi";
 import { useCanvasTexture } from "../../../three/useCanvasTexture";
+import type { Dettagli } from "../../dettagli";
+import { FINITURE } from "../../dettagli";
 import { alluminioRuvido } from "../disegni";
 import { NOTIFICA_TELEFONO_PX, SCHERMO_TELEFONO, TELEFONO_PX } from "../telefono";
 import type { SchermoTelefono } from "./disegni";
@@ -66,15 +68,15 @@ const ToastTelefono: React.FC<NotificaTelefono> = ({ messaggio, mittente, visibi
   );
 };
 
-/** Smartphone appoggiato a faccia in su: vetro scuro, cornice in alluminio, lo schermo acceso; la notifica su un piano a parte. */
-export const Smartphone: React.FC<{ schermo: SchermoTelefono; notifica?: NotificaTelefono }> = ({ schermo: s, notifica }) => {
+/** Smartphone appoggiato a faccia in su: vetro scuro, cornice in alluminio della finitura del video, lo schermo acceso; la notifica su un piano a parte. */
+export const Smartphone: React.FC<{ schermo: SchermoTelefono; dettagli: Dettagli; notifica?: NotificaTelefono }> = ({ schermo: s, dettagli, notifica }) => {
   const { larghezza: w, lunghezza: l, spessore: h } = SMARTPHONE;
-  const schermo = useCanvasTexture(TELEFONO_PX.w, TELEFONO_PX.h, disegnoTelefono(s), [JSON.stringify(s)]);
+  const schermo = useCanvasTexture(TELEFONO_PX.w, TELEFONO_PX.h, disegnoTelefono(s, dettagli), [JSON.stringify([s, dettagli.ora, dettagli.sfondo])]);
   const ruvido = useCanvasTexture(512, 512, alluminioRuvido);
   return (
     <Posa nome="smartphone">
       <RoundedBox args={[w, h, l]} radius={0.05} smoothness={4} position-y={h / 2} castShadow receiveShadow>
-        <meshPhysicalMaterial color="#5d6168" metalness={0.7} roughness={1} roughnessMap={ruvido} />
+        <meshPhysicalMaterial color={FINITURE[dettagli.finitura]} metalness={0.7} roughness={1} roughnessMap={ruvido} />
       </RoundedBox>
       <mesh position={[0, h + 0.001, 0]} rotation-x={-Math.PI / 2}>
         <planeGeometry args={[w - 0.04, l - 0.04]} />
@@ -153,9 +155,9 @@ export const CartaPagamento: React.FC = () => {
 };
 
 /** L'oggetto della scena sul piano (il portatile c'e' sempre). */
-export const OggettoSulPiano: React.FC<{ nome: NomeOggetto | "nessuno"; f: number; titolo: string; riga?: string; fuori?: number; menu?: string[]; schermata?: Schermata }> = ({ nome, f, titolo, riga, fuori, menu, schermata = "sistema" }) => {
+export const OggettoSulPiano: React.FC<{ nome: NomeOggetto | "nessuno"; f: number; titolo: string; dettagli: Dettagli; riga?: string; fuori?: number; menu?: string[]; schermata?: Schermata }> = ({ nome, f, titolo, dettagli, riga, fuori, menu, schermata = "sistema" }) => {
   if (nome === "chiavetta") return <Chiavetta fuori={fuori} spia={Math.floor(f / 7) % 2} />;
-  if (nome === "smartphone") return <Smartphone schermo={riga ? { tipo: "elenco", riga, titolo, menu, app: schermata !== "sistema" } : { tipo: "blocco", titolo }} />;
+  if (nome === "smartphone") return <Smartphone schermo={riga ? { tipo: "elenco", riga, titolo, menu, app: schermata !== "sistema" } : { tipo: "blocco", titolo }} dettagli={dettagli} />;
   if (nome === "router") return <Router lampeggio={Math.floor(f / 9) % 2} />;
   if (nome === "carta") return <CartaPagamento />;
   return null;

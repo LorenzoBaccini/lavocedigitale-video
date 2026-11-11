@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { VARIANTE_BASE } from "../src/editoriale/variante.ts";
-import { aggiungi, analizzaStorico, CHIAVE_STORICO, sequenzeRecenti, STORICO_VUOTO } from "./storico.ts";
+import type { Storyboard } from "../src/storyboard/tipi.ts";
+import { aggiungi, analizzaStorico, CHIAVE_STORICO, riassunto, sequenzeRecenti, STORICO_VUOTO } from "./storico.ts";
 
 test("il file che non esiste ancora e' uno storico vuoto", () => {
   assert.deepEqual(analizzaStorico(null), STORICO_VUOTO);
@@ -39,4 +40,31 @@ test("lo storico sta fuori dal prefisso video/, che scade dopo 7 giorni", () => 
 test("una variante rovinata a mano diventa vuota, non fa cadere la lettura", () => {
   const s = analizzaStorico(JSON.stringify({ recenti: [{ slug: "a", data: "x", scene: [{ tipo: "gancio" }], variante: null }], pubblicati: ["a"] }));
   assert.deepEqual(s.recenti[0].variante, {});
+});
+
+test("le voci scritte prima degli stili si leggono com'erano: i campi nuovi restano assenti", () => {
+  const vecchia = { musica: "caldo", luce: "calda", apertura: "classica" };
+  const s = analizzaStorico(JSON.stringify({ recenti: [{ slug: "a", data: "2026-11-06", scene: [{ tipo: "gancio" }], variante: vecchia }], pubblicati: ["a"] }));
+  assert.deepEqual(s.recenti[0].variante, vecchia);
+});
+
+test("il riassunto porta la variante intera, con stile, gancio, chiusura, frase finale e durata", () => {
+  const storyboard = { slug: "a", frasi: [{ testo: "Fine.", chiave: "Fine", scena: { tipo: "chiusura" } }] } as unknown as Storyboard;
+  const letto = analizzaStorico(JSON.stringify(aggiungi(STORICO_VUOTO, riassunto(storyboard, VARIANTE_BASE, "2026-11-09"))));
+  assert.deepEqual(letto.recenti[0].variante, VARIANTE_BASE);
+});
+
+test("l'impronta del video entra nella voce e si rilegge; una rovinata a mano si scarta, la voce resta", () => {
+  const storyboard = { slug: "a", frasi: [{ testo: "Fine.", chiave: "Fine", scena: { tipo: "chiusura" } }] } as unknown as Storyboard;
+  const impronta = Array(6).fill("0123456789abcdef#a1b2c3");
+  const letto = analizzaStorico(JSON.stringify(aggiungi(STORICO_VUOTO, riassunto(storyboard, VARIANTE_BASE, "2026-11-10", impronta))));
+  assert.deepEqual(letto.recenti[0].impronta, impronta);
+  const rovinata = analizzaStorico(JSON.stringify({ recenti: [{ slug: "b", data: "x", scene: [{ tipo: "gancio" }], variante: {}, impronta: ["zz"] }], pubblicati: ["b"] }));
+  assert.equal(rovinata.recenti[0].slug, "b");
+  assert.equal("impronta" in rovinata.recenti[0], false);
+});
+
+test("senza impronta (controllo saltato) la voce non ha il campo", () => {
+  const storyboard = { slug: "a", frasi: [{ testo: "Fine.", chiave: "Fine", scena: { tipo: "chiusura" } }] } as unknown as Storyboard;
+  assert.equal("impronta" in riassunto(storyboard, VARIANTE_BASE, "2026-11-10"), false);
 });

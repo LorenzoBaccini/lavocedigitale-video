@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { costruisciLinea } from "../../linea.ts";
 import { propsFrase } from "../../scenes/propsFrase.ts";
 import type { Storyboard } from "../../storyboard/tipi.ts";
+import { FRASI_CHIUSURA } from "../../storyboard/tipi.ts";
 import type { Timing } from "../../timing.ts";
 import { pausaPiuLunga, PAUSA_MAX } from "../regia.ts";
 import { NOTIFICA_PX, rettangoloInQuadro } from "../set/geometria.ts";
@@ -12,7 +13,7 @@ import { CORPO_NOTIFICA } from "../set/disegni.ts";
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, rettangoloTelefono } from "../set/telefono.ts";
 import { cameraAllarme, cameraAllarmeTelefono, NOTIFICA_IN_QUADRO, pianoAllarme } from "./allarme.ts";
 import { pianoChecklist } from "./checklist.ts";
-import { pianoChiusura } from "./chiusura.ts";
+import { attaccoChiusura, pianoChiusura } from "./chiusura.ts";
 import { pianoData } from "./data.ts";
 import { FRECCIA, PASSO_NOTE, pianoDocumenti } from "./documenti.ts";
 import { pianoGancio } from "./gancio.ts";
@@ -31,7 +32,7 @@ const senzaVoce = (sb: Storyboard, secondi: number) => {
   const l = costruisciLinea(timing, 30);
   return sb.frasi.map((_, i) => propsFrase(sb, timing, l, i));
 };
-const tutte = [leggi("tutte-le-scene.storyboard.json"), leggi("tutte-le-scene-2.storyboard.json"), leggi("tutte-le-scene-3.storyboard.json"), props.storyboard] as Storyboard[];
+const tutte = [leggi("tutte-le-scene.storyboard.json"), leggi("tutte-le-scene-2.storyboard.json"), leggi("tutte-le-scene-3.storyboard.json"), leggi("scene-nuove.storyboard.json"), leggi("scene-nuove-2.storyboard.json"), props.storyboard] as Storyboard[];
 
 test("nessuna inquadratura resta ferma oltre 2,5 s, con la voce vera e con frasi lunghe", () => {
   const casi = [...props.storyboard.frasi.map((_, i) => scena(i)), ...tutte.flatMap((sb) => [...senzaVoce(sb, 3), ...senzaVoce(sb, 7)])];
@@ -96,13 +97,38 @@ test("sul portatile indica e' il pulsante: si cerchia dopo i titoli e prima dell
   assert.ok(piano.testi.some((t) => t.testo === "Iscriviti ora"));
 });
 
-test("la chiusura sottolinea l'indirizzo quando la voce lo dice", () => {
+test("la chiusura scrive subito testata e indirizzo, e sottolinea l'indirizzo quando la voce lo dice", () => {
   const p = scena(7);
   if (p.tipo !== "chiusura") throw new Error("l'ultima frase e' la chiusura");
   const piano = pianoChiusura(p, p.durata);
   const detto = p.voce.parole.find((w) => w.t.startsWith("lavocedigitale"))!.da;
-  assert.equal(piano.sottolinea, detto + 8);
+  assert.equal(piano.sottolinea, detto + 4);
   assert.deepEqual(piano.testi.map((t) => t.testo), ["La Voce Digitale", "lavocedigitale.it"]);
+  // la voce dice l'indirizzo dopo un secondo e mezzo: la cartolina non lo aspetta
+  assert.ok(detto > 40);
+  assert.ok(piano.testi.every((t) => t.da <= 24), JSON.stringify(piano.testi));
+});
+
+test("la fascia integrata scrive la frase finale detta sopra l'indirizzo, senza ripeterlo", () => {
+  const attacchi = FRASI_CHIUSURA.map(({ testo, chiave }) => {
+    const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
+    return attaccoChiusura(senzaVoce(sb, 3)[0].voce.parole);
+  });
+  assert.deepEqual(attacchi, ["Tutto su", "Link nel post", "Il resto è nel link del post"]);
+  assert.equal(attaccoChiusura([{ t: "Trovi" }, { t: "tutto" }, { t: "su" }, { t: "lavocedigitale.it," }, { t: "il" }]), "Trovi tutto su");
+});
+
+test("con ogni frase finale, anche brevissima, la chiusura finisce i suoi segni prima della fine", () => {
+  for (const { testo, chiave } of FRASI_CHIUSURA) {
+    for (const secondi of [1, 1.5, 2.2, 3]) {
+      const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
+      const [p] = senzaVoce(sb, secondi);
+      if (p.tipo !== "chiusura") throw new Error("chiusura");
+      const piano = pianoChiusura(p, p.durata);
+      assert.ok(piano.sottolinea + 10 <= p.durata, `${testo} ${secondi}s: sottolinea ${piano.sottolinea} su ${p.durata}`);
+      assert.ok(piano.testi.every((t) => t.da < p.durata));
+    }
+  }
 });
 
 test("sulla data il cerchio cade quando la voce dice il giorno, il barrato dopo, il timbro per ultimo", () => {

@@ -1,0 +1,18 @@
+{
+  "slug": "scene-nuove-2",
+  "frasi": [
+    { "testo": "Il nuovo documento si ritira allo sportello del comune, senza appuntamento.", "chiave": "sportello", "scena": { "tipo": "mappa", "etichetta": "Dove ritirarlo", "titolo": "Lo ritiri allo sportello", "forma": "punto", "luoghi": ["Sportello del comune"] } },
+    { "testo": "Porta con te un documento valido e il codice della prenotazione.", "chiave": "documento", "scena": { "tipo": "simbolo", "etichetta": "Porta con te", "simbolo": "documento", "titolo": "Un documento valido" } },
+    { "testo": "La nuova rete per ora copre soltanto i quartieri del centro.", "chiave": "centro", "scena": { "tipo": "mappa", "etichetta": "Dove arriva la rete", "titolo": "Copertura solo in centro", "forma": "area", "luoghi": ["Quartieri del centro"] } },
+    { "testo": "Controlla la copertura e poi richiedi l'attivazione.", "chiave": "attivazione", "scena": { "tipo": "passi", "etichetta": "Per attivarla", "passi": [
+      { "testo": "Controlla la copertura", "simbolo": "segnale" },
+      { "testo": "Richiedi l'attivazione" }
+    ] } },
+    { "testo": "Dalla stazione ferroviaria parte una navetta gratis e diretta per l'ingresso della fiera.", "chiave": "navetta", "scena": { "tipo": "mappa", "etichetta": "Come arrivare", "titolo": "Navetta gratis e diretta", "forma": "percorso", "luoghi": ["Stazione ferroviaria", "Ingresso della fiera"] } },
+    { "testo": "Mostri il codice all'ingresso e ricevi subito il badge.", "chiave": "badge", "scena": { "tipo": "flusso", "etichetta": "Una volta dentro", "nodi": [
+      { "testo": "Mostri il codice", "simbolo": "documento" },
+      { "testo": "Ricevi il badge" }
+    ] } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+  ]
+}

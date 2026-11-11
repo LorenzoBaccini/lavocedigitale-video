@@ -5,11 +5,15 @@ import { Chiusura } from "./Chiusura";
 import { Citazione } from "./Citazione";
 import { Confronto } from "./Confronto";
 import { Data } from "./Data";
+import { Flusso } from "./Flusso";
 import { Gancio } from "./Gancio";
+import { Mappa } from "./Mappa";
 import { Numero } from "./Numero";
 import { Oggetto } from "./Oggetto";
+import { Passi } from "./Passi";
 import type { ScenaDi } from "./props";
 import { Rischio } from "./Rischio";
+import { Simbolo } from "./Simbolo";
 import { Teaser } from "./Teaser";
 import { Telefono } from "./Telefono";
 import { Documenti } from "./Documenti";
@@ -31,5 +35,9 @@ export const SCENE: { [T in Scena["tipo"]]?: React.FC<ScenaDi<T>> } = {
   numero: Numero,
   confronto: Confronto,
   citazione: Citazione,
+  simbolo: Simbolo,
+  passi: Passi,
+  flusso: Flusso,
+  mappa: Mappa,
   chiusura: Chiusura,
 };

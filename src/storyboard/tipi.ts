@@ -1,3 +1,5 @@
+import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
+
 export type Oggetto = "portatile" | "chiavetta" | "smartphone" | "router" | "carta" | "nessuno";
 
 export const OGGETTI: readonly Oggetto[] = ["portatile", "chiavetta", "smartphone", "router", "carta", "nessuno"];
@@ -13,6 +15,26 @@ export const SCHERMATE: readonly Schermata[] = ["sistema", "sito", "app"];
 /** Le cose che la scena `documenti` appoggia sul tavolo. */
 export type Pezzo = "tessera" | "documento" | "lettore" | "pin";
 export const PEZZI: readonly Pezzo[] = ["tessera", "documento", "lettore", "pin"];
+
+/** I pittogrammi disegnati a tratto: un insieme chiuso, generico, senza marchi. */
+export type Simbolo = "lucchetto" | "batteria" | "wifi" | "segnale" | "posizione" | "altoparlante" | "documento" | "euro" | "calendario" | "scudo";
+export const SIMBOLI: readonly Simbolo[] = ["lucchetto", "batteria", "wifi", "segnale", "posizione", "altoparlante", "documento", "euro", "calendario", "scudo"];
+
+/** Un passo della scena `passi`: il testo e, se serve, un pittogramma piccolo. */
+export interface Passo {
+  testo: string;
+  simbolo?: Simbolo;
+}
+
+/** Un nodo della scena `flusso`: il testo e, se serve, un pittogramma piccolo. */
+export interface Nodo {
+  testo: string;
+  simbolo?: Simbolo;
+}
+
+/** Il segno sulla piantina della scena `mappa`: lo spillo su un punto, una zona cerchiata, un tragitto da A a B. */
+export type FormaMappa = "punto" | "area" | "percorso";
+export const FORME_MAPPA: readonly FormaMappa[] = ["punto", "area", "percorso"];
 
 export interface Voce {
   grande: string;
@@ -42,6 +64,11 @@ export type Scena =
   | { tipo: "numero"; etichetta: string; numero: string; unita?: string; nota?: string }
   | { tipo: "confronto"; etichetta: string; a: Confronto; b: Confronto }
   | { tipo: "citazione"; testo: string; fonte: string }
+  | { tipo: "passi"; etichetta: string; passi: Passo[] }
+  | { tipo: "flusso"; etichetta: string; nodi: Nodo[] }
+  /** `luoghi`: uno con `punto` e `area`, due (partenza e arrivo) con `percorso` */
+  | { tipo: "mappa"; etichetta: string; titolo: string; forma: FormaMappa; luoghi: string[] }
+  | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
   | { tipo: "chiusura" };
 
 export interface Frase {
@@ -57,12 +84,46 @@ export interface Storyboard {
   frasi: Frase[];
 }
 
+/** L'ultima frase che Claude scrive e la validazione pretende; la pipeline la sostituisce con una di `FRASI_CHIUSURA`. */
 export const TESTO_CHIUSURA = "Trovi tutto su la voce digitale punto it, il link è nel post.";
 
+/**
+ * Le frasi finali dette davvero, indicizzate da `fraseFinale` della variante, con la loro chiave. Corte: l'indirizzo
+ * e' scritto nella cartolina e nella fascia, non serve dirlo ogni volta.
+ */
+export const FRASI_CHIUSURA = [
+  { testo: "Tutto su la voce digitale punto it.", chiave: "la voce digitale punto it" },
+  { testo: "Link nel post.", chiave: "Link nel post" },
+  { testo: "Il resto è nel link del post.", chiave: "link del post" },
+] as const;
+
+export interface LimitiDurata {
+  /** chiusura inclusa */
+  frasi: { min: number; max: number };
+  /** dette: le frasi prima della chiusura piu' la frase finale della variante, non `TESTO_CHIUSURA` */
+  parole: { min: number; max: number };
+  /** circa, a 2,35 parole al secondo: lo legge solo il prompt */
+  secondi: { min: number; max: number };
+}
+
+/** Frasi e parole dette per ogni durata della variante: il prompt chiede quella scelta, la validazione la applica. */
+export const LIMITI_DURATA: Record<NomeDurata, LimitiDurata> = {
+  corta: { frasi: { min: 4, max: 5 }, parole: { min: 32, max: 46 }, secondi: { min: 15, max: 21 } },
+  media: { frasi: { min: 6, max: 8 }, parole: { min: 50, max: 72 }, secondi: { min: 23, max: 32 } },
+  lunga: { frasi: { min: 8, max: 9 }, parole: { min: 72, max: 88 }, secondi: { min: 32, max: 40 } },
+};
+
+export const contaParole = (testo: string): number => testo.trim().split(/\s+/).filter(Boolean).length;
+
+/** Le parole che Claude scrive prima della chiusura: i limiti della durata meno la frase finale scelta. */
+export function paroleContenuto(durata: NomeDurata, fraseFinale: FraseFinale): { min: number; max: number } {
+  const { min, max } = LIMITI_DURATA[durata].parole;
+  const n = contaParole(FRASI_CHIUSURA[fraseFinale].testo);
+  return { min: min - n, max: max - n };
+}
+
 export const LIMITI = {
-  frasi: { min: 6, max: 8 },
   testoFrase: 160,
-  paroleCopione: { min: 50, max: 78 },
   titolo: 24,
   evidenza: 16,
   etichetta: 32,
@@ -72,6 +133,11 @@ export const LIMITI = {
   indica: 28,
   chiave: 18,
   voci: { min: 2, max: 3 },
+  passi: { min: 2, max: 4 },
+  passo: 28,
+  nodi: { min: 2, max: 3 },
+  nodo: 18,
+  luogo: 20,
   grande: 18,
   piccolo: 34,
   numero: 8,

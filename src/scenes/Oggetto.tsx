@@ -2,7 +2,8 @@ import { Vector3 } from "three";
 import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
-import { pianoOggetto } from "../editoriale/piani/oggetto";
+import { useDettagli } from "../editoriale/DettagliVideo";
+import { pianoOggetto, RICHIAMO_INDICA, TESTO_CONFERMA } from "../editoriale/piani/oggetto";
 import { fase } from "../editoriale/regia";
 import { Pennarello, Richiamo, SegnoInQuadro } from "../editoriale/Segno";
 import type { Camera } from "../editoriale/set/geometria";
@@ -13,18 +14,16 @@ import { OggettoSulPiano } from "../editoriale/set/oggetti/Oggetti";
 import type { Schermo } from "../editoriale/set/Portatile";
 import { angoliSchermoTelefono, puntoTelefono, sopraIlTelefono, TELEFONO_PX } from "../editoriale/set/telefono";
 import { POSTI, puntoCaldo } from "../editoriale/set/oggetti/posti";
-import { Scrivania } from "../editoriale/set/Scrivania";
+import { Set3D } from "../editoriale/set/Set3D";
 import { NotaAccanto } from "../editoriale/set/NotaAccanto";
 import { Occhiello } from "../editoriale/set/Occhiello";
-import { sopraIlTitolo, SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
+import { SPAZIO_OCCHIELLO } from "../editoriale/set/misureOcchiello";
 import { Velo } from "../editoriale/set/Velo";
-import type { Riga } from "../editoriale/Titolo";
+import { allineaFlesso, useStile } from "../editoriale/stili";
+import { titoliOggetto } from "../editoriale/testate/oggetto";
 import { Titolo } from "../editoriale/Titolo";
-import { altezzaRighe } from "../editoriale/titoli";
-import { INCHIOSTRO } from "../editoriale/carta/stile";
 import { cerchiatura, lunghezza, percorso, spunta } from "../editoriale/tratto";
 import { ALTEZZA, FONDO_SCENA, FONDO_UTILE, MARGINE, RESPIRO, TITOLO_TOP } from "../impaginazione";
-import { C, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
 const LARGHEZZA_PULSANTE = (PULSANTE_PX.w / SCHERMO_PX.w) * SCHERMO.larghezza;
@@ -61,10 +60,26 @@ function cerchioSu(oggetto: Exclude<ScenaDi<"oggetto">["oggetto"], "nessuno">, c
   return { cx: c.x, cy: c.y, rx, ry: rx * (oggetto === "smartphone" ? 0.42 : 0.78) };
 }
 
+/** La conferma in basso, sopra i sottotitoli: la spunta a penna, poi il testo. `suChiaro` la scrive scura sulla pagina chiara. */
+export const Conferma: React.FC<{ testo: string; da: number; f: number; suChiaro: boolean }> = ({ testo, da, f, suChiaro }) => {
+  const stile = useStile();
+  const ok = fase(f, da + TESTO_CONFERMA.da, da + TESTO_CONFERMA.a);
+  return (
+    <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile), alignItems: "center", gap: 18 }}>
+      <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
+        <Pennarello d={percorso(PUNTI_SPUNTA)} colore={suChiaro ? stile.colori.suChiaro : stile.colori.testo} spessore={8} progresso={(f - da) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
+      </svg>
+      <div data-impaginazione="conferma" data-su-chiaro={suChiaro ? "1" : undefined} style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 600, fontSize: corpo(testo, 66, 20, stile.larghezza), lineHeight: 1.12, color: suChiaro ? stile.colori.suChiaro : stile.colori.testo, textShadow: suChiaro ? "none" : stile.ombra(14, 0.5), opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{testo}</div>
+    </div>
+  );
+};
+
 // L'oggetto: in primo piano sulla scrivania, con l'occhiello e il titolo in alto, `indica` cerchiato a mano,
 // la conferma spuntata a penna in basso.
 export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   const f = useCurrentFrame();
+  const stile = useStile();
+  const dettagli = useDettagli();
   const { oggetto, durata, etichetta, indica, conferma } = props;
   const piano = pianoOggetto(props, durata);
   const schermata = props.schermata ?? "sistema";
@@ -77,8 +92,7 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
     ? inAsse(puntoSchermo(CENTRO_PRIMO_PIANO_PX, PULSANTE_PX.y + PULSANTE_PX.h / 2), distanzaPer(LARGHEZZA_PULSANTE, primoPiano.larghezza), primoPiano.quota)
     : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
   const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
-  const testata = [{ testo: props.titolo, size: corpo(props.titolo, 100, 18) }, ...(props.evidenza ? [{ testo: props.evidenza, size: corpo(props.evidenza, 84, 15) }] : [])];
-  const limite = TITOLO_TOP + sopraIlTitolo(etichetta) + altezzaRighe(testata) + 36;
+  const { righe, limite } = titoliOggetto(props, piano, stile);
   const cam = telefono
     ? fraTitoloEConferma(avvicinata, limite, conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA : FONDO_UTILE)
     : oggetto === "portatile" && !suPulsante
@@ -90,43 +104,31 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   // il richiamo va sotto il cerchio se ci sta prima della conferma e dei sottotitoli, altrimenti sopra
   const richiamoSotto = segno ? segno.cy + segno.ry + 140 < FONDO_UTILE - (conferma ? 110 : 10) : true;
 
-  const righe: Riga[] = [
-    { parole: piano.titolo, size: corpo(props.titolo, 100, 18), font: SERIF, peso: 700 },
-    ...(piano.evidenza.length ? [{ parole: piano.evidenza.map((p) => ({ ...p, colore: C.amber })), size: corpo(props.evidenza ?? "", 84, 15), font: SERIF, peso: 600, corsivo: true }] : []),
-  ];
-  const ok = piano.conferma === undefined ? 0 : fase(f, piano.conferma + 6, piano.conferma + 14);
   return (
     <>
-      <Scrivania camera={cam} schermo={schermo} orologio={props.contesto.orologio}>
-        <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} riga={indica} menu={props.menu} schermata={schermata} fuori={0.12 * (1 - fase(f, 0, 3))} />
-      </Scrivania>
+      <Set3D camera={cam} schermo={schermo} orologio={props.contesto.orologio}>
+        <OggettoSulPiano nome={oggetto} f={f} titolo={props.titolo} dettagli={dettagli} riga={indica} menu={props.menu} schermata={schermata} fuori={0.12 * (1 - fase(f, 0, 3))} />
+      </Set3D>
       <Velo alto={0.62} basso={inchiostro ? 0.85 : conferma ? 0.7 : 0.5} />
       {oggetto === "portatile" && !inchiostro && <Ingombro nome="schermo" angoli={angoliInQuadro({ x: 0, y: 0, ...SCHERMO_PX }, cam)} />}
       {chiara && schermo?.tipo === "finestra" && <Ingombro nome="pagina" angoli={angoliInQuadro(FINESTRA_PX, cam)} pieno />}
       {oggetto === "smartphone" && <Ingombro nome="telefono" angoli={angoliSchermoTelefono(cam)} />}
-      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: "center", gap: SPAZIO_OCCHIELLO }}>
+      <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile), gap: SPAZIO_OCCHIELLO }}>
         <Occhiello f={f} testo={etichetta} />
         <Titolo nome="titolo" f={f} righe={righe} style={{ alignSelf: "stretch" }} />
       </div>
       {segno && piano.indica !== undefined && (
         <>
-          <SegnoInQuadro punti={cerchiatura(segno.cx, segno.cy, segno.rx, segno.ry, 9)} colore={inchiostro ? INCHIOSTRO.testo : "#FAFAF7"} spessore={7} progresso={(f - piano.indica - 4) / 15} />
+          <SegnoInQuadro punti={cerchiatura(segno.cx, segno.cy, segno.rx, segno.ry, 9)} colore={inchiostro ? stile.colori.suChiaro : stile.colori.testo} spessore={7} progresso={(f - piano.indica - 4) / 15} />
           {telefono && indica && (
             <NotaAccanto nome="indica" testo={indica} x={segno.cx + segno.rx} y={segno.cy} sinistra={Math.max(NOTA_DA, segno.cx + segno.rx + 60)} da={piano.indica - 3} f={f} seme={23} />
           )}
           {!suPulsante && !telefono && indica && (
-            <Richiamo nome="indica" testo={indica} x={segno.cx} daY={richiamoSotto ? segno.cy + segno.ry + 10 : segno.cy - segno.ry - 10} aY={richiamoSotto ? segno.cy + segno.ry + 70 : segno.cy - segno.ry - 70} progresso={(f - piano.indica - 10) / 10} />
+            <Richiamo nome="indica" testo={indica} x={segno.cx} daY={richiamoSotto ? segno.cy + segno.ry + 10 : segno.cy - segno.ry - 10} aY={richiamoSotto ? segno.cy + segno.ry + 70 : segno.cy - segno.ry - 70} progresso={(f - piano.indica - RICHIAMO_INDICA.da) / (RICHIAMO_INDICA.a - RICHIAMO_INDICA.da)} />
           )}
         </>
       )}
-      {conferma && piano.conferma !== undefined && f >= piano.conferma && (
-        <div style={{ position: "absolute", bottom: FONDO_SCENA + RESPIRO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center", alignItems: "center", gap: 18 }}>
-          <svg width={SPUNTA} height={SPUNTA} style={{ flex: "none", overflow: "visible" }}>
-            <Pennarello d={percorso(PUNTI_SPUNTA)} colore={inchiostro ? INCHIOSTRO.testo : "#FAFAF7"} spessore={8} progresso={(f - piano.conferma) / 8} lunghezza={lunghezza(PUNTI_SPUNTA)} />
-          </svg>
-          <div data-impaginazione="conferma" data-su-chiaro={inchiostro ? "1" : undefined} style={{ minWidth: 0, fontFamily: SERIF, fontWeight: 600, fontSize: corpo(conferma, 66, 20), lineHeight: 1.12, color: inchiostro ? INCHIOSTRO.testo : "#FAFAF7", textShadow: inchiostro ? "none" : "0 2px 14px rgba(0,0,0,0.5)", opacity: ok, transform: `translateY(${(1 - ok) * 12}px)` }}>{conferma}</div>
-        </div>
-      )}
+      {conferma && piano.conferma !== undefined && f >= piano.conferma && <Conferma testo={conferma} da={piano.conferma} f={f} suChiaro={inchiostro} />}
     </>
   );
 };

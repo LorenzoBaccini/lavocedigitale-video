@@ -2,16 +2,15 @@ import { useCurrentFrame } from "remotion";
 
 import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
-import { SU_CARTA_TINTA } from "../editoriale/carta/Occhiello";
-import { INCHIOSTRO } from "../editoriale/carta/stile";
+import { CARTA_RITAGLIO } from "../editoriale/carta/stile";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { pianoCitazione } from "../editoriale/piani/citazione";
+import { DISSOLVENZA_FONTE, pianoCitazione } from "../editoriale/piani/citazione";
 import { fase } from "../editoriale/regia";
 import { SegnoInQuadro } from "../editoriale/Segno";
+import { allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
 import { sottolineatura } from "../editoriale/tratto";
 import { LARGHEZZA } from "../impaginazione";
-import { SANS, SERIF } from "../theme";
 import type { ScenaDi } from "./props";
 
 const ALTO = 600;
@@ -28,20 +27,23 @@ const STRAPPO = (() => {
 // la fonte sotto; a lato, il segno a pennarello di chi l'ha letta e l'ha segnata.
 export const Citazione: React.FC<ScenaDi<"citazione">> = (props) => {
   const f = useCurrentFrame();
+  const stile = useStile();
   const { durata, testo, fonte } = props;
   const piano = pianoCitazione(props, durata);
-  const size = Math.max(50, corpo(testo, 66, 70));
+  const size = corpo(testo, 66, 70, stile.larghezza, 50);
   const righe = Math.ceil((testo.length * size * 0.44) / (RITAGLIO.w - 120));
   const alto = righe * size * 1.12;
+  // sul poster niente ritaglio di giornale: la frase sta sulla tinta
+  const ritaglio: React.CSSProperties = stile.grafiche === "carta" ? { background: CARTA_RITAGLIO, clipPath: STRAPPO, boxShadow: stile.ombra(24, 0.25, 10), transform: "rotate(-0.8deg)" } : {};
   const margine = sottolineatura(alto + 20, 27).map(([x, y]) => [RITAGLIO.x + 30 + y, ALTO + 120 + x] as [number, number]);
   return (
     <Foglio tipo="liscia" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <div style={{ position: "absolute", top: ALTO, left: RITAGLIO.x, width: RITAGLIO.w, padding: "120px 60px 60px", background: "#EDE6D4", clipPath: STRAPPO, boxShadow: "0 10px 24px rgba(0,0,0,0.25)", transform: "rotate(-0.8deg)" }}>
-        <div style={{ position: "absolute", top: 10, left: 0, right: 0, textAlign: "center", fontFamily: SERIF, fontWeight: 700, fontSize: 130, lineHeight: 1, color: INCHIOSTRO.ambra, opacity: 0.9 }}>«</div>
-        <Titolo nome="citazione" f={f} tinta={SU_CARTA_TINTA} righe={[{ parole: piano.parole, size, font: SERIF, peso: 500, corsivo: true }]} style={{ position: "relative" }} />
-        <div data-impaginazione="fonte" style={{ marginTop: 34, textAlign: "center", fontFamily: SANS, fontWeight: 600, fontSize: 34, letterSpacing: "0.08em", textTransform: "uppercase", color: INCHIOSTRO.tenue, opacity: fase(f, piano.fonte, piano.fonte + 8) }}>— {fonte}</div>
+      <div style={{ position: "absolute", top: ALTO, left: RITAGLIO.x, width: RITAGLIO.w, padding: "120px 60px 60px", ...ritaglio }}>
+        <div style={{ position: "absolute", top: 10, left: 0, right: 0, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: 130, lineHeight: 1, color: stile.colori.accentoSuChiaro, opacity: 0.9 }}>«</div>
+        <Titolo nome="citazione" f={f} tinta="grafica" righe={[{ parole: piano.parole, size, peso: 500, corsivo: true }]} style={{ position: "relative" }} />
+        <div data-impaginazione="fonte" style={{ marginTop: 34, textAlign: allineaTesto(stile), fontFamily: stile.caratteri.testo, fontWeight: 600, fontSize: 34, letterSpacing: "0.08em", textTransform: "uppercase", color: stile.colori.inchiostro.tenue, opacity: fase(f, piano.fonte, piano.fonte + DISSOLVENZA_FONTE) }}>— {fonte}</div>
       </div>
-      <SegnoInQuadro punti={margine} colore={INCHIOSTRO.ambra} spessore={8} progresso={(f - piano.sottolinea) / 12} />
+      <SegnoInQuadro punti={margine} colore={stile.colori.accentoSuChiaro} spessore={8} progresso={(f - piano.sottolinea) / 12} />
     </Foglio>
   );
 };

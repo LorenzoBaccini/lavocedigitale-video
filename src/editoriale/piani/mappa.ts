@@ -2,7 +2,8 @@ import type { ScenaDi } from "../../scenes/props.ts";
 import type { FormaMappa } from "../../storyboard/tipi.ts";
 import type { PianoCarta } from "./carta.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { entroIl, fineDi, paroleTitolo, testoDi } from "../titoli.ts";
+import { fineDi, leggibile, paroleTitolo, testoDi, ultimaEntro } from "../titoli.ts";
+import { inSequenza, interoEntro } from "../lettura.ts";
 import { suCarta } from "./carta.ts";
 import { quandoDiceUna } from "../voce.ts";
 
@@ -31,13 +32,14 @@ export interface PianoMappa extends PianoCarta {
 }
 
 // La piantina appare in dissolvenza, poi la mano segna il luogo quando la voce lo nomina (o a un quarto della scena);
-// col percorso il tragitto arriva al secondo luogo quando la voce lo dice. Il titolo arriva sulla chiave. Ogni testo e'
-// intero 10 frame prima della fine, anche nelle frasi cortissime.
+// col percorso il tragitto arriva al secondo luogo quando la voce lo dice. Il titolo arriva sulla chiave. Ogni testo,
+// intero, resta la sua `lettura` prima della fine (anticipando la voce se serve), anche nelle frasi cortissime.
 export function pianoMappa(s: ScenaDi<"mappa">, durata: number): PianoMappa {
   const { voce, forma } = s;
   const n = s.luoghi.length;
-  const ultimo = durata - 13;
-  const tettoSegno = ultimo - (n - 1) * FRA_LUOGHI - DOPO_SEGNO[forma];
+  // l'etichetta di un luogo e' intera 3 frame dopo il suo arrivo
+  const tetti = inSequenza(s.luoghi.map((l) => interoEntro(l, durata) - 3), FRA_LUOGHI);
+  const tettoSegno = (tetti[0] ?? durata - 13) - DOPO_SEGNO[forma];
   const detto = quandoDiceUna(voce, s.luoghi[0], Math.round(durata * 0.25)) - DOPO_SEGNO[forma];
   const segno = Math.max(PIANTINA + DOPO_PIANTINA, Math.min(tettoSegno, detto));
   const luoghi = [segno + DOPO_SEGNO[forma]];
@@ -45,11 +47,11 @@ export function pianoMappa(s: ScenaDi<"mappa">, durata: number): PianoMappa {
     const da = Math.max(0, voce.parole.findIndex((w) => w.da > luoghi[0]));
     const arrivo = quandoDiceUna(voce, s.luoghi[1], luoghi[0] + TRAGITTO, da);
     // sotto i 22 frame il tetto scende sotto il primo luogo: l'arrivo non lo precede mai
-    luoghi.push(Math.max(luoghi[0], Math.min(ultimo, Math.max(luoghi[0] + FRA_LUOGHI, arrivo))));
+    luoghi.push(Math.max(luoghi[0], Math.min(tetti[1], Math.max(luoghi[0] + FRA_LUOGHI, arrivo))));
   }
   const chiave = voce.parole[voce.chiave]?.da ?? Math.round(durata * 0.6);
-  const titolo = Math.max(segno, Math.min(ultimo, Math.max(segno + 4, chiave)));
-  const parole = entroIl(paroleTitolo(s.titolo, voce, titolo), durata - 12);
+  const titolo = Math.max(segno, Math.min(ultimaEntro(s.titolo, durata), Math.max(segno + 4, chiave)));
+  const parole = leggibile(paroleTitolo(s.titolo, voce, titolo), durata, durata - 12);
   const testi = [{ testo: s.etichetta, da: 4 }, ...s.luoghi.map((testo, i) => ({ testo, da: luoghi[i] + 3 })), { testo: testoDi(parole), da: fineDi(parole) }];
   return { piantina: PIANTINA, segno, luoghi, titolo, parole, ...suCarta(testi, [], [PIANTINA, segno, ...luoghi, titolo], durata, s.contesto) };
 }

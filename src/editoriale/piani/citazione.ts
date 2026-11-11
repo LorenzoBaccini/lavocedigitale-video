@@ -1,6 +1,7 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import { normalizza } from "../../sottotitoli.ts";
 import { testoAschermo } from "../../testoAschermo.ts";
+import { interoEntro } from "../lettura.ts";
 import type { ParolaTitolo } from "../titoli.ts";
 import { fineDi, paroleTitolo, testoDi } from "../titoli.ts";
 import type { Voce } from "../voce.ts";
@@ -52,11 +53,14 @@ export function paroleCitazione(testo: string, voce: Voce): ParolaTitolo[] {
 // (con la voce solo se la voce la legge dall'inizio), poi la fonte; il pennarello sottolinea l'ultima riga.
 export function pianoCitazione(s: ScenaDi<"citazione">, durata: number): PianoCitazione {
   const parole = paroleCitazione(s.testo, s.voce);
-  const fine = Math.min(durata - 24, fineDi(parole));
-  // se la frase e' lunga si compone piu' in fretta: deve essere intera entro la fine della scena
-  const scala = fineDi(parole) > durata - 24 ? (durata - 30) / Math.max(1, fineDi(parole)) : 1;
+  // la fonte (intera 4 frame dopo) e la citazione prima di lei restano da leggere prima dello stacco
+  const tettoFonte = Math.min(durata - 16, interoEntro(s.fonte, durata) - 4);
+  const limite = Math.min(durata - 24, interoEntro(testoDi(parole), durata), tettoFonte - 6);
+  const fine = Math.min(limite, fineDi(parole));
+  // se la frase e' lunga si compone piu' in fretta: deve essere intera in tempo per leggerla
+  const scala = fineDi(parole) > limite ? Math.max(0, limite - 6) / Math.max(1, fineDi(parole)) : 1;
   const tempi = parole.map((p) => ({ ...p, da: Math.round(p.da * scala) }));
-  const fonte = Math.min(durata - 16, fine + 6);
+  const fonte = Math.min(tettoFonte, fine + 6);
   const sottolinea = Math.min(durata - 10, fonte + 8);
   const testi = [
     { testo: testoDi(tempi), da: fineDi(tempi) },

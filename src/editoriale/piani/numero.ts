@@ -1,5 +1,6 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import type { TestoAschermo } from "../piano.ts";
+import { interoEntro } from "../lettura.ts";
 import { quandoDice } from "../voce.ts";
 import type { PianoCarta } from "./carta.ts";
 import { suCarta } from "./carta.ts";
@@ -12,14 +13,16 @@ export interface PianoNumero extends PianoCarta {
 }
 
 // La cifra stampata grande, come in un'infografica di giornale: entra con la voce, il pennarello la sottolinea
-// sulla chiave; sotto l'unita' e la nota in corsivo.
+// sulla chiave; sotto l'unita' e la nota in corsivo. Cifra, unita' e nota restano da leggere prima dello stacco: se la
+// voce le dice tardi, entrano prima.
 export function pianoNumero(s: ScenaDi<"numero">, durata: number): PianoNumero {
   const { voce } = s;
-  const numero = Math.max(4, Math.min(durata - 40, quandoDice(voce, s.numero, 8)));
+  const tetto = Math.min(durata - 40, interoEntro(s.numero, durata) - 3, s.unita ? interoEntro(s.unita, durata) - 12 : Infinity);
+  const numero = Math.max(4, Math.min(tetto, quandoDice(voce, s.numero, 8)));
   const chiave = voce.parole[voce.chiave]?.da ?? numero + 10;
   const sottolinea = Math.min(durata - 14, Math.max(numero + 10, chiave + 3));
   const unita = s.unita ? numero + 8 : undefined;
-  const nota = s.nota ? Math.min(durata - 16, Math.max(sottolinea + 10, Math.round(durata * 0.45))) : undefined;
+  const nota = s.nota ? Math.min(durata - 16, interoEntro(s.nota, durata) - 4, Math.max(sottolinea + 10, Math.round(durata * 0.45))) : undefined;
   const testi: TestoAschermo[] = [
     { testo: s.etichetta, da: 4 },
     { testo: s.numero, da: numero + 3 },

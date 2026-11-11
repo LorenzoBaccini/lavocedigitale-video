@@ -2,7 +2,7 @@ import type { ScenaDi } from "../../scenes/props.ts";
 import type { Piano } from "../piano.ts";
 import { accentiMancanti } from "../regia.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { entroIl, fineDi, paroleInAccento, paroleTitolo, testoDi } from "../titoli.ts";
+import { fineDi, leggibile, paroleInAccento, paroleTitolo, testoDi } from "../titoli.ts";
 import { quandoDiceUna } from "../voce.ts";
 
 export interface PianoTelefono extends Piano {
@@ -21,7 +21,7 @@ export interface PianoTelefono extends Piano {
 // poi un cerchio sull'opzione che resta.
 export function pianoTelefono(s: ScenaDi<"telefono">, durata: number): PianoTelefono {
   const { voce } = s;
-  const titolo = entroIl(paroleTitolo(s.titolo, voce, 6), Math.round(durata * 0.55));
+  const titolo = leggibile(paroleTitolo(s.titolo, voce, 6), durata, Math.round(durata * 0.55));
   const accento = paroleInAccento(titolo, voce.parole.slice(voce.chiave).map((p) => p.t));
   const colpo = Math.min(durata - 6, Math.max(titolo[accento[0]]?.da ?? 0, voce.parole[voce.chiave]?.da ?? 0));
   const indice = s.esclusa === undefined ? -1 : s.opzioni.indexOf(s.esclusa);

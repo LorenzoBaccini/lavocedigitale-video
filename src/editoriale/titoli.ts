@@ -1,5 +1,6 @@
 import { normalizza } from "../sottotitoli.ts";
 import { testoAschermo } from "../testoAschermo.ts";
+import { interoEntro } from "./lettura.ts";
 import type { Voce } from "./voce.ts";
 
 /** Una parola di un titolo con il frame in cui la voce la dice (o in cui entra, se la voce non la dice). */
@@ -18,7 +19,7 @@ export const intera = (p: { da: number }) => p.da - ANTICIPO + 3;
  * altrimenti `passo` frame dopo la precedente. La prima parola non entra prima di `inizio`.
  */
 export function paroleTitolo(testo: string, voce: Voce, inizio: number, passo = 3): ParolaTitolo[] {
-  const scritte = testoAschermo(testo).split(/\s+/).filter(Boolean);
+  const scritte = paroleScritte(testo);
   let cursore = 0;
   let ultimo = inizio - passo;
   return scritte.map((t) => {
@@ -51,6 +52,16 @@ export function paroleInAccento(titolo: { t: string }[], chiave: string[]): numb
   }
   return titolo.length ? [titolo.length - 1] : [];
 }
+
+/** Le parole di un testo come le scrive lo schermo. */
+const paroleScritte = (testo: string) => testoAschermo(testo).split(/\s+/).filter(Boolean);
+
+/** L'ultimo frame in cui puo' entrare l'ultima parola di `testo` perche' il testo, intero, resti da leggere (vedi `lettura`). */
+export const ultimaEntro = (testo: string, durata: number) => interoEntro(paroleScritte(testo).join(" "), durata) + ANTICIPO - 3;
+
+/** Come `entroIl`, col limite anche della lettura: il titolo e' intero in tempo per leggerlo prima dello stacco. */
+export const leggibile = (parole: ParolaTitolo[], durata: number, limite = Infinity): ParolaTitolo[] =>
+  entroIl(parole, Math.min(limite, ultimaEntro(testoDi(parole), durata)));
 
 /** Se l'ultima parola entrerebbe oltre `limite`, i tempi si comprimono verso l'inizio: il titolo e' intero prima dello stacco. */
 export function entroIl(parole: ParolaTitolo[], limite: number): ParolaTitolo[] {

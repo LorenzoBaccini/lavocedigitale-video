@@ -97,3 +97,7 @@ cause:
 - **Gli esempi del prompt**: in Windows lo scudo barrato va sulla frase «nasce senza difese» (il `rischio` passa alla
   frase del problema) e la `checklist` resta, perché dice cosa serve; i `passi` vanno alla procedura dei Consensi nel
   Fascicolo medio, l'unico con `allarme`. Il test degli esempi resta in `durata.test.ts`, che già li estraeva.
+- **Tempo di lettura** (`lettura.ts`): ogni testo a schermo resta intero almeno `lettura(testo)` prima dello stacco,
+  da 1,2 s (fino a 12 caratteri) a 1,8 s (0,6 s + 0,05 s a carattere), al più metà scena sotto i 3,6 s; se la voce lo
+  porterebbe più tardi il testo la anticipa, mai il contrario. Vale in tutti i piani; nelle sequenze (`inSequenza`)
+  ogni elemento lascia la sua distanza minima a quelli dopo, e sotto i 2,3 s possono vincere le distanze.

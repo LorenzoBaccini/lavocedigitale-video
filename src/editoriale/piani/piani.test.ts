@@ -32,7 +32,7 @@ const senzaVoce = (sb: Storyboard, secondi: number) => {
   const l = costruisciLinea(timing, 30);
   return sb.frasi.map((_, i) => propsFrase(sb, timing, l, i));
 };
-const tutte = [leggi("tutte-le-scene.storyboard.json"), leggi("tutte-le-scene-2.storyboard.json"), leggi("tutte-le-scene-3.storyboard.json"), leggi("scene-nuove.storyboard.json"), props.storyboard] as Storyboard[];
+const tutte = [leggi("tutte-le-scene.storyboard.json"), leggi("tutte-le-scene-2.storyboard.json"), leggi("tutte-le-scene-3.storyboard.json"), leggi("scene-nuove.storyboard.json"), leggi("scene-nuove-2.storyboard.json"), props.storyboard] as Storyboard[];
 
 test("nessuna inquadratura resta ferma oltre 2,5 s, con la voce vera e con frasi lunghe", () => {
   const casi = [...props.storyboard.frasi.map((_, i) => scena(i)), ...tutte.flatMap((sb) => [...senzaVoce(sb, 3), ...senzaVoce(sb, 7)])];

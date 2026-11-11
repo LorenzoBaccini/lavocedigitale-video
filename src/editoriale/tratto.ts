@@ -117,3 +117,25 @@ export function trattoFra(a: { x: number; y: number }, z: { x: number; y: number
   const ang = Math.atan2(z.y - a.y, z.x - a.x);
   return sottolineatura(Math.hypot(z.x - a.x, z.y - a.y), seme).map(([x, y]): Punto => [a.x + x * Math.cos(ang) - y * Math.sin(ang), a.y + x * Math.sin(ang) + y * Math.cos(ang)]);
 }
+
+/**
+ * Il tratteggio di una polilinea: trattini lunghi `pieno` ogni `pieno + vuoto`, ciascuno una polilinea che segue le
+ * svolte. Solo i trattini fino alla distanza `fino` dall'inizio, l'ultimo tagliato li': il tragitto che avanza.
+ */
+export function tratteggio(punti: Punto[], pieno: number, vuoto: number, fino = Infinity): Punto[][] {
+  const totale = Math.min(fino, lunghezza(punti));
+  // la distanza dall'inizio di ogni vertice, e il punto alla distanza d
+  const progressive = punti.map((_, i) => lunghezza(punti.slice(0, i + 1)));
+  const a = (d: number): Punto => {
+    const i = Math.max(1, progressive.findIndex((x) => x >= d));
+    const t = (d - progressive[i - 1]) / (progressive[i] - progressive[i - 1] || 1);
+    return [punti[i - 1][0] + (punti[i][0] - punti[i - 1][0]) * t, punti[i - 1][1] + (punti[i][1] - punti[i - 1][1]) * t];
+  };
+  const trattini: Punto[][] = [];
+  for (let da = 0; da < totale; da += pieno + vuoto) {
+    const fine = Math.min(da + pieno, totale);
+    const svolte = punti.filter((_, i) => progressive[i] > da && progressive[i] < fine);
+    trattini.push([a(da), ...svolte, a(fine)]);
+  }
+  return trattini;
+}

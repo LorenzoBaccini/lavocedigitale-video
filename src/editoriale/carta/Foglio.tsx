@@ -9,7 +9,8 @@ import type { TipoCarta } from "./stile";
 // fibre della carta: rumore fisso, moltiplicato sul colore
 const FIBRE = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 0 0.33  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>")`;
 
-const COLORE: Record<TipoCarta, string> = {
+/** Il colore di ogni carta: chi ci appoggia sopra un'etichetta la stacca dal disegno con lo stesso fondo. */
+export const COLORE_CARTA: Record<TipoCarta, string> = {
   quadretti: "#F1EFE8",
   giornale: "#E7E1D2",
   agenda: "#F2EEE3",
@@ -43,7 +44,7 @@ export const Foglio: React.FC<{ tipo: TipoCarta; spinta?: number; children?: Rea
     <AbsoluteFill style={{ background: stile.colori.superficie }}>
       <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(92deg, rgba(0,0,0,0.12) 0 2px, transparent 2px 9px), repeating-linear-gradient(88deg, rgba(255,220,180,0.05) 0 1px, transparent 1px 23px)" }} />
       <AbsoluteFill style={{ transform: `scale(${1 + spinta})`, transformOrigin: "50% 45%" }}>
-        <div style={{ position: "absolute", left: BORDO_FOGLIO, right: BORDO_FOGLIO, top: -40, bottom: -40, background: COLORE[tipo], boxShadow: "0 0 0 1px rgba(0,0,0,0.08), 6px 10px 28px rgba(0,0,0,0.45)", overflow: "hidden" }}>
+        <div style={{ position: "absolute", left: BORDO_FOGLIO, right: BORDO_FOGLIO, top: -40, bottom: -40, background: COLORE_CARTA[tipo], boxShadow: "0 0 0 1px rgba(0,0,0,0.08), 6px 10px 28px rgba(0,0,0,0.45)", overflow: "hidden" }}>
           <AbsoluteFill style={disegno(tipo)} />
           <AbsoluteFill style={{ backgroundImage: FIBRE, mixBlendMode: "multiply", opacity: tipo === "giornale" ? 0.5 : 0.32 }} />
           {/* la luce della finestra: piu' chiara in alto a sinistra, cala verso il basso a destra */}

@@ -32,6 +32,10 @@ export interface Nodo {
   simbolo?: Simbolo;
 }
 
+/** Il segno sulla piantina della scena `mappa`: lo spillo su un punto, una zona cerchiata, un tragitto da A a B. */
+export type FormaMappa = "punto" | "area" | "percorso";
+export const FORME_MAPPA: readonly FormaMappa[] = ["punto", "area", "percorso"];
+
 export interface Voce {
   grande: string;
   piccolo: string;
@@ -62,6 +66,8 @@ export type Scena =
   | { tipo: "citazione"; testo: string; fonte: string }
   | { tipo: "passi"; etichetta: string; passi: Passo[] }
   | { tipo: "flusso"; etichetta: string; nodi: Nodo[] }
+  /** `luoghi`: uno con `punto` e `area`, due (partenza e arrivo) con `percorso` */
+  | { tipo: "mappa"; etichetta: string; titolo: string; forma: FormaMappa; luoghi: string[] }
   | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
   | { tipo: "chiusura" };
 
@@ -131,6 +137,7 @@ export const LIMITI = {
   passo: 28,
   nodi: { min: 2, max: 3 },
   nodo: 18,
+  luogo: 20,
   grande: 18,
   piccolo: 34,
   numero: 8,

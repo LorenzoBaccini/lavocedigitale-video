@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { avanzamento, cerchiatura, freccia, lunghezza, percorso, riquadro, sottolineatura, spunta } from "./tratto.ts";
+import { avanzamento, cerchiatura, freccia, lunghezza, percorso, riquadro, sottolineatura, spunta, tratteggio } from "./tratto.ts";
 
 test("lo stesso seme da' lo stesso segno, un seme diverso un altro", () => {
   assert.deepEqual(sottolineatura(200, 3), sottolineatura(200, 3));
@@ -79,4 +79,19 @@ test("la freccia ha asta e punta: parte da a, arriva in z e le due alette tornan
   assert.ok(dopo.some(([x]) => x < 90) && dopo.some(([x]) => x > 110));
   assert.ok(dopo.every(([, y]) => y < 120 + 6));
   assert.deepEqual(freccia({ x: 100, y: 0 }, { x: 100, y: 120 }, 3), punti);
+});
+
+test("il tratteggio spezza il percorso in trattini pieni e vuoti, solo fino al punto raggiunto", () => {
+  const linea: [number, number][] = [[0, 0], [100, 0], [100, 100]];
+  const tutti = tratteggio(linea, 20, 10);
+  // 200 px a passo 30: trattini da 0, 30, ..., 180 (l'ultimo tagliato a 200)
+  assert.equal(tutti.length, 7);
+  tutti.forEach((t) => assert.ok(lunghezza(t) <= 20 + 1e-9 && lunghezza(t) > 0));
+  // il trattino a cavallo dell'angolo lo segue: 90..110 passa per (100, 0)
+  assert.deepEqual(tutti[3], [[90, 0], [100, 0], [100, 10]]);
+  assert.deepEqual(tutti.at(-1), [[100, 80], [100, 100]]);
+  const meta = tratteggio(linea, 20, 10, 100);
+  assert.equal(meta.length, 4);
+  assert.deepEqual(meta.at(-1), [[90, 0], [100, 0]]);
+  assert.deepEqual(tratteggio(linea, 20, 10, 0), []);
 });

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { DISPOSITIVI, OGGETTI, SCHERMATE, SIMBOLI } from "./tipi.ts";
+import { DISPOSITIVI, FORME_MAPPA, OGGETTI, SCHERMATE, SIMBOLI } from "./tipi.ts";
 import { validaStoryboard } from "./valida.ts";
 
 const leggi = (): any =>
@@ -288,4 +288,42 @@ test("flusso: da 2 a 3 nodi, testo entro 18 caratteri, simbolo facoltativo dell'
   assert.ok(errori(sb).includes(`frasi[4].scena.nodi[0].simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`));
   sb.frasi[4].scena.nodi = ["Uno", nodo("Due")];
   assert.ok(errori(sb).includes("frasi[4].scena.nodi[0]: oggetto richiesto"));
+});
+
+test("mappa: un luogo con punto e area, due con percorso, ciascuno entro 20 caratteri, forma dell'elenco", () => {
+  const sb = leggi();
+  sb.frasi[4].scena = { tipo: "mappa", etichetta: "Dove", titolo: "x".repeat(24), forma: "punto", luoghi: ["x".repeat(20)] };
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, forma: "area" };
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, forma: "percorso", luoghi: ["Partenza", "Arrivo"] };
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  sb.frasi[4].scena.luoghi = ["Partenza"];
+  assert.ok(errori(sb).includes("frasi[4].scena.luoghi: 2 luoghi con percorso"));
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, forma: "punto", luoghi: ["Qui", "Là"] };
+  assert.ok(errori(sb).includes("frasi[4].scena.luoghi: 1 luogo con punto"));
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, forma: "area", luoghi: [] };
+  assert.ok(errori(sb).includes("frasi[4].scena.luoghi: 1 luogo con area"));
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, forma: "cerchio", luoghi: ["Qui"] };
+  assert.ok(errori(sb).includes(`frasi[4].scena.forma: deve essere uno tra ${FORME_MAPPA.join(", ")}`));
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, forma: "punto", luoghi: ["x".repeat(21)] };
+  assert.ok(errori(sb).includes("frasi[4].scena.luoghi[0]: 21 caratteri, massimo 20"));
+  sb.frasi[4].scena.luoghi = [""];
+  assert.ok(errori(sb).includes("frasi[4].scena.luoghi[0]: testo obbligatorio"));
+  sb.frasi[4].scena = { ...sb.frasi[4].scena, luoghi: ["Qui"], titolo: "x".repeat(25) };
+  assert.ok(errori(sb).includes("frasi[4].scena.titolo: 25 caratteri, massimo 24"));
+});
+
+test("scene-nuove-2 (le mappe) passa la validazione come media con ogni frase finale", () => {
+  const sb = fixture("scene-nuove-2.storyboard.json");
+  for (const fraseFinale of [0, 1, 2] as const) {
+    const esito = validaStoryboard(sb, "media", fraseFinale);
+    assert.equal(esito.ok, true, `${fraseFinale}: ${esito.ok ? "" : esito.errori.join("; ")}`);
+  }
+  const mappe = sb.frasi.filter((f: any) => f.scena.tipo === "mappa").map((f: any) => f.scena);
+  assert.deepEqual(mappe.map((m: any) => m.forma).sort(), [...FORME_MAPPA].sort());
+  for (const m of mappe) {
+    assert.equal(m.titolo.length, 24, m.titolo);
+    assert.ok(m.luoghi.every((l: string) => l.length === 20), m.luoghi.join(" / "));
+  }
 });

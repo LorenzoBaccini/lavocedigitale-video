@@ -1,5 +1,5 @@
 import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
-import { contaParole, DISPOSITIVI, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
+import { contaParole, DISPOSITIVI, FORME_MAPPA, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
 import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -201,6 +201,16 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   flusso: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);
     colonna(s, "nodi", p, LIMITI.nodi, LIMITI.nodo, e);
+  },
+  mappa: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    testo(s, "titolo", p, LIMITI.titolo, e);
+    if (!FORME_MAPPA.includes(s.forma as never)) e.push(`${p}.forma: deve essere uno tra ${FORME_MAPPA.join(", ")}`);
+    if (!Array.isArray(s.luoghi)) return void e.push(`${p}.luoghi: elenco richiesto`);
+    // un luogo per lo spillo o la zona, due per il tragitto: partenza e arrivo
+    const n = s.forma === "percorso" ? 2 : 1;
+    if (FORME_MAPPA.includes(s.forma as never) && s.luoghi.length !== n) e.push(`${p}.luoghi: ${n} ${n === 1 ? "luogo" : "luoghi"} con ${s.forma}`);
+    elenco(s, "luoghi", p, { min: 0, max: Infinity }, LIMITI.luogo, e);
   },
   simbolo: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);

@@ -16,6 +16,10 @@ export const SCHERMATE: readonly Schermata[] = ["sistema", "sito", "app"];
 export type Pezzo = "tessera" | "documento" | "lettore" | "pin";
 export const PEZZI: readonly Pezzo[] = ["tessera", "documento", "lettore", "pin"];
 
+/** I pittogrammi disegnati a tratto: un insieme chiuso, generico, senza marchi. */
+export type Simbolo = "lucchetto" | "batteria" | "wifi" | "segnale" | "posizione" | "altoparlante" | "documento" | "euro" | "calendario" | "scudo";
+export const SIMBOLI: readonly Simbolo[] = ["lucchetto", "batteria", "wifi", "segnale", "posizione", "altoparlante", "documento", "euro", "calendario", "scudo"];
+
 export interface Voce {
   grande: string;
   piccolo: string;
@@ -44,6 +48,7 @@ export type Scena =
   | { tipo: "numero"; etichetta: string; numero: string; unita?: string; nota?: string }
   | { tipo: "confronto"; etichetta: string; a: Confronto; b: Confronto }
   | { tipo: "citazione"; testo: string; fonte: string }
+  | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
   | { tipo: "chiusura" };
 
 export interface Frase {

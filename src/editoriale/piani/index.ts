@@ -12,6 +12,7 @@ import { pianoGancio } from "./gancio.ts";
 import { pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
 import { pianoRischio } from "./rischio.ts";
+import { pianoSimbolo } from "./simbolo.ts";
 import { pianoTeaser } from "./teaser.ts";
 import { pianoTelefono } from "./telefono.ts";
 
@@ -40,6 +41,8 @@ export function pianoScena(p: PropsScena<Scena>, durata: number): Piano {
       return pianoConfronto(p, durata);
     case "citazione":
       return pianoCitazione(p, durata);
+    case "simbolo":
+      return pianoSimbolo(p, durata);
     case "teaser":
       return pianoTeaser(p, durata);
     case "chiusura":

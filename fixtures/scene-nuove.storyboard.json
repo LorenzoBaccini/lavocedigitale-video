@@ -1,0 +1,9 @@
+{
+  "slug": "scene-nuove",
+  "frasi": [
+    { "testo": "Dal quattordici ottobre Windows 10 non riceve più le patch di sicurezza.", "chiave": "sicurezza", "scena": { "tipo": "simbolo", "etichetta": "Dal 14 ottobre", "simbolo": "scudo", "titolo": "Niente più sicurezza", "barrato": true } },
+    { "testo": "Per passare a Windows 11 serve un wifi che non cade mai.", "chiave": "wifi", "scena": { "tipo": "simbolo", "etichetta": "Per tutta la durata del download", "simbolo": "wifi", "titolo": "Un wifi che non cade mai" } },
+    { "testo": "E tieni il portatile attaccato alla corrente fino alla fine.", "chiave": "corrente", "scena": { "tipo": "simbolo", "etichetta": "Prima di iniziare", "simbolo": "batteria", "titolo": "Sempre in carica" } },
+    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+  ]
+}

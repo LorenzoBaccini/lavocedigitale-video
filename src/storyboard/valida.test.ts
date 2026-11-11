@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { DISPOSITIVI, OGGETTI, SCHERMATE } from "./tipi.ts";
+import { DISPOSITIVI, OGGETTI, SCHERMATE, SIMBOLI } from "./tipi.ts";
 import { validaStoryboard } from "./valida.ts";
 
 const leggi = (): any =>
@@ -212,4 +212,36 @@ test("indica e le note dei pezzi non hanno parole oltre il limite della colonna 
   assert.equal(validaStoryboard(sb, "media", 2).ok, true, "15 lettere ci stanno");
   oggetto.scena.indica = "Riconfigurazioni ora";
   assert.ok(errori(sb).some((e) => e.endsWith("indica: «Riconfigurazioni» ha 16 lettere, massimo 15 per parola")));
+});
+
+test("simbolo: un pittogramma dell'elenco, titolo entro il limite, barrato vero o falso", () => {
+  const sb = leggi();
+  sb.frasi[4].scena = { tipo: "simbolo", etichetta: "Dal 14 ottobre", simbolo: "scudo", titolo: "x".repeat(24), barrato: true };
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  delete sb.frasi[4].scena.barrato;
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true, "barrato e' facoltativo");
+  sb.frasi[4].scena.simbolo = "razzo";
+  assert.ok(errori(sb).includes(`frasi[4].scena.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`));
+  sb.frasi[4].scena.simbolo = "scudo";
+  sb.frasi[4].scena.titolo = "x".repeat(25);
+  assert.ok(errori(sb).includes("frasi[4].scena.titolo: 25 caratteri, massimo 24"));
+  sb.frasi[4].scena.titolo = "Niente patch";
+  sb.frasi[4].scena.barrato = "sì";
+  assert.ok(errori(sb).includes("frasi[4].scena.barrato: vero o falso"));
+  sb.frasi[4].scena.barrato = false;
+  sb.frasi[4].scena.etichetta = "x".repeat(33);
+  assert.ok(errori(sb).includes("frasi[4].scena.etichetta: 33 caratteri, massimo 32"));
+  sb.frasi[4].scena.etichetta = "Dal 14 ottobre";
+  delete sb.frasi[4].scena.simbolo;
+  assert.ok(errori(sb).some((e) => e.startsWith("frasi[4].scena.simbolo: deve essere uno tra")), "il simbolo e' obbligatorio");
+});
+
+test("scene-nuove passa la validazione come corta con ogni frase finale", () => {
+  const sb = fixture("scene-nuove.storyboard.json");
+  for (const fraseFinale of [0, 1, 2] as const) {
+    const esito = validaStoryboard(sb, "corta", fraseFinale);
+    assert.equal(esito.ok, true, `${fraseFinale}: ${esito.ok ? "" : esito.errori.join("; ")}`);
+  }
+  assert.ok(sb.frasi.some((f: any) => f.scena.tipo === "simbolo" && f.scena.barrato === true));
+  assert.ok(sb.frasi.some((f: any) => f.scena.tipo === "simbolo" && f.scena.titolo.length === 24));
 });

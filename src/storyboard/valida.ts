@@ -1,5 +1,5 @@
 import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
-import { contaParole, DISPOSITIVI, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, TESTO_CHIUSURA } from "./tipi.ts";
+import { contaParole, DISPOSITIVI, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
 import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -178,6 +178,12 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   citazione: (s, p, e) => {
     testo(s, "testo", p, LIMITI.testoCitazione, e);
     testo(s, "fonte", p, LIMITI.etichetta, e);
+  },
+  simbolo: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    if (!SIMBOLI.includes(s.simbolo as never)) e.push(`${p}.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`);
+    testo(s, "titolo", p, LIMITI.titolo, e);
+    if (s.barrato !== undefined && typeof s.barrato !== "boolean") e.push(`${p}.barrato: vero o falso`);
   },
   chiusura: () => {},
 };

@@ -103,3 +103,7 @@ cause:
   ogni elemento lascia la sua distanza minima a quelli dopo, e sotto i 2,6 s possono vincere le distanze. Il testo
   conta come intero a dissolvenza finita (costanti `DISSOLVENZA_*` condivise fra piano e scena); nel gancio la frase
   detta resta sulla voce, tranne le ultime parole che anticipano quanto basta perché l'ultima si legga (`codaInTempo`).
+- **La `mappa` solo per posti in città** (dopo la prima prova sul runner, dove Claude l'aveva usata per «l'app non è
+  disponibile nel tuo paese o regione» e sembrava una cartina vera sbagliata): il prompt la limita a dove si va, dove si
+  è, un tragitto o una zona di strade, e la validazione scarta i `luoghi` che nominano paesi, regioni, nazioni, il
+  mondo, l'Europa o l'estero.

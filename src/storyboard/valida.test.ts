@@ -318,6 +318,19 @@ test("mappa: un luogo con punto e area, due con percorso, ciascuno entro 20 cara
   assert.ok(errori(sb).includes("frasi[4].scena.titolo: 25 caratteri, massimo 24"));
 });
 
+test("mappa: un paese o una regione non sono luoghi della piantina", () => {
+  const sb = leggi();
+  const base = { tipo: "mappa", etichetta: "Dove", titolo: "App non disponibile", forma: "area" };
+  for (const luogo of ["Paese o regione", "Il tuo paese", "Regioni escluse", "Fuori dall'Europa", "Nazione", "Tutto il mondo", "All'estero"]) {
+    sb.frasi[4].scena = { ...base, luoghi: [luogo] };
+    assert.ok(errori(sb).some((x) => x.startsWith("frasi[4].scena.luoghi[0]: la mappa è una piantina di strade")), luogo);
+  }
+  for (const luogo of ["Sportello del comune", "Ultima posizione", "Quartieri del centro", "Paesino"]) {
+    sb.frasi[4].scena = { ...base, luoghi: [luogo] };
+    assert.equal(validaStoryboard(sb, "media", 2).ok, true, luogo);
+  }
+});
+
 test("scene-nuove-2 (le mappe) passa la validazione come media con ogni frase finale", () => {
   const sb = fixture("scene-nuove-2.storyboard.json");
   for (const fraseFinale of [0, 1, 2] as const) {

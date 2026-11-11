@@ -16,12 +16,10 @@ import { SCHEDA } from "../editoriale/stili/schermo";
 import type { Stile } from "../editoriale/stili/tipi";
 import { Titolo } from "../editoriale/Titolo";
 import type { Punto } from "../editoriale/tratto";
-import { avanzamento, casuale, cerchiatura, lunghezza, percorso, riquadro, tratteggio } from "../editoriale/tratto";
+import { avanzamento, casuale, cerchiatura, lunghezza, percorso, riquadro, smussa, tratteggio } from "../editoriale/tratto";
 import { ALTEZZA, FONDO_TITOLO, LARGHEZZA_UTILE, MARGINE, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
-/** Il lato massimo del riquadro della piantina, centrato fra i margini in ogni stile. */
-const LATO_MASSIMO = 720;
 /** Le etichette dei luoghi restano almeno a tanto dal bordo del riquadro. */
 const ARIA = 28;
 /** sotto l'occhiello (36 px su una riga) e un po' di aria */
@@ -30,11 +28,11 @@ const MAPPA_TOP = TITOLO_TOP + 90;
 const SPAZIO = ALTEZZA - FONDO_TITOLO - MAPPA_TOP;
 /** Fra la piantina e il titolo. */
 const FRA = 40;
-/**
- * Larghezza media di una lettera del titolo in rapporto al corpo (spazi compresi), per sapere se va a capo: misurata
- * 0,45 con Lora, Inter e Space Grotesk e 0,46 col monospazio della notte, qui un poco per eccesso.
- */
-const LETTERA_TITOLO = 0.48;
+/** Le righe del titolo per cui la piantina lascia sempre posto: un titolo di 24 caratteri puo' andare a capo. */
+const RIGHE_TITOLO = 2;
+/** L'interlinea del `Titolo` e lo spazio fra due righe. */
+const INTERLINEA_TITOLO = 1.12;
+const FRA_RIGHE = 4;
 const SPILLO = 150;
 /** La punta dello spillo nel riquadro 100×100 del pittogramma `posizione`. */
 const PUNTA = { x: 0.5, y: 0.88 };
@@ -48,26 +46,6 @@ const TRATTINO = [24, 15] as const;
 
 // La carta sotto il disegno: le etichette se ne staccano con lo stesso fondo, sopra le linee della piantina.
 const cartaDi = (stile: Stile) => (stile.grafiche === "carta" ? COLORE_CARTA.liscia : stile.grafiche === "scheda" ? SCHEDA : stile.colori.superficie);
-
-// smussa gli angoli di una polilinea con un arco di raggio `raggio`: il tragitto gira all'incrocio, non a spigolo
-function smussa(punti: Punto[], raggio: number): Punto[] {
-  const fuori: Punto[] = [punti[0]];
-  for (let i = 1; i < punti.length - 1; i++) {
-    const [p, v, q] = [punti[i - 1], punti[i], punti[i + 1]];
-    const verso = (a: Punto, b: Punto): Punto => {
-      const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-      return [(b[0] - a[0]) / l, (b[1] - a[1]) / l];
-    };
-    const [di, du] = [verso(v, p), verso(v, q)];
-    const a: Punto = [v[0] + di[0] * raggio, v[1] + di[1] * raggio];
-    const b: Punto = [v[0] + du[0] * raggio, v[1] + du[1] * raggio];
-    for (let k = 0; k <= 8; k++) {
-      const t = k / 8;
-      fuori.push([(1 - t) ** 2 * a[0] + 2 * (1 - t) * t * v[0] + t * t * b[0], (1 - t) ** 2 * a[1] + 2 * (1 - t) * t * v[1] + t * t * b[1]]);
-    }
-  }
-  return [...fuori, punti[punti.length - 1]];
-}
 
 /** Un'etichetta nel riquadro: `x` e' il bordo da cui parte (o il centro), `y` la cima o, con `sopra`, il fondo. */
 interface Etichetta {
@@ -87,10 +65,10 @@ export const Mappa: React.FC<ScenaDi<"mappa">> = (props) => {
   const stile = useStile();
   const { durata, etichetta, titolo, forma, luoghi } = props;
   const piano = pianoMappa(props, durata);
-  // la piantina e' grande quanto lascia il titolo, su una riga o su due (1,3 corpi a riga: interlinea e discendenti)
+  // la piantina e' grande quanto lascia il titolo, sempre su due righe: se ne usa una, il blocco resta centrato in altezza;
+  // in larghezza piantina e titolo partono dal bordo dei titoli dello stile, come nel `Simbolo`
   const corpoTitolo = corpo(titolo, 116, 16, stile.larghezza);
-  const righeTitolo = titolo.length * corpoTitolo * stile.larghezza * LETTERA_TITOLO > LARGHEZZA_UTILE ? 2 : 1;
-  const lato = Math.round(Math.min(LATO_MASSIMO, SPAZIO - FRA - righeTitolo * corpoTitolo * 1.3));
+  const lato = Math.floor(SPAZIO - FRA - RIGHE_TITOLO * corpoTitolo * INTERLINEA_TITOLO - (RIGHE_TITOLO - 1) * FRA_RIGHE);
   const larghezzaEtichetta = lato * LARGHEZZA_ETICHETTA;
   const seme = improntaMescolata(etichetta + titolo);
   const disegno = piantina(seme);
@@ -162,7 +140,7 @@ export const Mappa: React.FC<ScenaDi<"mappa">> = (props) => {
       <div style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE, display: "flex", justifyContent: allineaFlesso(stile) }}>
         <Occhiello testo={etichetta} opacita={fase(f, 0, 6)} />
       </div>
-      <div style={{ position: "absolute", top: MAPPA_TOP, bottom: FONDO_TITOLO, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: FRA }}>
+      <div style={{ position: "absolute", top: MAPPA_TOP, bottom: FONDO_TITOLO, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: allineaFlesso(stile), gap: FRA }}>
         <div style={{ position: "relative", flex: "none", width: lato, height: lato }}>
           {/* il controllo d'impaginazione vuole le etichette dentro questo bordo, cioe' a ARIA / 2 dal riquadro */}
           <div data-ingombro="piantina" style={{ position: "absolute", inset: ARIA / 2, pointerEvents: "none" }} />

@@ -118,6 +118,26 @@ export function trattoFra(a: { x: number; y: number }, z: { x: number; y: number
   return sottolineatura(Math.hypot(z.x - a.x, z.y - a.y), seme).map(([x, y]): Punto => [a.x + x * Math.cos(ang) - y * Math.sin(ang), a.y + x * Math.sin(ang) + y * Math.cos(ang)]);
 }
 
+/** Smussa gli angoli di una polilinea con un arco di raggio `raggio`: il tragitto gira all'incrocio, non a spigolo. */
+export function smussa(punti: Punto[], raggio: number, passi = 8): Punto[] {
+  const verso = (a: Punto, b: Punto): Punto => {
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+    return [(b[0] - a[0]) / l, (b[1] - a[1]) / l];
+  };
+  const fuori: Punto[] = [punti[0]];
+  for (let i = 1; i < punti.length - 1; i++) {
+    const [p, v, q] = [punti[i - 1], punti[i], punti[i + 1]];
+    const [di, du] = [verso(v, p), verso(v, q)];
+    const a: Punto = [v[0] + di[0] * raggio, v[1] + di[1] * raggio];
+    const b: Punto = [v[0] + du[0] * raggio, v[1] + du[1] * raggio];
+    for (let k = 0; k <= passi; k++) {
+      const t = k / passi;
+      fuori.push([(1 - t) ** 2 * a[0] + 2 * (1 - t) * t * v[0] + t * t * b[0], (1 - t) ** 2 * a[1] + 2 * (1 - t) * t * v[1] + t * t * b[1]]);
+    }
+  }
+  return [...fuori, punti[punti.length - 1]];
+}
+
 /**
  * Il tratteggio di una polilinea: trattini lunghi `pieno` ogni `pieno + vuoto`, ciascuno una polilinea che segue le
  * svolte. Solo i trattini fino alla distanza `fino` dall'inizio, l'ultimo tagliato li': il tragitto che avanza.

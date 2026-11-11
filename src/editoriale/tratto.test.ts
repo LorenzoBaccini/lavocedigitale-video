@@ -1,7 +1,18 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { avanzamento, cerchiatura, freccia, lunghezza, percorso, riquadro, sottolineatura, spunta, tratteggio } from "./tratto.ts";
+import { avanzamento, cerchiatura, freccia, lunghezza, percorso, riquadro, smussa, sottolineatura, spunta, tratteggio } from "./tratto.ts";
+
+test("smussa tiene gli estremi e gira l'angolo con un arco, senza passare dal vertice", () => {
+  const punti = smussa([[0, 0], [100, 0], [100, 100]], 20);
+  assert.deepEqual(punti[0], [0, 0]);
+  assert.deepEqual(punti.at(-1), [100, 100]);
+  // l'arco parte 20 px prima dell'angolo e finisce 20 px dopo
+  assert.deepEqual(punti[1], [80, 0]);
+  assert.deepEqual(punti.at(-2), [100, 20]);
+  assert.ok(punti.every(([x, y]) => !(x === 100 && y === 0)));
+  assert.ok(lunghezza(punti) < 200);
+});
 
 test("lo stesso seme da' lo stesso segno, un seme diverso un altro", () => {
   assert.deepEqual(sottolineatura(200, 3), sottolineatura(200, 3));

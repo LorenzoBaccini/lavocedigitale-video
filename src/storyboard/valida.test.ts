@@ -266,4 +266,26 @@ test("scene-nuove passa la validazione come media con ogni frase finale", () => 
   const passi = sb.frasi.filter((f: any) => f.scena.tipo === "passi").map((f: any) => f.scena.passi);
   assert.ok(passi.some((p: any[]) => p.length === 4 && p.every((x) => x.testo.length === 28) && p.some((x) => x.simbolo) && p.some((x) => !x.simbolo)));
   assert.ok(passi.some((p: any[]) => p.length === 2 && p.every((x) => !x.simbolo)));
+  const flussi = sb.frasi.filter((f: any) => f.scena.tipo === "flusso").map((f: any) => f.scena.nodi);
+  assert.ok(flussi.some((n: any[]) => n.length === 3 && n.every((x) => x.testo.length === 18) && n.every((x) => x.simbolo)));
+  assert.ok(flussi.some((n: any[]) => n.length === 2));
+});
+
+test("flusso: da 2 a 3 nodi, testo entro 18 caratteri, simbolo facoltativo dell'elenco", () => {
+  const sb = leggi();
+  const nodo = (testo: string) => ({ testo });
+  sb.frasi[4].scena = { tipo: "flusso", etichetta: "Come funziona", nodi: [{ testo: "x".repeat(18), simbolo: "wifi" }, nodo("Lo controlli"), nodo("Lo installi")] };
+  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  sb.frasi[4].scena.nodi = [nodo("Uno")];
+  assert.ok(errori(sb).includes("frasi[4].scena.nodi: da 2 a 3 nodi"));
+  sb.frasi[4].scena.nodi = ["a", "b", "c", "d"].map(nodo);
+  assert.ok(errori(sb).includes("frasi[4].scena.nodi: da 2 a 3 nodi"));
+  sb.frasi[4].scena.nodi = [nodo("x".repeat(19)), nodo("Due")];
+  assert.ok(errori(sb).includes("frasi[4].scena.nodi[0].testo: 19 caratteri, massimo 18"));
+  sb.frasi[4].scena.nodi = [nodo(""), nodo("Due")];
+  assert.ok(errori(sb).includes("frasi[4].scena.nodi[0].testo: testo obbligatorio"));
+  sb.frasi[4].scena.nodi = [{ testo: "Uno", simbolo: "razzo" }, nodo("Due")];
+  assert.ok(errori(sb).includes(`frasi[4].scena.nodi[0].simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`));
+  sb.frasi[4].scena.nodi = ["Uno", nodo("Due")];
+  assert.ok(errori(sb).includes("frasi[4].scena.nodi[0]: oggetto richiesto"));
 });

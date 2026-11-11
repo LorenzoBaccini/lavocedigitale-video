@@ -8,6 +8,7 @@ import { pianoDocumenti } from "./documenti.ts";
 import { pianoCitazione } from "./citazione.ts";
 import { pianoConfronto } from "./confronto.ts";
 import { pianoData } from "./data.ts";
+import { pianoFlusso } from "./flusso.ts";
 import { pianoGancio } from "./gancio.ts";
 import { pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
@@ -42,6 +43,8 @@ export function pianoScena(p: PropsScena<Scena>, durata: number): Piano {
       return pianoConfronto(p, durata);
     case "citazione":
       return pianoCitazione(p, durata);
+    case "flusso":
+      return pianoFlusso(p, durata);
     case "passi":
       return pianoPassi(p, durata);
     case "simbolo":

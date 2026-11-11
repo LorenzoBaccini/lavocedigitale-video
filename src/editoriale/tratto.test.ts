@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { avanzamento, cerchiatura, lunghezza, percorso, sottolineatura, spunta } from "./tratto.ts";
+import { avanzamento, cerchiatura, freccia, lunghezza, percorso, riquadro, sottolineatura, spunta } from "./tratto.ts";
 
 test("lo stesso seme da' lo stesso segno, un seme diverso un altro", () => {
   assert.deepEqual(sottolineatura(200, 3), sottolineatura(200, 3));
@@ -48,4 +48,29 @@ test("la mano parte decisa e rallenta: il tracciato va da 0 a 1 senza tornare in
   assert.equal(avanzamento(18, 10, 8), 1);
   assert.ok(avanzamento(12, 10, 8) > 0.25 * 1.5);
   for (let f = 10; f < 18; f++) assert.ok(avanzamento(f + 1, 10, 8) >= avanzamento(f, 10, 8));
+});
+
+test("il riquadro gira intorno al rettangolo, a mano, e chiude scavalcando l'inizio", () => {
+  const punti = riquadro(300, 120, 4);
+  assert.deepEqual(riquadro(300, 120, 4), punti);
+  assert.notDeepEqual(riquadro(300, 120, 5), punti);
+  punti.forEach(([x, y]) => assert.ok(x > -12 && x < 312 && y > -12 && y < 132, `${x},${y}`));
+  assert.ok(punti.some(([, y]) => y < 6) && punti.some(([, y]) => y > 114) && punti.some(([x]) => x < 6) && punti.some(([x]) => x > 294));
+  assert.ok(lunghezza(punti) > 2 * (300 + 120));
+  const [x0, y0] = punti[0];
+  const [x1, y1] = punti[punti.length - 1];
+  assert.ok(Math.hypot(x1 - x0, y1 - y0) > 3);
+});
+
+test("la freccia ha asta e punta: parte da a, arriva in z e le due alette tornano indietro", () => {
+  const punti = freccia({ x: 100, y: 0 }, { x: 100, y: 120 }, 3);
+  assert.ok(Math.hypot(punti[0][0] - 100, punti[0][1]) < 6);
+  const vicino = (p: number[]) => Math.hypot(p[0] - 100, p[1] - 120);
+  const punta = punti.reduce((i, p, k) => (vicino(p) < vicino(punti[i]) ? k : i), 0);
+  assert.ok(vicino(punti[punta]) < 6);
+  const dopo = punti.slice(punta + 1);
+  assert.ok(dopo.length > 2);
+  assert.ok(dopo.some(([x]) => x < 90) && dopo.some(([x]) => x > 110));
+  assert.ok(dopo.every(([, y]) => y < 120 + 6));
+  assert.deepEqual(freccia({ x: 100, y: 0 }, { x: 100, y: 120 }, 3), punti);
 });

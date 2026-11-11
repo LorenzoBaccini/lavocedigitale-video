@@ -26,6 +26,12 @@ export interface Passo {
   simbolo?: Simbolo;
 }
 
+/** Un nodo della scena `flusso`: il testo e, se serve, un pittogramma piccolo. */
+export interface Nodo {
+  testo: string;
+  simbolo?: Simbolo;
+}
+
 export interface Voce {
   grande: string;
   piccolo: string;
@@ -55,6 +61,7 @@ export type Scena =
   | { tipo: "confronto"; etichetta: string; a: Confronto; b: Confronto }
   | { tipo: "citazione"; testo: string; fonte: string }
   | { tipo: "passi"; etichetta: string; passi: Passo[] }
+  | { tipo: "flusso"; etichetta: string; nodi: Nodo[] }
   | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
   | { tipo: "chiusura" };
 
@@ -122,6 +129,8 @@ export const LIMITI = {
   voci: { min: 2, max: 3 },
   passi: { min: 2, max: 4 },
   passo: 28,
+  nodi: { min: 2, max: 3 },
+  nodo: 18,
   grande: 18,
   piccolo: 34,
   numero: 8,

@@ -67,17 +67,18 @@ function parole(o: Dict, campo: string, percorso: string, errori: string[]): voi
   if (lunga) errori.push(`${percorso}.${campo}: «${lunga}» ha ${lunga.length} lettere, massimo ${LIMITI.parolaNota} per parola`);
 }
 
-function passi(o: Dict, percorso: string, errori: string[]): void {
-  const v = o.passi;
-  if (!Array.isArray(v) || v.length < LIMITI.passi.min || v.length > LIMITI.passi.max) {
-    errori.push(`${percorso}.passi: da ${LIMITI.passi.min} a ${LIMITI.passi.max} passi`);
+/** Una colonna di voci con testo e pittogramma facoltativo (i `passi`, i `nodi`): da `min` a `max`, testo entro `lung`. */
+function colonna(o: Dict, campo: "passi" | "nodi", percorso: string, limiti: { min: number; max: number }, lung: number, errori: string[]): void {
+  const v = o[campo];
+  if (!Array.isArray(v) || v.length < limiti.min || v.length > limiti.max) {
+    errori.push(`${percorso}.${campo}: da ${limiti.min} a ${limiti.max} ${campo}`);
     return;
   }
-  v.forEach((passo, i) => {
-    const p = `${percorso}.passi[${i}]`;
-    if (!èDizionario(passo)) return void errori.push(`${p}: oggetto richiesto`);
-    testo(passo, "testo", p, LIMITI.passo, errori);
-    if (passo.simbolo !== undefined && !SIMBOLI.includes(passo.simbolo as never)) errori.push(`${p}.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`);
+  v.forEach((voce, i) => {
+    const p = `${percorso}.${campo}[${i}]`;
+    if (!èDizionario(voce)) return void errori.push(`${p}: oggetto richiesto`);
+    testo(voce, "testo", p, lung, errori);
+    if (voce.simbolo !== undefined && !SIMBOLI.includes(voce.simbolo as never)) errori.push(`${p}.simbolo: deve essere uno tra ${SIMBOLI.join(", ")}`);
   });
 }
 
@@ -195,7 +196,11 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   },
   passi: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);
-    passi(s, p, e);
+    colonna(s, "passi", p, LIMITI.passi, LIMITI.passo, e);
+  },
+  flusso: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    colonna(s, "nodi", p, LIMITI.nodi, LIMITI.nodo, e);
   },
   simbolo: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);

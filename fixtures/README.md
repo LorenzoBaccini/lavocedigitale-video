@@ -45,10 +45,14 @@
   con «Link nel post.».
 - `scene-nuove.storyboard.json`: le scene senza dispositivi. Per ora tre `simbolo` (uno con `barrato`, uno con il
   titolo al limite di 24 caratteri e l'occhiello al limite di 32, uno corto) e due `passi` (uno da quattro passi con
-  testi al limite di 28 caratteri, tre con pittogramma e uno senza per provare l'allineamento, uno da due senza), alternati, più la chiusura. Oggi è una media con
-  ogni frase finale (`src/storyboard/valida.test.ts`); chi ci aggiunge scene ne aggiorna la durata. Il controllo, in
-  ogni stile: `controlla-impaginazione.ts fixtures/scene-nuove.storyboard.json --stile=notte --scene=passi --passo=5`
-  (o `--scene=simbolo`).
+  testi al limite di 28 caratteri, tre con pittogramma e uno senza per provare l'allineamento, uno da due senza) e due
+  `flusso` (uno da tre nodi con testi al limite di 18 caratteri e tutti i pittogrammi, uno da due nodi con il
+  pittogramma solo sul primo), alternati, più la chiusura. Oggi è una media con ogni frase finale
+  (`src/storyboard/valida.test.ts`); con 8 frasi è al tetto di `media` e ha 57 parole prima della chiusura (65 al
+  massimo con le frasi finali da 7 parole): chi ci aggiunge scene (le tre `mappa`) deve passare a `lunga` o
+  spezzare in un secondo file, e accorciare i testi detti. Il controllo, in ogni stile:
+  `controlla-impaginazione.ts fixtures/scene-nuove.storyboard.json --stile=notte --scene=flusso --passo=5`
+  (o `--scene=passi`, `--scene=simbolo`).
 - Nessuna fixture dichiara `variante`: hanno tutte l'aspetto di base. Le varianti si provano con
   `controlla-impaginazione.ts <fixture> --ogni-apertura` (le tre inquadrature d'apertura del gancio) o
   `--variante=musica:chiaro,luce:sera,apertura:alta`; stile, gancio, chiusura e durata con

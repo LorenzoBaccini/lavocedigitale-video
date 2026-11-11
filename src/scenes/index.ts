@@ -8,6 +8,7 @@ import { Data } from "./Data";
 import { Gancio } from "./Gancio";
 import { Numero } from "./Numero";
 import { Oggetto } from "./Oggetto";
+import { Flusso } from "./Flusso";
 import { Passi } from "./Passi";
 import type { ScenaDi } from "./props";
 import { Rischio } from "./Rischio";
@@ -35,5 +36,6 @@ export const SCENE: { [T in Scena["tipo"]]?: React.FC<ScenaDi<T>> } = {
   citazione: Citazione,
   simbolo: Simbolo,
   passi: Passi,
+  flusso: Flusso,
   chiusura: Chiusura,
 };

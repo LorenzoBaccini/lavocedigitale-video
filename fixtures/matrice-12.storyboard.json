@@ -1,0 +1,137 @@
+{
+ "slug": "matrice-12",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "passi",
+    "etichetta": "Come fare",
+    "passi": [
+     {
+      "testo": "Apri",
+      "simbolo": "documento"
+     },
+     {
+      "testo": "Firma"
+     },
+     {
+      "testo": "Invia"
+     },
+     {
+      "testo": "Fatto"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "flusso",
+    "etichetta": "Come fare",
+    "nodi": [
+     {
+      "testo": "Apri"
+     },
+     {
+      "testo": "Firma"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "flusso",
+    "etichetta": "Verifica Ministero documento ide",
+    "nodi": [
+     {
+      "testo": "Sportello accessoe",
+      "simbolo": "segnale"
+     },
+     {
+      "testo": "Accesso credenzial"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "flusso",
+    "etichetta": "Ministero documento identità ric",
+    "nodi": [
+     {
+      "testo": "Sportello accessoe",
+      "simbolo": "segnale"
+     },
+     {
+      "testo": "Accesso credenzial",
+      "simbolo": "scudo"
+     },
+     {
+      "testo": "Credenziali verifi",
+      "simbolo": "altoparlante"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "flusso",
+    "etichetta": "Come fare",
+    "nodi": [
+     {
+      "testo": "Apri"
+     },
+     {
+      "testo": "Firma"
+     },
+     {
+      "testo": "Invia",
+      "simbolo": "altoparlante"
+     }
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "mappa",
+    "etichetta": "Dove",
+    "titolo": "Allo sportello",
+    "forma": "punto",
+    "luoghi": [
+     "Comune"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "mappa",
+    "etichetta": "Amministrazione Comune sportello",
+    "titolo": "Comune sportello accesso",
+    "forma": "punto",
+    "luoghi": [
+     "Sportello accesso cr"
+    ]
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Genera le fixture `matrice-NN.storyboard.json`: ogni tipo di scena per ogni dispositivo e schermata ammessi,
 con i testi corti e con i testi al limite dei LIMITI (titoli su due righe, etichette e sopratitoli lunghi).
+Le scene senza schermi (simbolo, passi, flusso, mappa) stanno nelle ultime fixture.
 
 Uso (dalla radice del repo): python3 fixtures/matrice.py
 Le ganci stanno nelle prime fixture: sono le uniche scene che cambiano con l'apertura della variante.
@@ -118,11 +119,37 @@ def set_vari():
     return out
 
 
+def senza_schermi():
+    """Le scene su carta senza dispositivo: simbolo (con e senza barra), passi da 2 e 4, flusso da 2 e 3, mappa in ogni forma.
+    Pittogrammi misti (solo su alcune righe) per provare il posto riservato alla colonna dei pittogrammi."""
+    out = []
+    for k, (simbolo, mx, barrato) in enumerate([("batteria", False, False), ("scudo", False, True), ("lucchetto", True, False), ("calendario", True, True)]):
+        s = {"tipo": "simbolo", "etichetta": esatto(32, k) if mx else "Serve", "simbolo": simbolo, "titolo": esatto(24, k + 1) if mx else "Carica piena"}
+        if barrato:
+            s["barrato"] = True
+        out.append(frase(DETTA, "preciso", s))
+    # (righe, testi al limite, indici delle righe con il pittogramma)
+    colonne = lambda campo, lung, casi, simboli: [
+        (campo, [{"testo": esatto(lung, j + 2) if mx else ["Apri", "Firma", "Invia", "Fatto"][j], **({"simbolo": simboli[j]} if j in con else {})} for j in range(n)], mx)
+        for n, mx, con in casi]
+    righe = (colonne("passi", 28, [(2, False, ()), (2, True, (0, 1)), (4, True, (0, 1, 3)), (4, False, (0,))], ["documento", "lucchetto", "euro", "wifi"])
+             + colonne("nodi", 18, [(2, False, ()), (2, True, (0,)), (3, True, (0, 1, 2)), (3, False, (2,))], ["segnale", "scudo", "altoparlante"]))
+    for k, (campo, voci, mx) in enumerate(righe):
+        out.append(frase(DETTA, "preciso", {"tipo": "passi" if campo == "passi" else "flusso", "etichetta": esatto(32, k) if mx else "Come fare", campo: voci}))
+    for k, forma in enumerate(["punto", "area", "percorso"]):
+        n = 2 if forma == "percorso" else 1
+        out.append(frase(DETTA, "preciso", {"tipo": "mappa", "etichetta": "Dove", "titolo": "Allo sportello", "forma": forma, "luoghi": ["Comune", "Stazione"][:n]}))
+        out.append(frase(DETTA, "preciso", {"tipo": "mappa", "etichetta": esatto(32, k), "titolo": esatto(24, k + 1), "forma": forma,
+                                             "luoghi": [esatto(20, k + 2 + j) for j in range(n)]}))
+    return out
+
+
 def main():
     radice = Path(__file__).parent
     for vecchia in radice.glob("matrice-*.storyboard.json"):
         vecchia.unlink()
-    gruppi = [ganci(), allarmi() + oggetti() + carta() + set_vari()]
+    # le scene senza schermi in un gruppo a parte: le matrici di prima restano uguali, le nuove vengono dopo
+    gruppi = [ganci(), allarmi() + oggetti() + carta() + set_vari(), senza_schermi()]
     # la notifica arriva nel gancio solo prima di un allarme sul portatile: un caso con la notifica al limite
     gruppi[0].insert(1, allarmi()[1])
     parole = lambda f: len(f["testo"].split())

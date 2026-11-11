@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { ATTIVI, DURATE, FRASI_FINALI } from "../editoriale/variante.ts";
 import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
 import type { Frase, Storyboard } from "./tipi.ts";
-import { contaParole, FRASI_CHIUSURA, LIMITI_DURATA, paroleContenuto, TESTO_CHIUSURA } from "./tipi.ts";
+import { contaParole, FORME_MAPPA, FRASI_CHIUSURA, LIMITI_DURATA, paroleContenuto, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
 import { erroriVarieta, somiglianza, validaStoryboard } from "./valida.ts";
 
 const fixture = (nome: string): Storyboard => JSON.parse(readFileSync(new URL(`../../fixtures/${nome}.storyboard.json`, import.meta.url), "utf8"));
@@ -113,6 +113,8 @@ test("chiusura-corta (4 frasi, 29 parole prima della chiusura) e' una corta con 
   const sb = fixture("chiusura-corta");
   assert.deepEqual([sb.frasi.length, contenutoDi(sb)], [4, 29]);
   assert.deepEqual(valeOvunque(sb, "corta"), []);
+  assert.deepEqual(erroriVarieta(sb, []), [], "la pipeline la accetterebbe: 2 scene su 3 su un dispositivo");
+  assert.equal(sb.frasi[2].scena.tipo, "allarme", "la scena 3D corta subito prima della chiusura");
   assert.ok(errori(sb, "media", 0).some((e) => e.startsWith("frasi: 4 frasi")));
 });
 
@@ -131,22 +133,37 @@ test("la tabella delle durate in agent-video.md e' quella di LIMITI_DURATA, senz
   assert.ok(!/\d+ a \d+ parole|\d+ parole\)/.test(AGENTE), "nessun altro conteggio di parole scritto a mano");
 });
 
-test("ogni esempio di agent-video.md passa la validazione nella durata che dichiara, con ognuna delle tre frasi finali", () => {
-  const esempi = [...AGENTE.matchAll(/durata (corta|media|lunga)[^\n]*\n\n```json\n([\s\S]*?)```/gi)];
-  assert.equal(esempi.length, 4);
-  for (const d of DURATE) assert.ok(esempi.some((m) => m[1].toLowerCase() === d), `c'e' un esempio ${d}`);
-  for (const [, durata, json] of esempi) {
-    const sb = JSON.parse(json) as Storyboard;
-    assert.deepEqual(valeOvunque(sb, durata.toLowerCase() as NomeDurata), [], durata);
-    // TODO(Task 6): l'esempio medio ha 4 scene su 6 su un dispositivo; riscrivere l'esempio e togliere il filtro
-    assert.deepEqual(erroriVarieta(sb, []).filter((e) => !e.includes("su un dispositivo")), [], durata);
+const ESEMPI = [...AGENTE.matchAll(/durata (corta|media|lunga)[^\n]*\n\n```json\n([\s\S]*?)```/gi)].map(([, durata, json]) => ({
+  durata: durata.toLowerCase() as NomeDurata,
+  sb: JSON.parse(json) as Storyboard,
+}));
+
+test("ogni esempio di agent-video.md passa la validazione e la varieta' nella durata che dichiara, con ognuna delle tre frasi finali", () => {
+  assert.equal(ESEMPI.length, 4);
+  for (const d of DURATE) assert.ok(ESEMPI.some((e) => e.durata === d), `c'e' un esempio ${d}`);
+  for (const { durata, sb } of ESEMPI) {
+    assert.deepEqual(valeOvunque(sb, durata), [], `${sb.slug} (${durata})`);
+    assert.deepEqual(erroriVarieta(sb, []), [], `${sb.slug} (${durata})`);
   }
+});
+
+// Claude imita gli esempi: se tutti hanno la notifica, ogni video ha la notifica.
+test("negli esempi di agent-video.md la notifica e' l'eccezione e compaiono tutte le scene senza dispositivo", () => {
+  const conAllarme = ESEMPI.filter((e) => e.sb.frasi.some((f) => f.scena.tipo === "allarme"));
+  assert.equal(conAllarme.length, 1, "un solo esempio con allarme");
+  const tipi = new Set(ESEMPI.flatMap((e) => e.sb.frasi.map((f) => f.scena.tipo)));
+  for (const t of ["simbolo", "passi", "flusso", "mappa"]) assert.ok(tipi.has(t), t);
+});
+
+test("agent-video.md descrive le scene nuove, i pittogrammi e le forme della mappa", () => {
+  for (const t of ["simbolo", "passi", "flusso", "mappa"]) assert.ok(AGENTE.includes(`| \`${t}\` |`), `riga della tabella per ${t}`);
+  for (const s of [...SIMBOLI, ...FORME_MAPPA]) assert.ok(AGENTE.includes(`\`${s}\``), s);
 });
 
 // Con 3 scene (corta da 4 frasi) la soglia del 70 % vuole tutte e 3 uguali: la regola resta possibile e non serve scalarla.
 test("varieta' in corta: 2 scene su 3 uguali passano, 3 su 3 no; contro un video piu' lungo conta la sequenza piu' lunga", () => {
   const sb = fixture("durata-corta");
-  assert.deepEqual(erroriVarieta(sb, [["gancio", "numero", "telefono"]]), []);
-  assert.ok(erroriVarieta(sb, [["gancio", "numero", "oggetto"]]).some((e) => e.startsWith("sequenza: 100%")));
-  assert.equal(somiglianza(["gancio", "numero", "oggetto"], ["gancio", "numero", "oggetto", "data", "checklist", "teaser"]), 0.5);
+  assert.deepEqual(erroriVarieta(sb, [["gancio", "simbolo", "telefono"]]), []);
+  assert.ok(erroriVarieta(sb, [["gancio", "simbolo", "oggetto"]]).some((e) => e.startsWith("sequenza: 100%")));
+  assert.equal(somiglianza(["gancio", "simbolo", "oggetto"], ["gancio", "simbolo", "oggetto", "data", "checklist", "teaser"]), 0.5);
 });

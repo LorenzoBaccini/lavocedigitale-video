@@ -133,11 +133,15 @@ test("le fixture con i testi al limite passano la validazione", () => {
   for (const sb of AL_LIMITE) assert.deepEqual(validaStoryboard(sb, "media", 2), { ok: true, storyboard: sb });
 });
 
+// le scene senza dispositivo hanno le loro fixture al limite, `scene-nuove` e `scene-nuove-2`
+const SCENE_NUOVE = ["scene-nuove.storyboard.json", "scene-nuove-2.storyboard.json"].map(fixture);
+
 test("le fixture al limite coprono tutti i tipi di scena e tutti gli oggetti", () => {
   const scene = AL_LIMITE.flatMap((sb) => sb.frasi.map((f: any) => f.scena));
-  const tipi = new Set(scene.map((s: any) => s.tipo));
+  const tipi = new Set([...AL_LIMITE, ...SCENE_NUOVE].flatMap((sb) => sb.frasi.map((f: any) => f.scena.tipo)));
   const oggetti = new Set([...scene, ...leggi().frasi.map((f: any) => f.scena)].map((s: any) => s.oggetto));
-  for (const t of ["gancio", "allarme", "oggetto", "data", "checklist", "rischio", "telefono", "documenti", "teaser", "numero", "confronto", "citazione", "chiusura"]) assert.ok(tipi.has(t), t);
+  const TUTTI = ["gancio", "allarme", "oggetto", "data", "checklist", "rischio", "telefono", "documenti", "teaser", "numero", "confronto", "citazione", "simbolo", "passi", "flusso", "mappa", "chiusura"];
+  for (const t of TUTTI) assert.ok(tipi.has(t), t);
   for (const d of DISPOSITIVI) assert.ok(scene.some((s: any) => s.dispositivo === d) || d === "portatile", d);
   for (const sc of SCHERMATE) assert.ok(scene.some((s: any) => s.schermata === sc) || sc === "sistema", sc);
   const pezzi = new Set(scene.flatMap((s: any) => (s.pezzi ?? []).map((p: any) => p.oggetto)));

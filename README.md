@@ -250,7 +250,9 @@ I numeri stanno in un posto solo, `LIMITI_DURATA` (`src/storyboard/tipi.ts`). Il
 (`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata, fraseFinale)` li
 applica. `agent-video.md` ha la stessa tabella perché Claude veda le tre durate e le regole di scrittura di ognuna
 (regola 20), e quattro esempi (due medie, una corta, una lunga): `durata.test.ts` controlla che la tabella coincida con
-`LIMITI_DURATA` e che ogni esempio passi nella durata che dichiara con ognuna delle tre frasi finali. `media` è la durata
+`LIMITI_DURATA` e che ogni esempio passi nella durata che dichiara con ognuna delle tre frasi finali, varietà compresa
+(una notifica al massimo, non più di metà delle scene su un dispositivo). Claude imita gli esempi: solo uno usa
+`allarme`, e insieme mostrano le quattro scene senza schermi (`simbolo`, `passi`, `flusso`, `mappa`). `media` è la durata
 di prima con il tetto delle parole sceso a 72, perché non si sovrapponga a `lunga` oltre il confine.
 
 Le parole contate sono quelle dette: le frasi prima della chiusura più la frase finale della variante (7, 3 o 7 parole),

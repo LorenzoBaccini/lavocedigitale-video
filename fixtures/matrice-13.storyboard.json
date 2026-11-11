@@ -1,0 +1,91 @@
+{
+ "slug": "matrice-13",
+ "orologio": "2026-03-02",
+ "frasi": [
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "mappa",
+    "etichetta": "Dove",
+    "titolo": "Allo sportello",
+    "forma": "area",
+    "luoghi": [
+     "Comune"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "mappa",
+    "etichetta": "Comune sportello accesso credenz",
+    "titolo": "Sportello accesso creden",
+    "forma": "area",
+    "luoghi": [
+     "Accesso credenzialie"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "mappa",
+    "etichetta": "Dove",
+    "titolo": "Allo sportello",
+    "forma": "percorso",
+    "luoghi": [
+     "Comune",
+     "Stazione"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "mappa",
+    "etichetta": "Sportello accesso credenziali ve",
+    "titolo": "Accesso credenziali veri",
+    "forma": "percorso",
+    "luoghi": [
+     "Credenziali verifica",
+     "Verifica Ministero d"
+    ]
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "teaser",
+    "testo": "Ancora"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "teaser",
+    "testo": "Ancora"
+   }
+  },
+  {
+   "testo": "Il sistema lo dice in modo preciso.",
+   "chiave": "preciso",
+   "scena": {
+    "tipo": "teaser",
+    "testo": "Ancora"
+   }
+  },
+  {
+   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
+   "chiave": "link",
+   "scena": {
+    "tipo": "chiusura"
+   }
+  }
+ ]
+}

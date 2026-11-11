@@ -2,7 +2,7 @@
   "slug": "chiusura-corta",
   "frasi": [
     { "testo": "Ti arriva un SMS dalla banca che ti chiede di confermare?", "chiave": "SMS", "scena": { "tipo": "gancio", "titolo": "Un SMS dalla banca", "evidenza": "dalla banca?", "sottotitolo": "prima di toccare il link", "oggetto": "smartphone", "schermata": "app" } },
-    { "testo": "Un link falso svuota il conto in pochi minuti.", "chiave": "svuota il conto", "scena": { "tipo": "rischio", "sopra": "Un link falso", "titolo": "svuota il conto", "dispositivo": "smartphone" } },
+    { "testo": "Un link falso svuota il conto in pochi minuti.", "chiave": "svuota il conto", "scena": { "tipo": "simbolo", "etichetta": "Un link falso", "simbolo": "euro", "titolo": "svuota il conto", "barrato": true } },
     { "testo": "Se il messaggio chiede il PIN, è una truffa.", "chiave": "truffa", "scena": { "tipo": "allarme", "sopra": "Se chiede il PIN", "titolo": "è una truffa", "notifica": "Conto sospeso: conferma il PIN entro oggi", "mittente": "Banca", "azione": "Conferma", "dispositivo": "smartphone" } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]

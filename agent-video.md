@@ -16,16 +16,20 @@ La voce è quella della testata: frasi corte, soggetto e verbo, cose concrete, n
 8. **`oggetto: "nessuno"`** quando nessun oggetto dell'elenco è davvero il soggetto della frase. Mai forzare un portatile dove non c'entra.
 9. La scena `allarme` è il primo piano di una notifica sullo schermo: **`notifica` è il messaggio che vi si legge**, scritto come lo scriverebbe il sistema, generico e senza marchi («Aggiornamenti di sicurezza non più disponibili per questo PC»), non uno slogan. Se manca, la notifica riporta la frase detta. **Usala solo per un messaggio che il sistema o un'app mostrano davvero secondo l'articolo, al massimo una volta per video**: la validazione scarta due `allarme`. Per le altre frasi scegli un'altra scena.
 10. La scena `oggetto` usa **`indica`** quando l'articolo spiega un passo pratico su quell'oggetto: il punto si cerchia a mano e `indica` ne è l'etichetta. Sul `portatile` diventa il pulsante della finestra (d'impostazioni, di una pagina web o di un'app, secondo `schermata`), sullo `smartphone` la voce evidenziata di un elenco: scrivilo come lo scriverebbe l'interfaccia («Verifica disponibilità»), generico. `indica` solo con un oggetto: mai con `oggetto: "nessuno"`.
-11. **Nessun marchio, logo o personaggio protetto** nelle scene: gli oggetti sono generici. **Occhielli, etichette, `indica` e `notifica` non nominano mai un marchio o un'azienda**: «Lo strumento ufficiale», non «Lo strumento di Microsoft». Il prodotto di cui parla l'articolo resta nella frase detta e nei titoli.
+11. **Nessun marchio, logo o personaggio protetto** nelle scene: gli oggetti sono generici. **Occhielli, etichette, `indica`, `notifica`, `passi`, `nodi` e `luoghi` non nominano mai un marchio o un'azienda**: «Lo strumento ufficiale», non «Lo strumento di Microsoft». Il prodotto di cui parla l'articolo resta nella frase detta e nei titoli.
 12. Un solo racconto: ogni frase prepara la successiva, e **nessuna frase ne contraddice un'altra**. Se dici che una cosa finisce («niente più correzioni di sicurezza») e poi chiedi di cercarla, spiega perché c'è ancora (il programma che le prolunga).
 13. **Un requisito o un confronto dice sempre rispetto a cosa**: «stessa lingua del Windows che hai», non «stessa lingua»; «stessa edizione, Home o Pro, come ora», non «stessa edizione». Vale per il `testo` e per i campi delle scene.
 14. **Prima di rispondere rileggi il copione come chi non ha letto l'articolo**: deve capirsi da solo, frase dopo frase, senza un dato che resti appeso. Se una frase si capisce solo conoscendo l'articolo, riscrivila.
 
 ## Regole delle scene
 
-15. **La scena nasce dalla frase, non da uno schema fisso.** Non esiste una sequenza obbligata (gancio, allarme, data, rischio, checklist, oggetto, chiusura): per ogni frase chiediti che cosa si vede quando la si dice, e scegli il `tipo` che lo mostra. Una frase su un'app si vede sul telefono, una sul sito su una pagina web, una su documenti e tessere sul tavolo, una scadenza sull'agenda.
+15. **La scena nasce dalla frase, non da uno schema fisso.** Non esiste una sequenza obbligata (gancio, allarme, data, rischio, checklist, oggetto, chiusura): per ogni frase chiediti che cosa si vede quando la si dice, e scegli il `tipo` che lo mostra. Una frase su un'app si vede sul telefono, una sul sito su una pagina web, una su documenti e tessere sul tavolo, una scadenza sull'agenda. Molte frasi non stanno su uno schermo, e per quelle ci sono quattro scene disegnate su carta:
+    - **un requisito fisico o uno stato** (la batteria, il segnale, la connessione, la protezione che manca, un costo) → `simbolo`: «Il sistema appena installato nasce senza difese» è lo scudo barrato, «Togli la modalità aereo» il segnale;
+    - **una procedura**, cioè passaggi da fare in quell'ordine → `passi`: «Apri la sezione Consensi e autorizza la consultazione» sono due passi;
+    - **una catena di causa ed effetto o un passaggio fra servizi** (da qui si arriva lì, questo porta a quello) → `flusso`: «Dall'app entri solo con lo SPID» è SPID → app → fascicolo;
+    - **un luogo, una zona, un tragitto** → `mappa`: «Il punto grigio è l'ultima posizione in cui sei stato» è uno spillo sulla piantina. La `mappa` è sempre un disegno generico, mai una cartina vera: niente città, vie o nomi di posti che l'articolo non nomina. I `luoghi` sono etichette («Ultima posizione», «Sportello del comune»), mai marchi.
 16. **Mai lo stesso `tipo` due volte di fila**: la validazione lo scarta. L'unica eccezione è `data`, e solo con due date diverse (la stessa data due volte viene scartata). Varia anche il dispositivo e l'inquadratura: dopo una scena sul telefono, se puoi, la successiva sta altrove (carta, portatile, tavolo).
-16 bis. **Al massimo metà delle scene, chiusura esclusa, su un dispositivo** (6 scene: 3, 7 scene: 4): la validazione scarta il copione che ne ha di più. Contano `gancio`, `allarme`, `rischio`, `telefono` e `oggetto` con `portatile` o `smartphone`; non contano `data`, `numero`, `confronto`, `citazione`, `checklist`, `documenti`, `teaser` e `oggetto` con un altro oggetto (carta, chiavetta, router, nessuno). Il resto della frase sta su carta.
+16 bis. **Al massimo metà delle scene, chiusura esclusa, su un dispositivo** (6 scene: 3, 7 scene: 4): la validazione scarta il copione che ne ha di più. Contano `gancio`, `allarme`, `rischio`, `telefono` e `oggetto` con `portatile` o `smartphone`; non contano `data`, `numero`, `confronto`, `citazione`, `checklist`, `documenti`, `teaser`, `simbolo`, `passi`, `flusso`, `mappa` e `oggetto` con un altro oggetto (carta, chiavetta, router, nessuno). Le altre frasi stanno su carta (regola 15).
 17. **L'ambientazione segue il contenuto.** Nelle scene sul set dichiara dove si svolge la frase:
     - `dispositivo` (`allarme`, `rischio`): `smartphone` se la frase parla di un'app o del telefono, `portatile` se parla del computer o del sistema. Se manca, lo smartphone si sceglie solo quando la frase dice «app», «smartphone», «telefono» o «telefoni», «telefonino», «cellulare» o «cellulari»; altrimenti il portatile.
     - `schermata` (`gancio` e `oggetto` sul portatile o sul telefono): `sistema` (desktop, impostazioni), `sito` (una pagina web nel browser), `app`. Se manca, `sito` quando la frase dice «sito» o «siti», «portale» o «portali», «pagina web»; `app` quando dice «app»; altrimenti `sistema`.
@@ -76,7 +80,13 @@ Il campo `tipo` sceglie la scena; i campi con `?` sono facoltativi. `oggetto` è
 | `numero` | `etichetta`, `numero`, `unita?`, `nota?` | una cifra grande |
 | `confronto` | `etichetta`, `a`, `b` (ciascuno `{ titolo, valore }`) | due cose a fronte |
 | `citazione` | `testo`, `fonte` | una frase dell'articolo, riportata alla lettera |
+| `simbolo` | `etichetta`, `simbolo`, `titolo`, `barrato?` | un requisito fisico o uno stato: un pittogramma grande disegnato a tratto, con il titolo sotto; `barrato: true` lo barra a pennarello quando la cosa manca o non va («senza difese», «niente segnale») |
+| `passi` | `etichetta`, `passi` (2-4 di `{ testo, simbolo? }`) | una procedura: i passaggi numerati, nell'ordine in cui si fanno, ciascuno con un pittogramma piccolo facoltativo |
+| `flusso` | `etichetta`, `nodi` (2-3 di `{ testo, simbolo? }`) | una catena di causa ed effetto o un passaggio fra servizi: riquadri collegati da frecce, dal primo all'ultimo, che resta evidenziato; pittogramma facoltativo per ogni nodo |
+| `mappa` | `etichetta`, `titolo`, `forma`, `luoghi` | un luogo, una zona o un tragitto su una piantina generica disegnata a mano, mai una cartina vera; `forma` è `punto` (uno spillo), `area` (una zona cerchiata) o `percorso` (un tragitto da A a B); `luoghi` sono le etichette: una con `punto` e `area`, due (partenza e arrivo) con `percorso` |
 | `chiusura` | nessuno | ultima frase |
+
+I pittogrammi di `simbolo`, `passi` e `flusso` sono un insieme chiuso, disegnati senza marchi: `lucchetto`, `batteria`, `wifi`, `segnale` (le tacche del telefono), `posizione` (lo spillo), `altoparlante`, `documento`, `euro`, `calendario`, `scudo`. Un nome fuori da questo elenco viene scartato: se nessuno è giusto per la frase, scegli un'altra scena (in `passi` e `flusso` il pittogramma si può togliere).
 
 ## Limiti (la validazione li fa rispettare)
 
@@ -88,6 +98,8 @@ Il campo `tipo` sceglie la scena; i campi con `?` sono facoltativi. `oggetto` è
 - `numero` al massimo 8 caratteri, e `valore` di ciascun lato del `confronto` 8; `teaser.testo` 40; `citazione.testo` 110;
 - `mittente` e `azione` al massimo 28 caratteri; `menu` da 1 a 5 voci di al massimo 18 caratteri;
 - `opzioni` da 2 a 3, ciascuna di al massimo 24 caratteri; `pezzi` da 2 a 3, `nota` al massimo 24;
+- `passi` da 2 a 4, il `testo` di ciascun passo al massimo 28 caratteri; `nodi` da 2 a 3, il `testo` di ciascun nodo al massimo 18; ogni `simbolo` uno dei pittogrammi dell'elenco;
+- `luoghi` della `mappa`: esattamente uno con `punto` e `area`, esattamente due con `percorso`, ciascuno di al massimo 20 caratteri; `forma` è `punto`, `area` o `percorso`; `barrato` di `simbolo` è `true` o `false`;
 - in `indica` e nelle `nota` dei pezzi nessuna parola oltre 15 lettere: sono note a mano in una colonna stretta e vanno a capo solo fra le parole;
 - `dispositivo` è `portatile` o `smartphone`; `schermata` è `sistema`, `sito` o `app`;
 - `data` e `orologio` devono essere giorni che esistono (2026-02-30 viene scartata);
@@ -97,7 +109,7 @@ Le cifre di tutte le scene devono comparire nel corpo dell'articolo: un anno o u
 
 ## Esempi
 
-Articolo: «Installare Windows 10 da USB dopo la fine del supporto». Durata media.
+Articolo: «Installare Windows 10 da USB dopo la fine del supporto». La frase «nasce senza difese» non chiede uno schermo: è lo scudo barrato. Durata media.
 
 ```json
 {
@@ -105,9 +117,9 @@ Articolo: «Installare Windows 10 da USB dopo la fine del supporto». Durata med
   "orologio": "2025-10-14",
   "frasi": [
     { "testo": "Devi reinstallare Windows dieci da zero?", "chiave": "Windows dieci", "scena": { "tipo": "gancio", "titolo": "Windows 10", "evidenza": "da zero?", "sottotitolo": "si può, con un passo in più", "oggetto": "portatile" } },
-    { "testo": "Si può, ma c'è un problema.", "chiave": "problema", "scena": { "tipo": "allarme", "sopra": "Ma c'è", "titolo": "un problema", "notifica": "Aggiornamenti di sicurezza non più disponibili per questo PC", "mittente": "Avviso di sicurezza", "azione": "Apri le impostazioni" } },
+    { "testo": "Si può, ma c'è un problema.", "chiave": "problema", "scena": { "tipo": "rischio", "sopra": "Si può, ma c'è", "titolo": "un problema", "dispositivo": "portatile" } },
     { "testo": "Dal quattordici ottobre duemilaventicinque niente più aggiornamenti di sicurezza.", "chiave": "aggiornamenti", "scena": { "tipo": "data", "etichetta": "Dal 14 ottobre 2025", "data": "2025-10-14", "barrato": "aggiornamenti di sicurezza" } },
-    { "testo": "Il sistema appena installato nasce senza difese.", "chiave": "senza difese", "scena": { "tipo": "rischio", "sopra": "Appena installato", "titolo": "nasce senza difese" } },
+    { "testo": "Il sistema appena installato nasce senza difese.", "chiave": "senza difese", "scena": { "tipo": "simbolo", "etichetta": "Appena installato", "simbolo": "scudo", "titolo": "nasce senza difese", "barrato": true } },
     { "testo": "Quando crei la chiavetta, scegli la stessa lingua e la stessa edizione del tuo Windows: così si attiva senza codice.", "chiave": "senza codice", "scena": { "tipo": "checklist", "etichetta": "Ti serve", "oggetto": "chiavetta", "voci": [
       { "grande": "≥ 8 GB", "piccolo": "la chiavetta USB" },
       { "grande": "stessa lingua", "piccolo": "del tuo Windows" },
@@ -121,7 +133,7 @@ Articolo: «Installare Windows 10 da USB dopo la fine del supporto». Durata med
 ```
 
 
-Articolo: «Fascicolo sanitario dell'Emilia-Romagna, il nuovo portale e come si accede». Qui le frasi parlano di un sito, di un'app e di documenti: le scene vanno sul portatile con la pagina web, sul telefono e sul tavolo, non sullo schema dell'esempio precedente. Durata media.
+Articolo: «Fascicolo sanitario dell'Emilia-Romagna, il nuovo portale e come si accede». Qui le frasi parlano di un sito, di un'app e di documenti: le scene vanno sul portatile con la pagina web, sul telefono, sul tavolo e su carta, non sullo schema dell'esempio precedente. È l'unico esempio con `allarme`: l'articolo parla di un messaggio che l'app mostra davvero. Durata media.
 
 ```json
 {
@@ -132,20 +144,20 @@ Articolo: «Fascicolo sanitario dell'Emilia-Romagna, il nuovo portale e come si 
     { "testo": "Dall'app ER-Salute però entri solo con lo SPID.", "chiave": "solo con lo SPID", "scena": { "tipo": "allarme", "sopra": "Dall'app", "titolo": "entri solo con SPID", "notifica": "Accesso dall'app consentito solo con credenziali SPID", "mittente": "Fascicolo sanitario", "dispositivo": "smartphone" } },
     { "testo": "Con solo la CIE, l'app non ti fa entrare.", "chiave": "non ti fa entrare", "scena": { "tipo": "telefono", "etichetta": "Con solo la CIE", "titolo": "l'app non ti fa entrare", "opzioni": ["Entra con SPID", "Entra con CIE"], "esclusa": "Entra con CIE" } },
     { "testo": "Entra dal sito con la CIE, o con la tessera sanitaria, lettore e PIN.", "chiave": "dal sito", "scena": { "tipo": "documenti", "etichetta": "Al posto dell'app", "titolo": "Entra dal sito", "pezzi": [{ "oggetto": "documento", "nota": "CIE" }, { "oggetto": "tessera", "nota": "tessera sanitaria" }, { "oggetto": "lettore", "nota": "lettore e PIN" }] } },
-    { "testo": "Al primo accesso autorizza la consultazione nella sezione Consensi, o non prosegui.", "chiave": "Consensi", "scena": { "tipo": "oggetto", "etichetta": "Al primo accesso, in Consensi", "titolo": "Dai il consenso", "conferma": "Poi puoi modificarlo", "indica": "Autorizza consultazione", "oggetto": "portatile", "schermata": "sito", "menu": ["Consensi"] } },
+    { "testo": "Al primo accesso autorizza la consultazione nella sezione Consensi, o non prosegui.", "chiave": "Consensi", "scena": { "tipo": "passi", "etichetta": "Al primo accesso, sul sito", "passi": [{ "testo": "Apri la sezione Consensi" }, { "testo": "Autorizza la consultazione" }] } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]
 }
 ```
 
-Lo stesso articolo in durata corta: resta solo il punto che blocca chi apre l'app, e che cosa fare al suo posto.
+Lo stesso articolo in durata corta: resta solo il punto che blocca chi apre l'app, e che cosa fare al suo posto. Qui la frase dell'allarme diventa un passaggio, dallo SPID all'app al fascicolo, e lo mostra un `flusso`: una frase può stare bene in più scene, e la notifica resta l'eccezione.
 
 ```json
 {
   "slug": "fascicolo-sanitario-emilia-romagna-nuovo-portale-accesso",
   "frasi": [
     { "testo": "Devi entrare nel fascicolo sanitario dell'Emilia-Romagna?", "chiave": "fascicolo", "scena": { "tipo": "gancio", "titolo": "Fascicolo sanitario", "evidenza": "Emilia-Romagna?", "sottotitolo": "dall'app serve lo SPID", "oggetto": "smartphone", "schermata": "app" } },
-    { "testo": "Dall'app ER-Salute però entri solo con lo SPID, non con la CIE.", "chiave": "solo con lo SPID", "scena": { "tipo": "allarme", "sopra": "Dall'app", "titolo": "entri solo con SPID", "notifica": "Accesso dall'app consentito solo con credenziali SPID", "mittente": "Fascicolo sanitario", "dispositivo": "smartphone" } },
+    { "testo": "Dall'app ER-Salute però entri solo con lo SPID, non con la CIE.", "chiave": "solo con lo SPID", "scena": { "tipo": "flusso", "etichetta": "Dall'app, non con la CIE", "nodi": [{ "testo": "Solo con lo SPID", "simbolo": "lucchetto" }, { "testo": "L'app regionale" }, { "testo": "Il tuo fascicolo", "simbolo": "documento" }] } },
     { "testo": "Con la CIE, o con la tessera sanitaria, entra dal sito.", "chiave": "dal sito", "scena": { "tipo": "documenti", "etichetta": "Senza SPID", "titolo": "Entra dal sito", "pezzi": [{ "oggetto": "documento", "nota": "CIE" }, { "oggetto": "tessera", "nota": "tessera sanitaria" }] } },
     { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
   ]
@@ -160,8 +172,8 @@ Articolo: «Google Maps non trova la tua posizione: il punto blu». Durata lunga
   "frasi": [
     { "testo": "Google Maps non trova la tua posizione?", "chiave": "posizione", "scena": { "tipo": "gancio", "titolo": "La tua posizione", "evidenza": "posizione?", "sottotitolo": "il pulsante dice da dove partire", "oggetto": "smartphone", "schermata": "app" } },
     { "testo": "Se il pulsante in basso è rosso, attiva i Servizi di localizzazione.", "chiave": "localizzazione", "scena": { "tipo": "oggetto", "etichetta": "Pulsante rosso in basso a destra", "titolo": "Attiva la posizione", "indica": "Servizi di localizzazione", "oggetto": "smartphone", "schermata": "sistema" } },
-    { "testo": "Il punto grigio non è sbagliato: è l'ultima posizione in cui sei stato.", "chiave": "punto grigio", "scena": { "tipo": "confronto", "etichetta": "Cosa dice il punto", "a": { "titolo": "Punto blu", "valore": "attuale" }, "b": { "titolo": "Punto grigio", "valore": "vecchia" } } },
-    { "testo": "Se il cerchio è largo, togli modalità aereo e risparmio energetico.", "chiave": "modalità aereo", "scena": { "tipo": "allarme", "sopra": "Se il cerchio è largo", "titolo": "posizione imprecisa", "notifica": "Posizione poco precisa: disattiva la modalità aereo", "mittente": "Posizione", "dispositivo": "smartphone" } },
+    { "testo": "Il punto grigio non è sbagliato: è l'ultima posizione in cui sei stato.", "chiave": "punto grigio", "scena": { "tipo": "mappa", "etichetta": "Il punto grigio non è sbagliato", "titolo": "è dove sei stato", "forma": "punto", "luoghi": ["Ultima posizione"] } },
+    { "testo": "Se il cerchio è largo, togli modalità aereo e risparmio energetico.", "chiave": "modalità aereo", "scena": { "tipo": "simbolo", "etichetta": "Se il cerchio è largo", "simbolo": "segnale", "titolo": "togli modalità aereo" } },
     { "testo": "Accendi Wi-Fi e dati: il GPS da solo approssima di venti metri.", "chiave": "venti metri", "scena": { "tipo": "numero", "etichetta": "Il GPS da solo", "numero": "20", "unita": "metri", "nota": "di approssimazione" } },
     { "testo": "Se il fascio punta male, muovi il telefono formando un otto.", "chiave": "formando un otto", "scena": { "tipo": "citazione", "testo": "muovi il telefono formando un 8, finché il fascio si restringe e punta dove devi", "fonte": "La guida ufficiale" } },
     { "testo": "Sul computer invece dai prima il permesso della posizione al browser.", "chiave": "browser", "scena": { "tipo": "oggetto", "etichetta": "Sul computer, nel browser", "titolo": "Dai il permesso", "indica": "Consenti posizione", "oggetto": "portatile", "schermata": "sito" } },

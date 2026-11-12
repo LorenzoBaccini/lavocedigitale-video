@@ -121,6 +121,9 @@ function lato(o: Dict, nome: "a" | "b", percorso: string, errori: string[]): voi
   testo(v, "valore", p, LIMITI.numero, errori);
 }
 
+// La piantina e' un pezzo di citta': paesi, regioni e mondo non si disegnano, sembrerebbe una cartina vera sbagliata.
+const FUORI_PIANTINA = /(?<!\p{L})(paes[ei]|region[ei]|nazion[ei]|mondo|continent[ei]|europa|ester[oi])(?!\p{L})/iu;
+
 const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   gancio: (s, p, e) => {
     testo(s, "titolo", p, LIMITI.titolo, e);
@@ -211,6 +214,9 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     const n = s.forma === "percorso" ? 2 : 1;
     if (FORME_MAPPA.includes(s.forma as never) && s.luoghi.length !== n) e.push(`${p}.luoghi: ${n} ${n === 1 ? "luogo" : "luoghi"} con ${s.forma}`);
     elenco(s, "luoghi", p, { min: 0, max: Infinity }, LIMITI.luogo, e);
+    s.luoghi.forEach((l, i) => {
+      if (typeof l === "string" && FUORI_PIANTINA.test(l)) e.push(`${p}.luoghi[${i}]: la mappa è una piantina di strade, «${l}» non ci sta: per un paese, una regione o la disponibilità di un servizio scegli un'altra scena`);
+    });
   },
   simbolo: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);

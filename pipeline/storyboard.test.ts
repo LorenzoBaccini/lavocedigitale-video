@@ -51,6 +51,15 @@ test("riprova una volta con gli errori nel prompt quando il JSON non è valido",
   assert.ok(prompt[1].includes(rotto));
 });
 
+test("la riprova chiede di toccare solo cio' che gli errori indicano e ripete le parole ammesse", async () => {
+  const rotto = JSON.stringify({ slug: articolo.slug, frasi: [] });
+  const { prompt, chiedi } = scrivi([rotto, FIXTURE]);
+  await scriviStoryboard(articolo, chiedi, MEDIA);
+  assert.match(prompt[1], /Correggi solo quello che gli errori indicano/);
+  // media con «Il resto è nel link del post.»: da 43 a 65 parole prima della chiusura
+  assert.match(prompt[1], /fra 43 e 65 parole prima della chiusura/);
+});
+
 test("scarta dopo due JSON non validi", async () => {
   const { chiedi } = scrivi(["non è json", JSON.stringify({ slug: "x", frasi: [] })]);
   await assert.rejects(

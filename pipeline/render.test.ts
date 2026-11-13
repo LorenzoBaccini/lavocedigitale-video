@@ -19,6 +19,10 @@ test("argomentiRender usa tutti i processori ricevuti", () => {
   assert.ok(argomentiRender("p.json", "o.mp4", "swangle", 2).includes("--concurrency=2"));
 });
 
+test("argomentiRender alza il timeout oltre il primo frame 3D in swangle", () => {
+  assert.ok(argomentiRender("p.json", "o.mp4", "swangle").includes("--timeout=120000"));
+});
+
 test("argomentiFinitura rispetta le specifiche dei Reel Facebook", () => {
   const a = argomentiFinitura("grezzo.mp4", "finale.mp4").join(" ");
   for (const parte of [

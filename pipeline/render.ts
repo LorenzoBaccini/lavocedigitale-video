@@ -8,8 +8,10 @@ const COMPOSIZIONE = "notizia";
 const GL_PREDEFINITO = "swangle";
 
 // Remotion di default usa metà dei processori: sul runner (2 vCPU) vorrebbe dire un frame alla volta.
+// Il timeout di default (30 s) è al limite del primo frame 3D in swangle sul runner, che va dai 20 ai 30 s:
+// il 13 nov 2026 il video di OneDrive è saltato così. 120 s lasciano margine.
 export function argomentiRender(props: string, uscita: string, gl: string, processori = availableParallelism()): string[] {
-  return ["remotion", "render", "src/index.ts", COMPOSIZIONE, uscita, `--props=${props}`, `--gl=${gl}`, "--codec=h264", `--concurrency=${processori}`];
+  return ["remotion", "render", "src/index.ts", COMPOSIZIONE, uscita, `--props=${props}`, `--gl=${gl}`, "--codec=h264", `--concurrency=${processori}`, "--timeout=120000"];
 }
 
 /**

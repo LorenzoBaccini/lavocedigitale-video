@@ -148,7 +148,8 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "indica", p, LIMITI.indica, e, true);
     parole(s, "indica", p, e);
     oggetto(s, p, e);
-    if (s.oggetto === "nessuno" && s.indica !== undefined) e.push(`${p}.indica: indica solo con un oggetto`);
+    // la scena disegna comunque la scrivania con il portatile: senza un oggetto vero la frase sta su carta
+    if (s.oggetto === "nessuno") e.push(`${p}.oggetto: la scena oggetto vuole un oggetto vero; se nessuno è il soggetto della frase usa una scena su carta (numero, simbolo, citazione, passi)`);
     unoTra(s, "schermata", SCHERMATE, p, e);
     elenco(s, "menu", p, LIMITI.menu, LIMITI.voceMenu, e, true);
     if (s.menu !== undefined && s.indica === undefined) e.push(`${p}.menu: menu solo con indica`);

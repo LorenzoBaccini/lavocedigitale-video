@@ -15,6 +15,8 @@ export function argomentiRender(props: string, uscita: string, gl: string, proce
 /**
  * GOP chiuso di 2 s (60 frame a 30 fps) e audio AAC 48 kHz stereo: i requisiti dei Reel Facebook.
  * Il `scale` serve perché Remotion esce in yuvj420p (full range) e senza finirebbe fuori specifica.
+ * Il `loudnorm` porta l'audio vicino ai -14 LUFS dei social: senza usciva sui -23, 9 dB sotto gli altri video del feed.
+ * Il picco a -2 lascia margine all'AAC, che lo alza di qualche decimo.
  */
 export function argomentiFinitura(ingresso: string, uscita: string): string[] {
   return [
@@ -22,6 +24,7 @@ export function argomentiFinitura(ingresso: string, uscita: string): string[] {
     "-vf", "scale=out_range=tv",
     "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p",
     "-g", "60", "-keyint_min", "60", "-sc_threshold", "0",
+    "-af", "loudnorm=I=-14:TP=-2:LRA=11",
     "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
     "-movflags", "+faststart",
     uscita,

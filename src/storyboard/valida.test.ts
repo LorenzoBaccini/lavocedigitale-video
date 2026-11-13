@@ -117,13 +117,12 @@ test("accetta un barrato di 26 caratteri e rifiuta 27", () => {
   assert.ok(errori(sb).some((e) => e.includes("frasi[2].scena.barrato")));
 });
 
-test("rifiuta indica su una scena oggetto senza oggetto", () => {
+test("rifiuta la scena oggetto senza oggetto, anche senza indica", () => {
   const sb = leggi();
   sb.frasi[5].scena.oggetto = "nessuno";
-  assert.ok(errori(sb).some((e) => e.includes("frasi[5].scena.indica")));
   delete sb.frasi[5].scena.indica;
   delete sb.frasi[5].scena.menu;
-  assert.equal(validaStoryboard(sb, "media", 2).ok, true);
+  assert.ok(errori(sb).some((e) => e.includes("frasi[5].scena.oggetto: la scena oggetto vuole un oggetto vero")));
 });
 
 const fixture = (nome: string): any => JSON.parse(readFileSync(new URL(`../../fixtures/${nome}`, import.meta.url), "utf8"));

@@ -30,6 +30,7 @@ test("argomentiFinitura rispetta le specifiche dei Reel Facebook", () => {
     "-g 60",
     "-keyint_min 60",
     "-sc_threshold 0",
+    "-af loudnorm=I=-14:TP=-2:LRA=11",
     "-c:a aac",
     "-b:a 128k",
     "-ar 48000",

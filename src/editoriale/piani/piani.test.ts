@@ -18,6 +18,7 @@ import { pianoData } from "./data.ts";
 import { FRECCIA, PASSO_NOTE, pianoDocumenti } from "./documenti.ts";
 import { pianoGancio } from "./gancio.ts";
 import { pianoScena } from "./index.ts";
+import { pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
 import { pianoTelefono } from "./telefono.ts";
 
@@ -224,4 +225,18 @@ test("ogni testo e' intero prima dello stacco, anche nelle frasi brevi senza voc
   for (const p of tutte.flatMap((sb) => senzaVoce(sb, 3))) {
     for (const t of pianoScena(p, p.durata).testi) assert.ok(t.da <= p.durata - 10, `${p.tipo}: «${t.testo}» a ${t.da} di ${p.durata}`);
   }
+});
+
+test("numero: la nota detta prima della cifra entra con la voce, non dopo la cifra", () => {
+  // la frase vera del contatore (12 nov 2026): la cifra arriva solo all'ultima parola
+  const testo = "Così hai i watt: un lampeggio ogni trentasei secondi vale cento.";
+  const tempi = [0.12, 0.78, 1.12, 1.26, 1.99, 2.1, 2.74, 3.04, 3.88, 4.28, 4.68];
+  const parole = testo.split(" ").map((t, i) => ({ t, da: tempi[i], a: (tempi[i + 1] ?? 5.1) - 0.04 }));
+  const sb = { slug: "contatore", frasi: [{ testo, chiave: "cento", scena: { tipo: "numero", etichetta: "Così hai i watt", numero: "100", unita: "watt", nota: "un lampeggio ogni 36 secondi" } }] } as Storyboard;
+  const timing: Timing = { voce: "elevenlabs", clips: [{ file: "s5.wav", secondi: 5.36, inviluppo: Array(161).fill(0.5), parole }] };
+  const p = propsFrase(sb, timing, costruisciLinea(timing, 30), 0);
+  if (p.tipo !== "numero") throw new Error("attesa una scena numero");
+  const piano = pianoNumero(p, p.durata);
+  assert.ok(piano.nota !== undefined && piano.nota < piano.numero, `nota a ${piano.nota}, cifra a ${piano.numero}`);
+  assert.ok(Math.abs(piano.nota - p.voce.parole[5].da) <= 1, `la nota entra su «lampeggio»: ${piano.nota} contro ${p.voce.parole[5].da}`);
 });

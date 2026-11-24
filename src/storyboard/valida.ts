@@ -308,8 +308,12 @@ export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValid
 
   const marcati = frasi.filter((f) => èDizionario(f) && TONI_MARCATI.includes(f.tono as never)).length;
   if (marcati > LIMITI.toniMarcati) {
-    errori.push(`toni: ${marcati} frasi fra ${TONI_MARCATI.join(" e ")}, al massimo ${LIMITI.toniMarcati}`);
+    errori.push(`toni: ${marcati} frasi fra ${TONI_MARCATI.slice(0, -1).join(", ")} e ${TONI_MARCATI.at(-1)}, al massimo ${LIMITI.toniMarcati}`);
   }
+  // una voce che non cambia mai tono suona piatta: almeno meta' delle frasi va recitata
+  const recitate = frasi.filter((f) => èDizionario(f) && f.tono !== undefined && f.tono !== "deciso").length;
+  const minimo = Math.ceil(frasi.length / 2);
+  if (recitate < minimo) errori.push(`toni: ${recitate} frasi recitate su ${frasi.length}, almeno ${minimo}: dai un tono a piu' frasi`);
 
   return errori.length ? { ok: false, errori } : { ok: true, storyboard: input as unknown as Storyboard };
 }

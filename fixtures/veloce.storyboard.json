@@ -103,7 +103,8 @@
       "chiave": "reinstalleresti",
       "scena": {
         "tipo": "chiusura"
-      }
+      },
+      "tono": "curioso"
     }
   ]
 }

@@ -2,9 +2,9 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { scalaRitmo } from "./ritmo";
 
-// Il ritmo della scena: tagli di zoom, scatto sulla chiave, il gancio che avanza. Come la spinta, e' un movimento
-// transitorio: il controllo d'impaginazione misura la scena senza.
-export const RitmoScena: React.FC<{ durata: number; chiave: number; tagli: number[]; indice: number; children: React.ReactNode }> = ({ durata, chiave, tagli, indice, children }) => {
+// Il movimento di camera della scena, continuo. Come la spinta, e' transitorio: il controllo d'impaginazione misura la
+// scena senza.
+export const RitmoScena: React.FC<{ durata: number; indice: number; children: React.ReactNode }> = ({ durata, indice, children }) => {
   const f = useCurrentFrame();
-  return <AbsoluteFill style={{ transform: `scale(${scalaRitmo(f, durata, chiave, tagli, indice)})` }}>{children}</AbsoluteFill>;
+  return <AbsoluteFill style={{ transform: `scale(${scalaRitmo(f, durata, indice)})` }}>{children}</AbsoluteFill>;
 };

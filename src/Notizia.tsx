@@ -9,7 +9,7 @@ import { scenaFerma } from "./editoriale/fermo";
 import { notificaSulloSchermo, suoniDettaglio } from "./editoriale/ganci/dettaglio";
 import { Lampo } from "./editoriale/Lampo";
 import { RitmoScena } from "./editoriale/RitmoScena";
-import { ritmoFrase, suoniRitmo } from "./editoriale/ritmo";
+import { frameChiave, suoniRitmo } from "./editoriale/ritmo";
 import { pianoScena } from "./editoriale/piani";
 import { SCENE_SCHERMO } from "./editoriale/schermo";
 import { Spinta } from "./editoriale/Spinta";
@@ -60,11 +60,11 @@ export const Notizia: React.FC<PropsNotizia> = ({ storyboard, timing, audioBase,
               const props = propsFrase(storyboard, timing, linea, i);
               const fascia = ferma !== undefined && i === ultima;
               const chiusura = frase.scena.tipo === "chiusura";
-              const ritmo = ritmoFrase(props.voce, linea.durate[i], i);
+              const chiave = frameChiave(props.voce);
               const contenuto = fascia ? <ChiusuraIntegrata {...(props as PropsScena<Extract<Scena, { tipo: "chiusura" }>>)} /> : Componente ? <Componente {...props} /> : <Tipografica testo={frase.testo} durata={linea.durate[i]} />;
-              const scena = chiusura || misuraImpaginazione ? contenuto : <RitmoScena durata={linea.durate[i]} chiave={ritmo.chiave} tagli={ritmo.tagli} indice={i}>{contenuto}</RitmoScena>;
+              const scena = chiusura || misuraImpaginazione ? contenuto : <RitmoScena durata={linea.durate[i]} indice={i}>{contenuto}</RitmoScena>;
               // senza il foglio non c'e' il fruscio della carta
-              const suoni = [...(fascia ? [] : pianoScena(props, linea.durate[i]).suoni), ...suoniRitmo(i, ritmo.chiave, chiusura)];
+              const suoni = [...(fascia ? [] : pianoScena(props, linea.durate[i]).suoni), ...suoniRitmo(i, chiave, chiusura)];
               const voce = (
                 <>
                   <Audio src={staticFile(`${audioBase}/${timing.clips[i].file}`)} />

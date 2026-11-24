@@ -25,12 +25,12 @@ function copione(frasi: number, parole: number): Storyboard {
   return {
     slug: "copione",
     frasi: [
-      { testo: Array(gancio).fill("parola").join(" "), chiave: "parola", scena: scene[0] },
+      { testo: Array(gancio).fill("parola").join(" "), chiave: "parola", tono: "curioso", scena: scene[0] },
       ...Array.from({ length: n - 1 }, (_, i) => {
         const k = Math.floor(resto / (n - 1)) + (i < resto % (n - 1) ? 1 : 0);
-        return { testo: Array(k).fill("parola").join(" "), chiave: "parola", scena: scene[(i + 1) % 2] };
+        return { testo: Array(k).fill("parola").join(" "), chiave: "parola", tono: "curioso", scena: scene[(i + 1) % 2] };
       }),
-      { testo: DOMANDA, chiave: "sapevi", scena: { tipo: "chiusura" } },
+      { testo: DOMANDA, chiave: "sapevi", tono: "curioso", scena: { tipo: "chiusura" } },
     ],
   };
 }

@@ -10,7 +10,8 @@
         "evidenza": "sotto il router?",
         "sottotitolo": "chi la legge entra in rete",
         "oggetto": "router"
-      }
+      },
+      "tono": "serio"
     },
     {
       "testo": "Chi passa sotto casa può leggerla e collegarsi.",
@@ -64,7 +65,8 @@
         "indica": "Accedi",
         "oggetto": "portatile",
         "schermata": "sito"
-      }
+      },
+      "tono": "malizioso"
     },
     {
       "testo": "Nella sezione Wi-Fi scegli una password lunga e nuova.",
@@ -101,7 +103,8 @@
       "chiave": "router",
       "scena": {
         "tipo": "chiusura"
-      }
+      },
+      "tono": "curioso"
     }
   ]
 }

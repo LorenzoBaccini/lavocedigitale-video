@@ -15,8 +15,8 @@ import { èPrincipale } from "./principale.ts";
 /** Nicola Lorusso, decisione del 4 novembre. */
 export const VOCE_ID = "sKbNSlHXq99bttvf8rRF";
 export const MODELLO = "eleven_v3";
-/** eleven_v3 accetta 0 (creative), 0,5 (natural), 1 (robust). */
-export const STABILITA = 0.5;
+/** eleven_v3 accetta 0 (creative), 0,5 (natural), 1 (robust): creative e' quella che segue di piu' i tag. */
+export const STABILITA = 0;
 /** La voce si accelera con ffmpeg dopo la generazione: il ritmo dei video brevi, gratis. */
 export const RITMO = 1.1;
 const URL_VOCE = `https://api.elevenlabs.io/v1/text-to-speech/${VOCE_ID}/with-timestamps?output_format=mp3_44100_128`;

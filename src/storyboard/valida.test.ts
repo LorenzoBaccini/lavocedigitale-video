@@ -383,13 +383,27 @@ test("nessuna parentesi quadra nel testo: ElevenLabs la leggerebbe come regia", 
   assert.ok(errori(sb).includes("frasi[5].testo: nessuna parentesi quadra nel testo"));
 });
 
-test("il tono è uno dell'elenco e al massimo due sono sussurrati o ironici", () => {
+test("il tono è uno dell'elenco e al massimo tre sono le reazioni forti", () => {
   const sb = nuovo();
   sb.frasi[2].tono = "arrabbiato";
   assert.ok(errori(sb).some((e) => e.startsWith("frasi[2].tono: deve essere uno tra deciso")));
-  sb.frasi[2].tono = "ironico";
-  sb.frasi[5].tono = "sussurrato";
-  assert.ok(errori(sb).includes("toni: 3 frasi fra sussurrato e ironico, al massimo 2"));
+  sb.frasi[2].tono = "ridendo";
+  sb.frasi[4].tono = "drammatico";
+  sb.frasi[5].tono = "sospirando";
+  assert.ok(errori(sb).some((e) => e.startsWith("toni: 4 frasi fra sussurrato, ironico, drammatico, ridendo e sospirando, al massimo 3")));
+});
+
+test("almeno meta' delle frasi sono recitate: un copione tutto deciso suona piatto", () => {
+  const sb = nuovo();
+  for (const f of sb.frasi) delete f.tono;
+  sb.frasi[0].tono = "curioso";
+  assert.ok(errori(sb).includes("toni: 1 frasi recitate su 8, almeno 4: dai un tono a piu' frasi"));
+});
+
+test("maiuscole per l'enfasi e puntini per le pause passano", () => {
+  const sb = nuovo();
+  sb.frasi[1].testo = "Si può fare... ma il sistema nasce SCOPERTO.";
+  assert.equal(validaStoryboard(sb, "lunga").ok, true, JSON.stringify(validaStoryboard(sb, "lunga")));
 });
 
 test("le parole contano anche la domanda finale", () => {

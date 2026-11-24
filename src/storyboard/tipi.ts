@@ -72,8 +72,8 @@ export type Scena =
   | { tipo: "chiusura" };
 
 /** Come la voce dice la frase: diventa un tag di eleven_v3 davanti alla frase, mai nel `testo`. */
-export type Tono = "deciso" | "entusiasta" | "curioso" | "serio" | "sussurrato" | "sorpreso" | "ironico";
-export const TONI: readonly Tono[] = ["deciso", "entusiasta", "curioso", "serio", "sussurrato", "sorpreso", "ironico"];
+export type Tono = "deciso" | "entusiasta" | "curioso" | "serio" | "sussurrato" | "sorpreso" | "ironico" | "drammatico" | "malizioso" | "ridendo" | "sospirando";
+export const TONI: readonly Tono[] = ["deciso", "entusiasta", "curioso", "serio", "sussurrato", "sorpreso", "ironico", "drammatico", "malizioso", "ridendo", "sospirando"];
 export const TAG_TONO: Record<Tono, string> = {
   deciso: "",
   entusiasta: "[excited]",
@@ -82,9 +82,13 @@ export const TAG_TONO: Record<Tono, string> = {
   sussurrato: "[whispers]",
   sorpreso: "[surprised]",
   ironico: "[sarcastic]",
+  drammatico: "[dramatically]",
+  malizioso: "[mischievously]",
+  ridendo: "[laughs]",
+  sospirando: "[sighs]",
 };
-/** I toni che stancano se ripetuti: al massimo `LIMITI.toniMarcati` per video. */
-export const TONI_MARCATI: readonly Tono[] = ["sussurrato", "ironico"];
+/** Le reazioni forti: stancano se ripetute, al massimo `LIMITI.toniMarcati` per video. */
+export const TONI_MARCATI: readonly Tono[] = ["sussurrato", "ironico", "drammatico", "ridendo", "sospirando"];
 
 export interface Frase {
   testo: string;
@@ -127,7 +131,7 @@ export const LIMITI = {
   domandaParole: 12,
   /** oltre, la domanda non sta nella fascia della chiusura integrata */
   domandaCaratteri: 80,
-  toniMarcati: 2,
+  toniMarcati: 3,
   titolo: 24,
   evidenza: 16,
   etichetta: 32,

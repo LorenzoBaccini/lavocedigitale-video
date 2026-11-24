@@ -45,7 +45,8 @@
       "chiave": "rimandi",
       "scena": {
         "tipo": "chiusura"
-      }
+      },
+      "tono": "curioso"
     }
   ]
 }

@@ -72,10 +72,10 @@ test("il taglio è esatto al campione, con dissolvenze di 10 ms e senza silenzio
 });
 
 test("il testo per la voce mette il tag del tono davanti a ogni frase; deciso e assente non hanno tag", () => {
-  assert.equal(testoVoce([{ testo: "A b.", tono: "serio" }, { testo: "C d." }, { testo: "E f?", tono: "deciso" }, { testo: "G.", tono: "sussurrato" }]), "[serious] A b. C d. E f? [whispers] G.");
+  assert.equal(testoVoce([{ testo: "A b.", tono: "serio" }, { testo: "C d." }, { testo: "E f?", tono: "deciso" }, { testo: "G.", tono: "sussurrato" }, { testo: "H.", tono: "ridendo" }]), "[serious] A b. C d. E f? [whispers] G. [laughs] H.");
 });
 
-test("stabilita' naturale e voce a 1,1x", () => {
-  assert.equal(STABILITA, 0.5);
+test("stabilita' creative, la piu' espressiva, e voce a 1,1x", () => {
+  assert.equal(STABILITA, 0);
   assert.equal(RITMO, 1.1);
 });

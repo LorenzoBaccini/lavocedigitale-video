@@ -23,6 +23,6 @@
       { "testo": "Ricevi un avviso" }
     ] } },
     { "testo": "E tieni il portatile attaccato alla corrente.", "chiave": "corrente", "scena": { "tipo": "simbolo", "etichetta": "Prima di iniziare", "simbolo": "batteria", "titolo": "Sempre in carica" } },
-    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+    { "testo": "Tu lo sapevi?", "chiave": "sapevi", "scena": { "tipo": "chiusura" } }
   ]
 }

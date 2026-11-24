@@ -13,6 +13,6 @@
       { "testo": "Mostri il codice", "simbolo": "documento" },
       { "testo": "Ricevi il badge" }
     ] } },
-    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link", "scena": { "tipo": "chiusura" } }
+    { "testo": "E tu lo reinstalleresti da zero oppure passeresti subito a quello nuovo?", "chiave": "quello nuovo", "scena": { "tipo": "chiusura" } }
   ]
 }

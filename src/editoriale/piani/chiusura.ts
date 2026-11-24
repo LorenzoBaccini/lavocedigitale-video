@@ -4,7 +4,6 @@ import type { PianoCarta } from "./carta.ts";
 import { suCarta } from "./carta.ts";
 
 export const INDIRIZZO = "lavocedigitale.it";
-export const TESTATA = "La Voce Digitale";
 export const INVITO = "Scrivilo nei commenti";
 
 /** In quanti frame entrano la scheda della cartolina e la fascia dell'integrata. */

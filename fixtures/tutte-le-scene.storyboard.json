@@ -12,6 +12,6 @@
     ] } },
     { "testo": "Chi apre quel link sbagliato perde i suoi soldi in un'ora.", "chiave": "perde i suoi soldi", "scena": { "tipo": "rischio", "sopra": "Chi apre quel link sbagliato poi", "titolo": "Perde i soldi in un'ora!" } },
     { "testo": "E poi c'è un trucco che conoscono in pochi.", "chiave": "conoscono in pochi", "scena": { "tipo": "teaser", "testo": "E poi c'è un trucco che pochi conoscono." } },
-    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link è nel post", "scena": { "tipo": "chiusura" } }
+    { "testo": "E tu lo reinstalleresti da zero oppure passeresti subito a quello nuovo?", "chiave": "quello nuovo", "scena": { "tipo": "chiusura" } }
   ]
 }

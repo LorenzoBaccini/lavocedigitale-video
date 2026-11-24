@@ -13,6 +13,6 @@
     ] } },
     { "testo": "Sul sito apri Consensi e autorizza la consultazione.", "chiave": "Consensi", "scena": { "tipo": "oggetto", "etichetta": "Sul sito, nella sezione Consensi", "titolo": "Autorizza i medici ora", "evidenza": "Al primo accesso", "conferma": "Puoi cambiarlo quando vuoi!", "indica": "Autorizza la consultazione", "oggetto": "portatile", "schermata": "sito", "menu": ["Il mio profilo ora", "Documenti sanitari", "Prenotazioni varie", "Pagamenti e ticket", "Consensi e privacy"] } },
     { "testo": "Nell'app, tocca Notifiche e attiva gli avvisi sui referti.", "chiave": "attiva gli avvisi", "scena": { "tipo": "oggetto", "etichetta": "Nell'app, dalla pagina iniziale", "titolo": "Attiva gli avvisi ora", "evidenza": "Sui referti!", "indica": "Avvisi sui nuovi referti!", "oggetto": "smartphone", "schermata": "app", "menu": ["Referti e ricette!", "Prenota una visita", "Notifiche dell'app"] } },
-    { "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "il link è nel post", "scena": { "tipo": "chiusura" } }
+    { "testo": "Tu lo sapevi?", "chiave": "sapevi", "scena": { "tipo": "chiusura" } }
   ]
 }

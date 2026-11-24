@@ -60,8 +60,8 @@
    }
   },
   {
-   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
-   "chiave": "link",
+   "testo": "Tu lo sapevi?",
+   "chiave": "sapevi",
    "scena": {
     "tipo": "chiusura"
    }

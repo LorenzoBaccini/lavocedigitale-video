@@ -55,7 +55,8 @@ test("il gancio scrive la frase detta, la chiave in grande; il sottotitolo non l
   assert.deepEqual(piano.parole.map((w) => w.t), ["Devi", "reinstallare", "Windows", "10", "da", "zero?"]);
   assert.deepEqual(piano.grande, [2, 4]);
   assert.deepEqual(piano.testi, [{ testo: "Devi reinstallare Windows 10 da zero?", da: 0 }]);
-  assert.ok(piano.parole.every((w) => w.da === 0), "il gancio e' intero al fotogramma 0: e' anche l'anteprima del Reel");
+  // in Titolo una parola e' intera a `da - ANTICIPO + 3`: da -1 vuol dire intera al fotogramma 0
+  assert.ok(piano.parole.every((w) => w.da <= -1), "il gancio e' intero al fotogramma 0: e' anche l'anteprima del Reel");
   // prima dell'allarme arriva la notifica, e la camera va da lei fino allo stacco
   assert.ok(piano.notifica !== undefined && piano.notifica < p.durata);
   assert.equal(piano.spinta.a, p.durata);

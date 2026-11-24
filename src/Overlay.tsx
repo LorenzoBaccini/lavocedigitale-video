@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 import { corpo, pop } from "./anim";
+import { ETICHETTE_GANCIO, inchiostroSu } from "./editoriale/marchio";
 import { clamp01 } from "./editoriale/regia";
 import { SU_CARTA } from "./editoriale/carta/stile";
 import { scenaFerma } from "./editoriale/fermo";
@@ -55,6 +56,14 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
           <LogoMark size={LOGO.lato} color={grafica ? stile.colori.inchiostro.testo : pienoBlocco > 0 ? mescola(stile.colori.testo, coloriDiviso(stile).testo, pienoBlocco) : stile.colori.testo} livello={livelloVoce(timing, linea, f)} />
         </div>
       )}
+      {i === 0 && (
+        // l'etichetta di rubrica: c'e' gia' al fotogramma 0, che e' anche l'anteprima del Reel
+        <div style={{ position: "absolute", top: 130, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+          <div data-impaginazione="etichetta" style={{ fontFamily: stile.caratteri.testo, fontWeight: 900, fontSize: 64 / stile.larghezza, letterSpacing: 1, padding: "12px 34px", borderRadius: 14, background: stile.colori.accento, color: inchiostroSu(stile.colori.accento), boxShadow: "0 10px 30px rgba(0,0,0,0.35)", transform: `rotate(-3deg) scale(${0.92 + 0.08 * pop(f, 0, 9) + 0.025 * Math.sin(f / 5)})` }}>
+            {ETICHETTE_GANCIO[variante.gancioTesto]}
+          </div>
+        </div>
+      )}
       {!ridondante && (
         <div data-impaginazione="sottotitolo" style={{ position: "absolute", bottom: SOTTOTITOLO_BASSO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center", opacity: Math.min(1, entrata * 1.5), transform: `scale(${0.92 + 0.08 * entrata})` }}>
           <div style={{ display: "flex", justifyContent: "center", flexWrap: "nowrap", whiteSpace: "nowrap", gap: "0 18px", fontFamily: sotto.carattere ?? stile.caratteri.testo, fontWeight: 800, fontSize: size, lineHeight: 1.15, letterSpacing: -1, color: sotto.testo, textShadow: sotto.ombra, ...(sotto.pillola && { background: sotto.pillola.fondo, borderRadius: sotto.pillola.raggio, padding: sotto.pillola.imbottitura }) }}>
@@ -64,7 +73,7 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
               const detta = p.da === undefined || locale >= p.da;
               const scatto = 1 + (p.chiave ? 0.14 : 0.06) * Math.sin(Math.PI * t);
               return (
-                <span key={j} style={{ display: "inline-block", opacity: detta ? 1 : 0.35, transform: `scale(${scatto})`, color: p.chiave ? sotto.chiave : undefined, textShadow: p.chiave ? sotto.bagliore : undefined }}>{p.t}</span>
+                <span key={j} style={{ display: "inline-block", opacity: detta ? 1 : 0.35, transform: `scale(${scatto})`, ...(p.chiave && { background: stile.colori.accento, color: inchiostroSu(stile.colori.accento), textShadow: "none", padding: "0 14px", borderRadius: 12 }) }}>{p.t}</span>
               );
             })}
           </div>

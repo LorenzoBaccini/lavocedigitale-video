@@ -7,6 +7,8 @@ import { entroLettura, intera, paroleTitolo, testoDi } from "../titoli.ts";
 /** Oltre questi caratteri la frase detta non sta come titolo: si scrivono titolo ed evidenza. */
 export const FRASE_TITOLO_MAX = 64;
 const DURATA_SPINTA = 22;
+/** Le parole entrano `ANTICIPO` frame prima e finiscono 3 frame dopo (`Titolo`): con -1 sono intere al fotogramma 0. */
+const DA_INTERO = -1;
 
 export interface PianoGancio extends Piano {
   /** parole del titolo; la riga grande (la chiave, sottolineata) va da `grande[0]` a `grande[1]` escluso */
@@ -30,7 +32,7 @@ export function pianoGancio(s: ScenaDi<"gancio">, durata: number): PianoGancio {
   const usaFrase = frase.length <= FRASE_TITOLO_MAX && voce.parole.length > 0;
   // la frase detta e' intera al fotogramma 0 (e' l'anteprima del Reel, e chi guarda muto la legge subito); titolo ed
   // evidenza scritti restano da leggere prima dello stacco
-  const parole = usaFrase ? voce.parole.map(({ t }) => ({ t, da: 0 })) : entroLettura([...paroleTitolo(s.titolo, voce, 3), ...paroleTitolo(s.evidenza, voce, 12)], durata);
+  const parole = usaFrase ? voce.parole.map(({ t }) => ({ t, da: DA_INTERO })) : entroLettura([...paroleTitolo(s.titolo, voce, 3), ...paroleTitolo(s.evidenza, voce, 12)], durata);
   const grande: [number, number] = usaFrase ? [Math.max(0, voce.chiave), Math.max(voce.chiave + 1, voce.chiaveFine)] : [0, paroleTitolo(s.titolo, voce, 3).length];
   // sottolineatura e spinta restano sulla voce: arrivano quando la chiave si dice
   const kDa = (usaFrase ? voce.parole[grande[0]]?.da : parole[grande[0]]?.da) ?? 0;

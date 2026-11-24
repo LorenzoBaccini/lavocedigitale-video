@@ -8,7 +8,6 @@ import type { Variante } from "../src/editoriale/variante.ts";
 import { VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
-import { FRASI_CHIUSURA, TESTO_CHIUSURA } from "../src/storyboard/tipi.ts";
 import type { Timing } from "../src/timing.ts";
 import type { ArticoloVideo } from "./articolo.ts";
 import { avvisaFallimento, eseguiPipeline, slugValido, type Dipendenze } from "./main.ts";
@@ -396,24 +395,20 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   const f = finte({ leggiStorico: async () => JSON.stringify({ recenti, pubblicati: ["b", "a"] }) });
   const esito = await eseguiPipeline(SLUG, { prova: true }, f.dip);
   assert.deepEqual(f.chiamate.scriviStoryboard[0][1], [["gancio", "telefono"], ["gancio", "data"]]);
-  assert.deepEqual(f.chiamate.scriviStoryboard[0][2], { durata: esito.variante?.durata, fraseFinale: esito.variante?.fraseFinale }, "lo storyboard riceve durata e frase finale della variante");
+  assert.deepEqual(f.chiamate.scriviStoryboard[0][2], { durata: esito.variante?.durata, gancioTesto: esito.variante?.gancioTesto }, "lo storyboard riceve durata e gancio testo della variante");
   assert.equal(esito.variante?.musica, "notturno");
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));
   assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).variante, esito.variante);
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile studio · gancio ${esito.variante?.gancio} · chiusura (cartolina|integrata) · frase finale \\d · durata media · musica notturno`));
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile studio · gancio ${esito.variante?.gancio} · chiusura (cartolina|integrata) · gancio testo \\w+ · durata media · musica notturno`));
 });
 
-test("la frase finale della variante sostituisce quella del copione prima della voce: voce, render e storico la vedono", async () => {
+test("lo storyboard di Claude arriva alla voce e al render cosi' com'e', domanda finale compresa", async () => {
   const f = finte();
   const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
   assert.equal(esito.stato, "pubblicato");
-  const attesa = FRASI_CHIUSURA[esito.variante!.fraseFinale].testo;
-  const allaVoce = f.chiamate.voce[0][0] as Storyboard;
-  assert.equal(allaVoce.frasi.at(-1)!.testo, attesa);
-  assert.deepEqual(allaVoce.frasi.slice(0, -1), storyboard.frasi.slice(0, -1));
-  assert.equal((f.chiamate.render[0][0] as PropsNotizia).storyboard.frasi.at(-1)!.testo, attesa);
-  assert.equal(storyboard.frasi.at(-1)!.testo, TESTO_CHIUSURA, "lo storyboard di Claude resta quello validato");
+  assert.deepEqual((f.chiamate.voce[0][0] as Storyboard).frasi, storyboard.frasi);
+  assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).storyboard.frasi, storyboard.frasi);
 });
 
 test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se lo storyboard viene scartato", async () => {
@@ -429,13 +424,13 @@ test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se
   assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile studio/);
 });
 
-test("lo storico registra stile, gancio, chiusura, frase finale e durata; le voci vecchie senza quei campi non fanno cadere la scelta", async () => {
+test("lo storico registra stile, gancio, chiusura, gancio testo e durata; le voci vecchie senza quei campi non fanno cadere la scelta", async () => {
   const recenti = [voceStorico("a", { musica: "chiaro", luce: "sera", apertura: "radente" }, ["gancio", "data", "chiusura"])];
   const f = finte({ leggiStorico: async () => JSON.stringify({ recenti, pubblicati: ["a"] }) });
   const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
   assert.equal(esito.stato, "pubblicato");
   const variante = JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0].variante;
-  assert.deepEqual(Object.keys(variante).sort(), ["apertura", "chiusura", "durata", "fraseFinale", "gancio", "luce", "musica", "stile"]);
+  assert.deepEqual(Object.keys(variante).sort(), ["apertura", "chiusura", "durata", "gancio", "gancioTesto", "luce", "musica", "stile"]);
   assert.deepEqual(variante, esito.variante);
 });
 
@@ -536,7 +531,7 @@ test("somiglianza: troppo simile cambia variante con la stessa voce e lo stesso 
   assert.equal(f.n("controllaImpaginazione"), 2);
   const resa = f.chiamate.render[0][0] as PropsNotizia;
   assert.notEqual(resa.variante?.stile, prima?.stile);
-  assert.equal(resa.variante?.fraseFinale, prima?.fraseFinale);
+  assert.equal(resa.variante?.gancioTesto, prima?.gancioTesto);
   assert.equal(resa.variante?.durata, prima?.durata);
   assert.deepEqual(resa.timing, (f.chiamate.controllaImpaginazione[0][0] as PropsNotizia).timing);
   assert.deepEqual(esito.variante, resa.variante);

@@ -16,7 +16,7 @@ test("--variante sovrascrive solo i campi dati, sulla variante delle props", () 
   assert.deepEqual(varianteDaArgomenti([], undefined), VARIANTE_BASE);
   assert.deepEqual(varianteDaArgomenti(["--variante=luce:sera,apertura:alta"], undefined), { ...VARIANTE_BASE, luce: "sera", apertura: "alta" });
   const props = { ...VARIANTE_BASE, musica: "notturno", luce: "sera", apertura: "radente" } as const;
-  assert.deepEqual(varianteDaArgomenti(["--variante=luce:mattino,fraseFinale:0"], props), { ...props, luce: "mattino", fraseFinale: 0 });
+  assert.deepEqual(varianteDaArgomenti(["--variante=luce:mattino,gancioTesto:errore"], props), { ...props, luce: "mattino", gancioTesto: "errore" });
 });
 
 test("valori sconosciuti di --variante ripiegano sull'aspetto approvato", () => {

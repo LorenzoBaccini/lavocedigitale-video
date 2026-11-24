@@ -13,7 +13,7 @@ const COPPIE = [
   ["stile", "gancio"],
   ["stile", "durata"],
   ["gancio", "chiusura"],
-  ["durata", "fraseFinale"],
+  ["durata", "gancioTesto"],
   ["somiglianza:stile:2", "somiglianza:gancio:2"],
   ["somiglianza:stile:3", "somiglianza:gancio:3"],
 ];

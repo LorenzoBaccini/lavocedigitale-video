@@ -92,7 +92,7 @@ test("la variante successiva cambia lo stile, non uno degli ultimi 3 se si puo',
   const n = prossimaVariante("slug", v, 2, [v], recenti);
   assert.ok(["notte", "schermo"].includes(n.stile));
   assert.equal(n.gancio, "scena");
-  assert.equal(n.fraseFinale, v.fraseFinale);
+  assert.equal(n.gancioTesto, v.gancioTesto);
   assert.equal(n.durata, v.durata);
   assert.equal(n.musica, v.musica);
   assert.deepEqual(prossimaVariante("slug", v, 2, [v], recenti), n);

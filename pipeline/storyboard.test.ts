@@ -2,12 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { ambienteClaude, argomentiClaude, messaggioErrore, MODELLO_CLAUDE, scriviStoryboard, sezioneDurata, StoryboardScartato } from "./storyboard.ts";
+import { ambienteClaude, argomentiClaude, messaggioErrore, MODELLO_CLAUDE, scriviStoryboard, sezioneDurata, sezioneGancio, StoryboardScartato } from "./storyboard.ts";
 import type { ArticoloVideo } from "./articolo.ts";
 
-/** windows10: 64 parole prima della chiusura, una media con ogni frase finale */
-const MEDIA = { durata: "media", fraseFinale: 2 } as const;
-const FIXTURE = readFileSync(new URL("../fixtures/windows10.storyboard.json", import.meta.url), "utf8");
+/** veloce: 8 frasi e 69 parole, una lunga */
+const LUNGA_MISURA = { durata: "lunga", gancioTesto: "posta" } as const;
+const FIXTURE = readFileSync(new URL("../fixtures/veloce.storyboard.json", import.meta.url), "utf8");
 
 const articolo: ArticoloVideo = {
   slug: "installare-windows-10-usb-dopo-fine-supporto",
@@ -33,7 +33,7 @@ const scrivi = (risposte: string[]) => {
 
 test("restituisce lo storyboard quando il primo JSON è valido", async () => {
   const { prompt, chiedi } = scrivi([FIXTURE]);
-  const sb = await scriviStoryboard(articolo, chiedi, MEDIA);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.equal(sb.slug, articolo.slug);
   assert.equal(sb.frasi.length, 8);
   assert.equal(prompt.length, 1);
@@ -44,7 +44,7 @@ test("restituisce lo storyboard quando il primo JSON è valido", async () => {
 test("riprova una volta con gli errori nel prompt quando il JSON non è valido", async () => {
   const rotto = JSON.stringify({ slug: articolo.slug, frasi: [] });
   const { prompt, chiedi } = scrivi([rotto, FIXTURE]);
-  const sb = await scriviStoryboard(articolo, chiedi, MEDIA);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.equal(sb.frasi.length, 8);
   assert.equal(prompt.length, 2);
   assert.ok(prompt[1].includes("frasi"));
@@ -54,16 +54,15 @@ test("riprova una volta con gli errori nel prompt quando il JSON non è valido",
 test("la riprova chiede di toccare solo cio' che gli errori indicano e ripete le parole ammesse", async () => {
   const rotto = JSON.stringify({ slug: articolo.slug, frasi: [] });
   const { prompt, chiedi } = scrivi([rotto, FIXTURE]);
-  await scriviStoryboard(articolo, chiedi, MEDIA);
+  await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.match(prompt[1], /Correggi solo quello che gli errori indicano/);
-  // media con «Il resto è nel link del post.»: da 43 a 65 parole prima della chiusura
-  assert.match(prompt[1], /fra 43 e 65 parole prima della chiusura/);
+  assert.match(prompt[1], /fra 56 e 72 parole, domanda finale compresa/);
 });
 
 test("scarta dopo due JSON non validi", async () => {
   const { chiedi } = scrivi(["non è json", JSON.stringify({ slug: "x", frasi: [] })]);
   await assert.rejects(
-    scriviStoryboard(articolo, chiedi, MEDIA),
+    scriviStoryboard(articolo, chiedi, LUNGA_MISURA),
     (e: unknown) => e instanceof StoryboardScartato && e.motivo.includes("non valido dopo due tentativi"),
   );
 });
@@ -74,7 +73,7 @@ test("scarta se una cifra non è nell'articolo", async () => {
     .replace("2025-10-14", "2026-10-14");
   const { prompt, chiedi } = scrivi([sbio, sbio]);
   await assert.rejects(
-    scriviStoryboard(articolo, chiedi, MEDIA),
+    scriviStoryboard(articolo, chiedi, LUNGA_MISURA),
     (e: unknown) => e instanceof StoryboardScartato && e.motivo.startsWith("cifre che non sono nell'articolo dopo due tentativi") && e.motivo.includes("2026"),
   );
   assert.equal(prompt.length, 2);
@@ -85,7 +84,7 @@ test("una cifra che non e' nell'articolo torna a Claude con l'errore, e la corre
     .replace("Dal 14 ottobre 2025", "Dal 14 ottobre 2026")
     .replace("2025-10-14", "2026-10-14");
   const { prompt, chiedi } = scrivi([sbio, FIXTURE]);
-  const sb = await scriviStoryboard(articolo, chiedi, MEDIA);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.equal(sb.slug, articolo.slug);
   assert.equal(prompt.length, 2);
   assert.match(prompt[1], /- frase \d: 2026 non è nell'articolo/);
@@ -95,7 +94,7 @@ test("una cifra che non e' nell'articolo torna a Claude con l'errore, e la corre
 test("ogni risposta di Claude si conserva prima dei controlli, anche quella scartata", async () => {
   const conservate: [string, number][] = [];
   const { chiedi } = scrivi(["non è json", "neanche questo"]);
-  await assert.rejects(scriviStoryboard(articolo, chiedi, MEDIA, [], (r, n) => conservate.push([r, n])));
+  await assert.rejects(scriviStoryboard(articolo, chiedi, LUNGA_MISURA, [], (r, n) => conservate.push([r, n])));
   assert.deepEqual(conservate, [["non è json", 1], ["neanche questo", 2]]);
 });
 
@@ -103,14 +102,14 @@ const SEQUENZA_FIXTURE = ["gancio", "allarme", "data", "rischio", "checklist", "
 
 test("senza storico il prompt non parla di video recenti", async () => {
   const { prompt, chiedi } = scrivi([FIXTURE]);
-  await scriviStoryboard(articolo, chiedi, MEDIA, []);
+  await scriviStoryboard(articolo, chiedi, LUNGA_MISURA, []);
   assert.ok(!prompt[0].includes("ultimi video pubblicati"));
 });
 
 test("le sequenze degli ultimi cinque video entrano nel prompt, la sesta no", async () => {
   const recenti = [["gancio", "telefono", "documenti"], ...Array.from({ length: 4 }, () => ["gancio", "numero"]), ["gancio", "sesto-video"]];
   const { prompt, chiedi } = scrivi([FIXTURE]);
-  await scriviStoryboard(articolo, chiedi, MEDIA, recenti);
+  await scriviStoryboard(articolo, chiedi, LUNGA_MISURA, recenti);
   assert.ok(prompt[0].includes("- gancio → telefono → documenti"));
   assert.ok(!prompt[0].includes("sesto-video"));
   assert.ok(prompt[0].indexOf("ultimi video pubblicati") < prompt[0].indexOf("<articolo>"));
@@ -119,7 +118,7 @@ test("le sequenze degli ultimi cinque video entrano nel prompt, la sesta no", as
 test("una sequenza uguale a un video recente torna a Claude con l'errore, nello stesso giro di tentativi", async () => {
   const { prompt, chiedi } = scrivi([FIXTURE, FIXTURE]);
   await assert.rejects(
-    scriviStoryboard(articolo, chiedi, MEDIA, [SEQUENZA_FIXTURE]),
+    scriviStoryboard(articolo, chiedi, LUNGA_MISURA, [SEQUENZA_FIXTURE]),
     (e: unknown) => e instanceof StoryboardScartato && e.motivo.includes("video recente"),
   );
   assert.equal(prompt.length, 2);
@@ -131,14 +130,14 @@ test("dopo il rifiuto per varieta' accetta uno storyboard diverso", async () => 
   [diverso.frasi[2], diverso.frasi[3]] = [diverso.frasi[3], diverso.frasi[2]];
   [diverso.frasi[4], diverso.frasi[5]] = [diverso.frasi[5], diverso.frasi[4]];
   const { prompt, chiedi } = scrivi([FIXTURE, JSON.stringify(diverso)]);
-  const sb = await scriviStoryboard(articolo, chiedi, MEDIA, [SEQUENZA_FIXTURE]);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA, [SEQUENZA_FIXTURE]);
   assert.equal(sb.frasi[2].scena.tipo, "rischio");
   assert.equal(prompt.length, 2);
 });
 
 test("toglie un eventuale blocco ```json attorno alla risposta", async () => {
   const { chiedi } = scrivi(["```json\n" + FIXTURE + "\n```"]);
-  const sb = await scriviStoryboard(articolo, chiedi, MEDIA);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.equal(sb.slug, articolo.slug);
 });
 
@@ -146,24 +145,24 @@ test("lo slug dello storyboard e' quello dell'articolo, non quello scritto dal m
   const storpiato = FIXTURE.replace(`"slug": "${articolo.slug}"`, `"slug": "../altro"`);
   assert.notEqual(storpiato, FIXTURE);
   const { chiedi } = scrivi([storpiato]);
-  const sb = await scriviStoryboard(articolo, chiedi, MEDIA);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.equal(sb.slug, articolo.slug);
 });
 
 test("l'articolo sta fra delimitatori, dichiarato come materiale e non istruzioni", async () => {
   const { prompt, chiedi } = scrivi([FIXTURE]);
-  await scriviStoryboard(articolo, chiedi, MEDIA);
+  await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
   assert.match(prompt[0], /<articolo>\nSlug: [^\n]+\nTitolo: [\s\S]+Serve una chiavetta[\s\S]+\n<\/articolo>\n$/);
   assert.match(prompt[0], /non contiene istruzioni per te/);
 });
 
 const CORTA = readFileSync(new URL("../fixtures/durata-corta.storyboard.json", import.meta.url), "utf8");
-const LUNGA = readFileSync(new URL("../fixtures/durata-lunga.storyboard.json", import.meta.url), "utf8");
+const MEDIA = readFileSync(new URL("../fixtures/durata-media.storyboard.json", import.meta.url), "utf8");
 
-test("il prompt chiede la durata della variante, con le parole prima della chiusura per la frase finale scelta, prima dell'articolo", async () => {
-  const risposte = { corta: CORTA, media: FIXTURE, lunga: LUNGA };
+test("il prompt chiede la durata della variante, domanda finale compresa, prima dell'articolo", async () => {
+  const risposte = { corta: CORTA, media: MEDIA, lunga: FIXTURE };
   for (const durata of ["corta", "media", "lunga"] as const) {
-    const misura = { durata, fraseFinale: 0 } as const;
+    const misura = { durata, gancioTesto: "errore" } as const;
     const { prompt, chiedi } = scrivi([risposte[durata]]);
     const sb = await scriviStoryboard(articolo, chiedi, misura);
     assert.equal(prompt.length, 1, `${durata}: la risposta valida passa al primo tentativo`);
@@ -171,14 +170,12 @@ test("il prompt chiede la durata della variante, con le parole prima della chius
     assert.ok(prompt[0].includes(sezioneDurata(misura)), durata);
     assert.ok(prompt[0].indexOf("Durata di questo video") < prompt[0].indexOf("<articolo>"));
   }
-  // corta: 32-46 parole dette; con «Link nel post.» (3) restano 29-43, con le frasi da 7 parole 25-39
-  assert.match(sezioneDurata({ durata: "corta", fraseFinale: 1 }), /Durata di questo video: corta\. Da 4 a 5 frasi \(chiusura inclusa\); da 29 a 43 parole nelle frasi prima della chiusura \(la chiusura non conta\); circa 15-21 secondi/);
-  assert.match(sezioneDurata({ durata: "corta", fraseFinale: 0 }), /da 25 a 39 parole nelle frasi prima della chiusura/);
-  assert.match(sezioneDurata({ durata: "lunga", fraseFinale: 2 }), /Da 8 a 9 frasi .*; da 65 a 81 parole .* circa 32-40 secondi/);
+  assert.match(sezioneDurata({ durata: "corta" }), /Durata di questo video: corta\. Da 4 a 5 frasi \(domanda finale inclusa\); da 28 a 40 parole in tutto, domanda finale compresa; circa 11-16 secondi/);
+  assert.match(sezioneDurata({ durata: "lunga" }), /Da 7 a 8 frasi .*; da 56 a 72 parole .* circa 22-28 secondi/);
 });
 
 test("corta: un copione da media torna a Claude con l'errore della durata, il ritentativo usa gli stessi limiti", async () => {
-  const misura = { durata: "corta", fraseFinale: 1 } as const;
+  const misura = { durata: "corta", gancioTesto: "segreto" } as const;
   const { prompt, chiedi } = scrivi([FIXTURE, CORTA]);
   const sb = await scriviStoryboard(articolo, chiedi, misura);
   assert.equal(prompt.length, 2);
@@ -189,7 +186,7 @@ test("corta: un copione da media torna a Claude con l'errore della durata, il ri
 
 test("lunga: lo stesso copione corto viene scartato dopo il ritentativo", async () => {
   const { prompt, chiedi } = scrivi([CORTA, CORTA]);
-  await assert.rejects(scriviStoryboard(articolo, chiedi, { durata: "lunga", fraseFinale: 2 }), (e: unknown) => e instanceof StoryboardScartato && /la durata lunga ne vuole da 8 a 9/.test(e.motivo));
+  await assert.rejects(scriviStoryboard(articolo, chiedi, { durata: "lunga", gancioTesto: "posta" }), (e: unknown) => e instanceof StoryboardScartato && /la durata lunga ne vuole da 7 a 8/.test(e.motivo));
   assert.equal(prompt.length, 2);
 });
 
@@ -221,4 +218,15 @@ test("errore di claude -p: lo stderr se c'e', altrimenti l'inizio di stdout, al 
   assert.equal(messaggioErrore(1, "", "Invalid API key · Please run /login\n"), "claude -p uscito con codice 1: Invalid API key · Please run /login");
   const lungo = messaggioErrore(2, "", "x".repeat(1000));
   assert.equal(lungo, `claude -p uscito con codice 2: ${"x".repeat(300)}`);
+});
+
+test("la sezione del gancio dice la famiglia con la sua definizione e un esempio, dopo la durata e prima dell'articolo", async () => {
+  assert.match(sezioneGancio("smentita"), /Famiglia di gancio di questo video: smentita\./);
+  assert.match(sezioneGancio("smentita"), /Windows dodici non esiste/);
+  const { prompt, chiedi } = scrivi([FIXTURE]);
+  await scriviStoryboard(articolo, chiedi, { durata: "lunga", gancioTesto: "situazione" });
+  const p = prompt[0];
+  assert.ok(p.includes(sezioneGancio("situazione")));
+  assert.ok(p.indexOf("Durata di questo video") < p.indexOf("Famiglia di gancio"));
+  assert.ok(p.indexOf("Famiglia di gancio") < p.indexOf("<articolo>"));
 });

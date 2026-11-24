@@ -1,5 +1,6 @@
-import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
-import { contaParole, DISPOSITIVI, FORME_MAPPA, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
+import type { NomeDurata } from "../editoriale/variante.ts";
+import { normalizza } from "../sottotitoli.ts";
+import { contaParole, DISPOSITIVI, FORME_MAPPA, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, SCHERMATE, SIMBOLI, TONI, TONI_MARCATI } from "./tipi.ts";
 import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -228,6 +229,8 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   chiusura: () => {},
 };
 
+const RIMANDI = new Set(["link", "articolo", "articoli"]);
+
 function validaFrase(frase: unknown, i: number, errori: string[]): number {
   const p = `frasi[${i}]`;
   if (!èDizionario(frase)) {
@@ -241,6 +244,14 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
       errori.push(`${p}.chiave: deve comparire nel testo della frase`);
     }
   }
+  if (typeof frase.testo === "string") {
+    // ElevenLabs leggerebbe «[beta]» come un tag di regia
+    if (/[[\]]/.test(frase.testo)) errori.push(`${p}.testo: nessuna parentesi quadra nel testo`);
+    if (frase.testo.split(/[^\p{L}]+/u).some((w) => RIMANDI.has(normalizza(w)))) {
+      errori.push(`${p}.testo: niente rimandi al link o all'articolo, il video dà la soluzione intera`);
+    }
+  }
+  unoTra(frase, "tono", TONI, p, errori);
   const scena = frase.scena;
   if (!èDizionario(scena)) {
     errori.push(`${p}.scena: oggetto richiesto`);
@@ -252,11 +263,8 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
   return typeof frase.testo === "string" ? contaParole(frase.testo) : 0;
 }
 
-/**
- * `durata` e `fraseFinale`: quelle della variante. Le parole sono quelle dette: le frasi prima della chiusura piu' la
- * frase finale scelta; l'ultima frase del copione resta comunque `TESTO_CHIUSURA`, la sostituzione viene dopo.
- */
-export function validaStoryboard(input: unknown, durata: NomeDurata, fraseFinale: FraseFinale): EsitoValidazione {
+/** `durata`: quella della variante. Le parole contano tutte le frasi, domanda finale compresa. */
+export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValidazione {
   const limiti = LIMITI_DURATA[durata];
   const errori: string[] = [];
   if (!èDizionario(input)) return { ok: false, errori: ["storyboard: oggetto richiesto"] };
@@ -270,20 +278,35 @@ export function validaStoryboard(input: unknown, durata: NomeDurata, fraseFinale
     errori.push(`frasi: ${frasi.length} frasi, la durata ${durata} ne vuole da ${limiti.frasi.min} a ${limiti.frasi.max}`);
   }
 
-  const conteggi = frasi.map((f, i) => validaFrase(f, i, errori));
-  const prima = conteggi.slice(0, -1).reduce((a, b) => a + b, 0);
-  const dette = prima + contaParole(FRASI_CHIUSURA[fraseFinale].testo);
+  const dette = frasi.map((f, i) => validaFrase(f, i, errori)).reduce((a, b) => a + b, 0);
   if (dette < limiti.parole.min || dette > limiti.parole.max) {
-    const ammesse = paroleContenuto(durata, fraseFinale);
-    errori.push(`copione: ${prima} parole prima della chiusura (${dette} dette con la frase finale), la durata ${durata} ne vuole da ${ammesse.min} a ${ammesse.max} prima della chiusura`);
+    errori.push(`copione: ${dette} parole, la durata ${durata} ne vuole da ${limiti.parole.min} a ${limiti.parole.max}, domanda finale compresa`);
+  }
+
+  const prima = frasi[0];
+  if (èDizionario(prima) && typeof prima.testo === "string") {
+    const n = contaParole(prima.testo);
+    if (n > LIMITI.gancioParole) errori.push(`frasi[0].testo: il gancio ha ${n} parole, al massimo ${LIMITI.gancioParole}`);
+    if (prima.testo.trim().endsWith("?")) errori.push("frasi[0].testo: il gancio è un'affermazione, non una domanda");
   }
 
   const ultima = frasi.at(-1);
+  const u = `frasi[${frasi.length - 1}]`;
   if (èDizionario(ultima) && èDizionario(ultima.scena) && ultima.scena.tipo !== "chiusura") {
-    errori.push(`frasi[${frasi.length - 1}].scena.tipo: l'ultima scena deve essere chiusura`);
+    errori.push(`${u}.scena.tipo: l'ultima scena deve essere chiusura`);
   }
-  if (èDizionario(ultima) && typeof ultima.testo === "string" && ultima.testo.trim() !== TESTO_CHIUSURA) {
-    errori.push(`frasi[${frasi.length - 1}].testo: l'ultima frase deve essere «${TESTO_CHIUSURA}»`);
+  if (èDizionario(ultima) && typeof ultima.testo === "string" && frasi.length > 1) {
+    const n = contaParole(ultima.testo);
+    if (!ultima.testo.trim().endsWith("?")) errori.push(`${u}.testo: la domanda finale finisce con «?»`);
+    if (n > LIMITI.domandaParole) errori.push(`${u}.testo: la domanda finale ha ${n} parole, al massimo ${LIMITI.domandaParole}`);
+  }
+  frasi.slice(0, -1).forEach((f, i) => {
+    if (èDizionario(f) && èDizionario(f.scena) && f.scena.tipo === "chiusura") errori.push(`frasi[${i}].scena.tipo: la chiusura è solo l'ultima frase`);
+  });
+
+  const marcati = frasi.filter((f) => èDizionario(f) && TONI_MARCATI.includes(f.tono as never)).length;
+  if (marcati > LIMITI.toniMarcati) {
+    errori.push(`toni: ${marcati} frasi fra ${TONI_MARCATI.join(" e ")}, al massimo ${LIMITI.toniMarcati}`);
   }
 
   return errori.length ? { ok: false, errori } : { ok: true, storyboard: input as unknown as Storyboard };

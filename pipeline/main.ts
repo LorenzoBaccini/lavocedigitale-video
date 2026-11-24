@@ -7,7 +7,6 @@ import type { Variante } from "../src/editoriale/variante.ts";
 import { scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
-import { conFraseFinale } from "../src/storyboard/fraseFinale.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import type { Timing } from "../src/timing.ts";
@@ -97,7 +96,7 @@ async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postI
 }
 
 export const rigaVariante = (v: Variante): string =>
-  [`stile ${v.stile}`, `gancio ${v.gancio}`, `chiusura ${v.chiusura}`, `frase finale ${v.fraseFinale + 1}`, `durata ${v.durata}`, `musica ${v.musica}`, `luce ${v.luce}`, `apertura ${v.apertura}`].join(" · ");
+  [`stile ${v.stile}`, `gancio ${v.gancio}`, `chiusura ${v.chiusura}`, `gancio testo ${v.gancioTesto}`, `durata ${v.durata}`, `musica ${v.musica}`, `luce ${v.luce}`, `apertura ${v.apertura}`].join(" · ");
 
 export function resoconto(slug: string, esito: Esito): string {
   const t = esito.tempi;
@@ -181,9 +180,9 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
 
   let storyboard: Storyboard;
   try {
-    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), { durata: variante.durata, fraseFinale: variante.fraseFinale }));
-    // la validazione ha visto la frase del copione: la frase finale della variante la sostituisce prima della voce
-    storyboard = conFraseFinale({ ...storyboard, slug }, variante.fraseFinale);
+    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), { durata: variante.durata, gancioTesto: variante.gancioTesto }));
+    // lo slug decide i percorsi: vale quello dell'articolo
+    storyboard = { ...storyboard, slug };
   } catch (e) {
     if (!(e instanceof StoryboardScartato)) throw e;
     Object.assign(esito, { stato: "saltato", motivo: e.motivo });

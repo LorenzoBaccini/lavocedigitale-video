@@ -5,7 +5,6 @@ import { readFileSync } from "node:fs";
 import { costruisciLinea } from "../../linea.ts";
 import { propsFrase } from "../../scenes/propsFrase.ts";
 import type { Storyboard } from "../../storyboard/tipi.ts";
-import { FRASI_CHIUSURA } from "../../storyboard/tipi.ts";
 import type { Timing } from "../../timing.ts";
 import { pausaPiuLunga, PAUSA_MAX } from "../regia.ts";
 import { NOTIFICA_PX, rettangoloInQuadro } from "../set/geometria.ts";
@@ -110,17 +109,8 @@ test("la chiusura scrive subito testata e indirizzo, e sottolinea l'indirizzo qu
   assert.ok(piano.testi.every((t) => t.da <= 24), JSON.stringify(piano.testi));
 });
 
-test("la fascia integrata scrive la frase finale detta sopra l'indirizzo, senza ripeterlo", () => {
-  const attacchi = FRASI_CHIUSURA.map(({ testo, chiave }) => {
-    const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
-    return attaccoChiusura(senzaVoce(sb, 3)[0].voce.parole);
-  });
-  assert.deepEqual(attacchi, ["Tutto su", "Link nel post", "Il resto è nel link del post"]);
-  assert.equal(attaccoChiusura([{ t: "Trovi" }, { t: "tutto" }, { t: "su" }, { t: "lavocedigitale.it," }, { t: "il" }]), "Trovi tutto su");
-});
-
 test("con ogni frase finale, anche brevissima, la chiusura finisce i suoi segni prima della fine", () => {
-  for (const { testo, chiave } of FRASI_CHIUSURA) {
+  for (const { testo, chiave } of [{ testo: "Tu lo sapevi?", chiave: "sapevi" }, { testo: "E tu lo reinstalleresti o passeresti a quello nuovo?", chiave: "reinstalleresti" }]) {
     for (const secondi of [1, 1.5, 2.2, 3]) {
       const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
       const [p] = senzaVoce(sb, secondi);

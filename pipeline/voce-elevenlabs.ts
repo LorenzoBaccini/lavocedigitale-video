@@ -2,18 +2,23 @@ import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import type { Storyboard } from "../src/storyboard/tipi.ts";
+import type { Frase, Storyboard } from "../src/storyboard/tipi.ts";
+import { TAG_TONO } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import type { Timing } from "../src/timing.ts";
 import { problemiTiming } from "../src/timing.ts";
 import type { Allineamento } from "./allineamento.ts";
-import { frasiDaParole, paroleDaAllineamento, tagliFrasi } from "./allineamento.ts";
+import { accelera, frasiDaParole, paroleDaAllineamento, tagliFrasi } from "./allineamento.ts";
 import { inviluppo } from "./inviluppo.ts";
 import { èPrincipale } from "./principale.ts";
 
 /** Nicola Lorusso, decisione del 4 novembre. */
 export const VOCE_ID = "sKbNSlHXq99bttvf8rRF";
 export const MODELLO = "eleven_v3";
+/** eleven_v3 accetta 0 (creative), 0,5 (natural), 1 (robust). */
+export const STABILITA = 0.5;
+/** La voce si accelera con ffmpeg dopo la generazione: il ritmo dei video brevi, gratis. */
+export const RITMO = 1.1;
 const URL_VOCE = `https://api.elevenlabs.io/v1/text-to-speech/${VOCE_ID}/with-timestamps?output_format=mp3_44100_128`;
 const TIMEOUT_MS = 120_000;
 const PAUSA_RIPROVA_MS = 5_000;
@@ -42,7 +47,7 @@ export async function chiediAElevenLabs(
     const r = await chiama(URL_VOCE, {
       method: "POST",
       headers: { "xi-api-key": chiave, "Content-Type": "application/json" },
-      body: JSON.stringify({ text: testo, model_id: MODELLO, language_code: "it" }),
+      body: JSON.stringify({ text: testo, model_id: MODELLO, language_code: "it", voice_settings: { stability: STABILITA } }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     if (r.ok) {
@@ -89,12 +94,22 @@ async function campioni(mp3: string): Promise<Float32Array> {
   return new Float32Array(pcm.buffer, pcm.byteOffset, Math.floor(pcm.length / 4));
 }
 
-/** Dall'audio del copione intero alle clip per frase: `s{i}.wav`, più `timing.json` con inviluppo e tempi per parola. */
-export async function scriviVoce(audio: Buffer, allineamento: Allineamento, frasi: string[], cartella: string): Promise<Timing> {
+/** Il copione per ElevenLabs: ogni frase con il tag del suo tono davanti. */
+export const testoVoce = (frasi: Pick<Frase, "testo" | "tono">[]): string =>
+  frasi.map((f) => [TAG_TONO[f.tono ?? "deciso"], f.testo].filter(Boolean).join(" ")).join(" ");
+
+/**
+ * Dall'audio del copione intero alle clip per frase: `s{i}.wav`, più `timing.json` con inviluppo e tempi per parola.
+ * `voce-originale.mp3` e `allineamento.json` restano come li ha dati ElevenLabs; `voce.mp3` e' accelerata a `RITMO`.
+ */
+export async function scriviVoce(audio: Buffer, grezzo: Allineamento, frasi: string[], cartella: string): Promise<Timing> {
   mkdirSync(cartella, { recursive: true });
+  const originale = join(cartella, "voce-originale.mp3");
   const mp3 = join(cartella, "voce.mp3");
-  writeFileSync(mp3, audio);
-  writeFileSync(join(cartella, "allineamento.json"), JSON.stringify(allineamento));
+  writeFileSync(originale, audio);
+  writeFileSync(join(cartella, "allineamento.json"), JSON.stringify(grezzo));
+  await ffmpeg(["-y", "-v", "error", "-i", originale, "-filter:a", `atempo=${RITMO}`, "-c:a", "libmp3lame", "-b:a", "128k", mp3]);
+  const allineamento = accelera(grezzo, RITMO);
 
   const perFrase = frasiDaParole(paroleDaAllineamento(allineamento), frasi);
   const pcm = await campioni(mp3);
@@ -120,23 +135,23 @@ export async function scriviVoce(audio: Buffer, allineamento: Allineamento, fras
 }
 
 export async function voceElevenLabs(storyboard: Storyboard, cartella: string): Promise<Timing> {
-  const frasi = storyboard.frasi.map((f) => f.testo);
-  const { audio, allineamento } = await chiediAElevenLabs(frasi.join(" "), chiaveElevenLabs());
-  return scriviVoce(audio, allineamento, frasi, cartella);
+  const { audio, allineamento } = await chiediAElevenLabs(testoVoce(storyboard.frasi), chiaveElevenLabs());
+  return scriviVoce(audio, allineamento, storyboard.frasi.map((f) => f.testo), cartella);
 }
 
 // Uso: node --experimental-strip-types pipeline/voce-elevenlabs.ts <storyboard.json> <cartella> [--riusa]
-// --riusa rifà clip e timing da voce.mp3 e allineamento.json già nella cartella, senza chiamare ElevenLabs.
+// --riusa rifà clip e timing da voce-originale.mp3 e allineamento.json già nella cartella, senza chiamare ElevenLabs.
 if (èPrincipale(import.meta.url)) {
   const argomenti = process.argv.slice(2);
   const [file, cartella] = argomenti.filter((a) => !a.startsWith("--")).map((a) => resolve(a));
   if (!file || !cartella) throw new Error("uso: voce-elevenlabs.ts <storyboard.json> <cartella> [--riusa]");
   const storyboard = JSON.parse(readFileSync(file, "utf8")) as Storyboard;
-  const mp3 = join(cartella, "voce.mp3");
+  const mp3 = join(cartella, "voce-originale.mp3");
   const salvato = join(cartella, "allineamento.json");
   let timing: Timing;
   if (argomenti.includes("--riusa")) {
-    if (!existsSync(mp3) || !existsSync(salvato)) throw new Error(`--riusa: mancano voce.mp3 o allineamento.json in ${cartella}`);
+    if (!existsSync(mp3)) throw new Error(`--riusa: manca voce-originale.mp3 in ${cartella} (cartella di prima del format veloce)`);
+    if (!existsSync(salvato)) throw new Error(`--riusa: manca allineamento.json in ${cartella}`);
     const allineamento = JSON.parse(readFileSync(salvato, "utf8")) as Allineamento;
     timing = await scriviVoce(readFileSync(mp3), allineamento, storyboard.frasi.map((f) => f.testo), cartella);
   } else {

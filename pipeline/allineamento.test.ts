@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import type { Allineamento } from "./allineamento.ts";
-import { frasiDaParole, paroleDaAllineamento, tagliFrasi } from "./allineamento.ts";
+import { accelera, frasiDaParole, paroleDaAllineamento, tagliFrasi } from "./allineamento.ts";
 
 // Un carattere ogni 0,1 s; i segni dati in `lunghi` durano quanto indicato (la voce mette la pausa sulla punteggiatura).
 function allinea(testo: string, lunghi: Record<number, number> = {}): Allineamento {
@@ -77,4 +77,15 @@ test("«è» in NFD nella voce combacia con «è» in NFC del copione", () => {
   const parole = paroleDaAllineamento(allinea(`Chi ${nfd} qui`));
   const frasi = frasiDaParole(parole, ["Chi \u00e8 qui"]);
   assert.deepEqual(frasi[0].map((p) => p.testo), ["Chi", "\u00e8", "qui"]);
+});
+
+test("i tag di regia di eleven_v3 stanno nell'allineamento ma non sono parole", () => {
+  const parole = paroleDaAllineamento(allinea("[whispers] Ciao mondo. [excited] Via!"));
+  assert.deepEqual(parole.map((p) => p.testo), ["Ciao", "mondo.", "Via!"]);
+  assert.equal(parole[0].inizio, 1.1);
+});
+
+test("accelera divide i tempi per il ritmo, al millesimo", () => {
+  const a = accelera({ characters: ["a", "b"], character_start_times_seconds: [0, 1.1], character_end_times_seconds: [1.1, 2.2] }, 1.1);
+  assert.deepEqual(a, { characters: ["a", "b"], character_start_times_seconds: [0, 1], character_end_times_seconds: [1, 2] });
 });

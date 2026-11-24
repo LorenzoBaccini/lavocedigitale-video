@@ -81,7 +81,10 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    Il copione finisce sempre con `TESTO_CHIUSURA` (lo pretendono prompt e validazione); subito dopo la
    validazione `conFraseFinale` (`src/storyboard/fraseFinale.ts`) mette al suo posto la frase finale della
    variante: voce, sottotitolo, storyboard dell'artifact e props vedono solo quella. Vedi [Le chiusure](#le-chiusure).
-2. **Voce** (`pipeline/voce-elevenlabs.ts`): una sola chiamata all'endpoint `with-timestamps`;
+2. **Voce** (`pipeline/voce-elevenlabs.ts`): una sola chiamata all'endpoint `with-timestamps`, con il tag
+   eleven_v3 del `tono` davanti a ogni frase (`[serious]`, `[whispers]`…, `TAG_TONO` in `src/storyboard/tipi.ts`) e
+   stabilità 0,5; poi ffmpeg accelera l'mp3 a 1,1× (`RITMO`) e i tempi si dividono per 1,1. I tag tornano
+   nell'allineamento con un loro intervallo e non diventano parole;
    `pipeline/allineamento.ts` ricava le parole e le assegna alle frasi, ffmpeg taglia una clip per
    frase. Se ElevenLabs fallisce il video salta: nessuna voce di riserva.
 3. **Controllo d'impaginazione** (`pipeline/controlla-impaginazione.ts`): fotogrammi a inizio, metà
@@ -546,7 +549,7 @@ farebbe un tentativo della pipeline.
 ## Rifare in locale un video del runner, senza ripagare
 
 Ogni run carica l'artifact `video-<run id>` (3 giorni): articolo, risposte di Claude, storyboard,
-props, `voce.mp3`, `allineamento.json`, `timing.json` e, in prova, l'mp4.
+props, `voce-originale.mp3` (come l'ha data ElevenLabs), `voce.mp3` (accelerata), `allineamento.json`, `timing.json` e, in prova, l'mp4.
 
 ```
 gh run download <run id> -n video-<run id> -D out/runner
@@ -559,7 +562,7 @@ node --experimental-strip-types pipeline/controlla-impaginazione.ts out/<slug>/p
 node --experimental-strip-types pipeline/render.ts out/<slug>/props.json out/<slug>/<slug>.mp4
 ```
 
-`--riusa` rifà clip e timing da `voce.mp3` e `allineamento.json` senza chiamare ElevenLabs.
+`--riusa` rifà clip e timing da `voce-originale.mp3` e `allineamento.json` senza chiamare ElevenLabs (le cartelle di prima del format veloce hanno solo `voce.mp3`: lì non funziona).
 
 ## Dove sta cosa
 

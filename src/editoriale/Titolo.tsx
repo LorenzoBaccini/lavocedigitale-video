@@ -46,6 +46,8 @@ const stileParola = (f: number, p: Parola): CSSProperties => {
 };
 
 const PUNTI_RIGA = percorso(sottolineatura(100, 1));
+// il tratto sta appena sotto la parola (1,12 di interlinea, il tratto a 0,963 del corpo)
+const SOPRA_FONDO = 1.12 - 0.963;
 
 export const Titolo: React.FC<{ nome: string; f: number; righe: Riga[]; style: CSSProperties; tinta?: Tinta }> = ({ nome, f, righe, style, tinta = "set" }) => {
   const stile = useStile();
@@ -57,13 +59,16 @@ export const Titolo: React.FC<{ nome: string; f: number; righe: Riga[]; style: C
     <div data-impaginazione={nome} style={{ ...style, display: "flex", flexDirection: "column", alignItems: allinea, gap: 4 }}>
       {righe.map((riga, r) => (
         <div key={r} style={{ ...(sinistra && riga.parole.some((p) => p.colpo) && { paddingRight: RISERVA_COLPO }), position: "relative", display: "inline-flex", flexWrap: "wrap", justifyContent: allinea, gap: `0 ${riga.size * 0.24}px`, fontFamily: riga.font ?? stile.caratteri.titolo, fontStyle: riga.corsivo ? "italic" : "normal", fontWeight: riga.peso ?? 600, fontSize: riga.size, lineHeight: 1.12, letterSpacing: -riga.size * 0.012, color: colore, textShadow: ombra, fontFeatureSettings: '"kern", "liga", "lnum"' }}>
-          {riga.sottolinea && (
-            <svg viewBox="0 -12 100 24" preserveAspectRatio="none" style={{ position: "absolute", left: 0, width: "100%", top: "86%", height: riga.size * 0.2, overflow: "visible" }}>
-              <Pennarello d={PUNTI_RIGA} colore={riga.sottolinea.colore} spessore={riga.size * 0.075} progresso={(f - riga.sottolinea.da) / riga.sottolinea.durata} rivela />
-            </svg>
-          )}
           {riga.parole.map((p, j) => (
-            <span key={j} style={{ position: "relative", display: "inline-block", ...stileParola(f, p), ...(sinistra && { transformOrigin: "left center" }) }}>{p.t}</span>
+            <span key={j} style={{ position: "relative", display: "inline-block", ...stileParola(f, p), ...(sinistra && { transformOrigin: "left center" }) }}>
+              {p.t}
+              {riga.sottolinea && (
+                // sotto ogni parola: se la riga va a capo il tratto segue le parole, non la larghezza della riga
+                <svg viewBox="0 -12 100 24" preserveAspectRatio="none" style={{ position: "absolute", left: 0, width: "100%", top: `calc(100% - ${riga.size * SOPRA_FONDO}px)`, height: riga.size * 0.2, overflow: "visible" }}>
+                  <Pennarello d={PUNTI_RIGA} colore={riga.sottolinea.colore} spessore={riga.size * 0.075} progresso={(f - riga.sottolinea.da) / riga.sottolinea.durata} rivela />
+                </svg>
+              )}
+            </span>
           ))}
         </div>
       ))}

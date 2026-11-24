@@ -70,16 +70,17 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
           </div>
         </div>
       )}
-      {!ridondante && (
+      {!ridondante && blocco.parole.some((p) => p.da === undefined || locale >= p.da) && (
         <div data-impaginazione="sottotitolo" style={{ position: "absolute", bottom: SOTTOTITOLO_BASSO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center", opacity: Math.min(1, entrata * 1.5), transform: `scale(${0.92 + 0.08 * entrata})` }}>
           <div style={{ display: "flex", justifyContent: "center", flexWrap: "nowrap", whiteSpace: "nowrap", gap: "0 18px", fontFamily: sotto.carattere ?? stile.caratteri.testo, fontWeight: 800, fontSize: size, lineHeight: 1.15, letterSpacing: -1, color: sotto.testo, textShadow: sotto.ombra, ...(sotto.pillola && { background: sotto.pillola.fondo, borderRadius: sotto.pillola.raggio, padding: sotto.pillola.imbottitura }) }}>
             {blocco.parole.map((p, j) => {
-              // la parola compare quando la voce la dice (il posto e' gia' tenuto: il blocco non si sposta); la chiave scatta piu' forte
+              // solo le parole gia' dette: la pillola cresce con la voce e non resta mai vuota
+              if (p.da !== undefined && locale < p.da) return null;
+              // la chiave scatta piu' forte
               const t = p.da === undefined ? 1 : clamp01((locale - p.da) / 8);
-              const detta = p.da === undefined || locale >= p.da;
               const scatto = 1 + (p.chiave ? 0.14 : 0.06) * Math.sin(Math.PI * t);
               return (
-                <span key={j} style={{ display: "inline-block", opacity: detta ? 1 : 0, transform: `scale(${scatto})`, ...(p.chiave && { background: stile.colori.accento, color: inchiostroSu(stile.colori.accento), textShadow: "none", padding: "0 14px", borderRadius: 12 }) }}>{p.t}</span>
+                <span key={j} style={{ display: "inline-block", transform: `scale(${scatto})`, ...(p.chiave && { background: stile.colori.accento, color: inchiostroSu(stile.colori.accento), textShadow: "none", padding: "0 14px", borderRadius: 12 }) }}>{p.t}</span>
               );
             })}
           </div>

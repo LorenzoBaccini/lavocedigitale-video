@@ -12,7 +12,7 @@ import { CORPO_NOTIFICA } from "../set/disegni.ts";
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, rettangoloTelefono } from "../set/telefono.ts";
 import { cameraAllarme, cameraAllarmeTelefono, NOTIFICA_IN_QUADRO, pianoAllarme } from "./allarme.ts";
 import { pianoChecklist } from "./checklist.ts";
-import { attaccoChiusura, pianoChiusura } from "./chiusura.ts";
+import { INDIRIZZO, INVITO, pianoChiusura } from "./chiusura.ts";
 import { pianoData } from "./data.ts";
 import { FRECCIA, PASSO_NOTE, pianoDocumenti } from "./documenti.ts";
 import { pianoGancio } from "./gancio.ts";
@@ -98,26 +98,25 @@ test("sul portatile indica e' il pulsante: si cerchia dopo i titoli e prima dell
   assert.ok(piano.testi.some((t) => t.testo === "Iscriviti ora"));
 });
 
-test("la chiusura scrive subito testata e indirizzo, e sottolinea l'indirizzo quando la voce lo dice", () => {
-  const p = scena(7);
-  if (p.tipo !== "chiusura") throw new Error("l'ultima frase e' la chiusura");
+test("la chiusura scrive subito la domanda, poi l'invito a commentare quando la voce ha finito", () => {
+  const sb: Storyboard = { slug: "x", frasi: [{ testo: "Tu lo reinstalleresti o cambieresti PC?", chiave: "cambieresti PC", scena: { tipo: "chiusura" } }] };
+  const [p] = senzaVoce(sb, 2.5);
+  if (p.tipo !== "chiusura") throw new Error("chiusura");
   const piano = pianoChiusura(p, p.durata);
-  const detto = p.voce.parole.find((w) => w.t.startsWith("lavocedigitale"))!.da;
-  assert.equal(piano.sottolinea, detto + 4);
-  assert.deepEqual(piano.testi.map((t) => t.testo), ["La Voce Digitale", "lavocedigitale.it"]);
-  // la voce dice l'indirizzo dopo un secondo e mezzo: la cartolina non lo aspetta
-  assert.ok(detto > 40);
-  assert.ok(piano.testi.every((t) => t.da <= 24), JSON.stringify(piano.testi));
+  assert.ok(piano.domanda <= 6, `domanda a ${piano.domanda}`);
+  const ultima = p.voce.parole.at(-1)!;
+  assert.ok(piano.invito >= ultima.da, `invito a ${piano.invito}, ultima parola a ${ultima.da}`);
+  assert.deepEqual(piano.testi.map((t) => t.testo), ["Tu lo reinstalleresti o cambieresti PC?", INVITO, INDIRIZZO]);
 });
 
-test("con ogni frase finale, anche brevissima, la chiusura finisce i suoi segni prima della fine", () => {
+test("con ogni domanda, anche brevissima, la chiusura scrive tutto prima della fine", () => {
   for (const { testo, chiave } of [{ testo: "Tu lo sapevi?", chiave: "sapevi" }, { testo: "E tu lo reinstalleresti o passeresti a quello nuovo?", chiave: "reinstalleresti" }]) {
     for (const secondi of [1, 1.5, 2.2, 3]) {
       const sb: Storyboard = { slug: "x", frasi: [{ testo, chiave, scena: { tipo: "chiusura" } }] };
       const [p] = senzaVoce(sb, secondi);
       if (p.tipo !== "chiusura") throw new Error("chiusura");
       const piano = pianoChiusura(p, p.durata);
-      assert.ok(piano.sottolinea + 10 <= p.durata, `${testo} ${secondi}s: sottolinea ${piano.sottolinea} su ${p.durata}`);
+      assert.ok(piano.invito + 12 <= p.durata, `${testo} ${secondi}s: invito ${piano.invito} su ${p.durata}`);
       assert.ok(piano.testi.every((t) => t.da < p.durata));
     }
   }

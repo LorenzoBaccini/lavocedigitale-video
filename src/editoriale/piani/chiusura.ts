@@ -1,41 +1,36 @@
 import type { ScenaDi } from "../../scenes/props.ts";
-import { quandoDice } from "../voce.ts";
+import { testoAschermo } from "../../testoAschermo.ts";
 import type { PianoCarta } from "./carta.ts";
 import { suCarta } from "./carta.ts";
 
 export const INDIRIZZO = "lavocedigitale.it";
 export const TESTATA = "La Voce Digitale";
+export const INVITO = "Scrivilo nei commenti";
 
-/** In quanti frame entrano il marchio e la testata (la scheda della cartolina, la fascia dell'integrata). */
+/** In quanti frame entrano la scheda della cartolina e la fascia dell'integrata. */
 export const ENTRATA_CHIUSURA = 6;
-/** L'indirizzo e' scritto al piu' tardi qui, anche se la voce lo dice dopo. */
-const INDIRIZZO_ENTRO = 20;
+/** Frame in cui la domanda e' scritta per intero: chi guarda muto la legge mentre la voce la dice. */
+const DOMANDA = 4;
+/** L'invito resta a schermo almeno questi frame prima della fine. */
+const INVITO_PRIMA_DELLA_FINE = 12;
 
 export interface PianoChiusura extends PianoCarta {
-  testata: number;
-  indirizzo: number;
-  sottolinea: number;
+  domanda: number;
+  invito: number;
 }
 
-// La chiusura: marchio e testata subito, l'indirizzo entro due terzi di secondo, sottolineato quando la voce lo dice.
+/** La domanda come si scrive: i numeri detti in lettere tornano cifre, come nei sottotitoli. */
+export const domandaScritta = (s: Pick<ScenaDi<"chiusura">, "voce">): string => testoAschermo(s.voce.parole.map((p) => p.t).join(" "));
+
+// La chiusura: la domanda subito, l'invito a commentare quando la voce ha finito di farla.
 // Lo stesso piano regge la cartolina e la fascia della chiusura integrata.
 export function pianoChiusura(s: ScenaDi<"chiusura">, durata: number): PianoChiusura {
-  const testata = 0;
-  const detto = quandoDice(s.voce, INDIRIZZO, Math.round(durata * 0.3));
-  const indirizzo = Math.min(INDIRIZZO_ENTRO, Math.max(ENTRATA_CHIUSURA, detto - 2));
-  const sottolinea = Math.min(durata - 14, Math.max(indirizzo + 6, detto + 4));
+  const ultima = s.voce.parole.at(-1);
+  const invito = Math.max(DOMANDA + 2, Math.min(durata - INVITO_PRIMA_DELLA_FINE, ultima ? ultima.a : Math.round(durata / 2)));
   const testi = [
-    { testo: TESTATA, da: testata + ENTRATA_CHIUSURA },
-    { testo: INDIRIZZO, da: indirizzo + 4 },
+    { testo: domandaScritta(s), da: DOMANDA },
+    { testo: INVITO, da: invito },
+    { testo: INDIRIZZO, da: DOMANDA },
   ];
-  return { testata, indirizzo, sottolinea, ...suCarta(testi, [], [testata, indirizzo, sottolinea], durata, s.contesto) };
+  return { domanda: DOMANDA, invito, ...suCarta(testi, [], [0, DOMANDA, invito], durata, s.contesto) };
 }
-
-/**
- * Quello che la fascia scrive sopra l'indirizzo: la frase finale detta, senza l'indirizzo se lo dice
- * («Tutto su», «Link nel post», «Il resto è nel link del post»).
- */
-export const attaccoChiusura = (parole: { t: string }[]): string => {
-  const i = parole.findIndex((p) => p.t.toLowerCase().startsWith(INDIRIZZO));
-  return (i < 0 ? parole : parole.slice(0, i)).map((p) => p.t).join(" ");
-};

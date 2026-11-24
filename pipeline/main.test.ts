@@ -227,8 +227,8 @@ test("il resoconto riporta slug, stato, voce, durata e tempi", async () => {
   assert.ok(testo.includes(SLUG));
   assert.match(testo, /Stato: prova/);
   assert.match(testo, /Voce: elevenlabs/);
-  // 8 clip da 3,5 s più 0,8 s di coda sulla chiusura
-  assert.match(testo, /Durata: 28\.8 s/);
+  // 8 clip da 3,5 s più 1,5 s di coda sulla chiusura
+  assert.match(testo, /Durata: 29\.5 s/);
   assert.match(testo, /storyboard \d+ s · voce \d+ s · somiglianza \d+ s · render \d+ s/);
 });
 

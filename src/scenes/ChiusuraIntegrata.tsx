@@ -1,11 +1,10 @@
 import { useContext } from "react";
 import { useCurrentFrame } from "remotion";
 
-import { attaccoChiusura, ENTRATA_CHIUSURA, INDIRIZZO, pianoChiusura } from "../editoriale/piani/chiusura";
+import { domandaScritta, ENTRATA_CHIUSURA, INVITO, pianoChiusura } from "../editoriale/piani/chiusura";
 import { fase, uscita } from "../editoriale/regia";
 import { allineaFlesso, useStile } from "../editoriale/stili";
 import { conAlfa } from "../editoriale/stili/alfa";
-import { Titolo } from "../editoriale/Titolo";
 import { FONDO_UTILE, LARGHEZZA, MARGINE } from "../impaginazione";
 import { LogoMark } from "../Logo";
 import { LivelloVoce } from "../voce";
@@ -20,14 +19,15 @@ export const FASCIA = { y: FONDO_UTILE - 10, altezza: 290 };
 const VELO_FERMA = 0.35;
 
 // La chiusura integrata: sopra l'ultima scena, ferma (vedi Ferma) e un po' velata, entra la fascia nei colori dello
-// stile col logo, l'attacco della frase detta e l'indirizzo grande, coi tempi della cartolina.
+// stile con la domanda detta e l'invito a commentare, coi tempi della cartolina.
 export const ChiusuraIntegrata: React.FC<ScenaDi<"chiusura">> = (props) => {
   const f = useCurrentFrame();
   const stile = useStile();
   const livello = useContext(LivelloVoce);
   const piano = pianoChiusura(props, props.durata);
-  const t = uscita(fase(f, piano.testata, piano.testata + ENTRATA_CHIUSURA));
-  const attacco = attaccoChiusura(props.voce.parole);
+  const t = uscita(fase(f, 0, ENTRATA_CHIUSURA));
+  const invito = uscita(fase(f, piano.invito, piano.invito + ENTRATA_CHIUSURA));
+  const domanda = domandaScritta(props);
   const allinea = allineaFlesso(stile);
   return (
     <>
@@ -37,21 +37,16 @@ export const ChiusuraIntegrata: React.FC<ScenaDi<"chiusura">> = (props) => {
       </div>
       {/* l'ingombro della fascia per il controllo d'impaginazione: nessun testo della scena ferma ci deve stare sotto */}
       <div data-ingombro="fascia" data-pieno="1" style={{ position: "absolute", left: 0, top: FASCIA.y, width: LARGHEZZA, height: FASCIA.altezza, pointerEvents: "none" }} />
-      <div style={{ position: "absolute", left: MARGINE, right: MARGINE, top: FASCIA.y + 24, display: "flex", flexDirection: "column", alignItems: allinea, gap: 4, opacity: t, transform: `translateY(${(1 - t) * 40}px)` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 26, maxWidth: "100%" }}>
-          <LogoMark size={180} color={stile.colori.testo} livello={livello} />
-          {attacco && (
-            <div data-impaginazione="sottotitolo" style={{ fontFamily: stile.caratteri.testo, fontWeight: 700, fontSize: 46 / stile.larghezza, lineHeight: 1.1, color: stile.colori.tenue }}>
-              {attacco}
-            </div>
-          )}
+      <div style={{ position: "absolute", left: MARGINE, right: MARGINE, top: FASCIA.y + 30, display: "flex", flexDirection: "column", alignItems: allinea, gap: 14, opacity: t, transform: `translateY(${(1 - t) * 40}px)` }}>
+        <div data-impaginazione="sottotitolo" style={{ fontFamily: stile.caratteri.titolo, fontWeight: 800, fontSize: (domanda.length <= 45 ? 58 : 48) / stile.larghezza, lineHeight: 1.1, color: stile.colori.testo, textAlign: allinea === "center" ? "center" : "left" }}>
+          {domanda}
         </div>
-        <Titolo
-          nome="sottotitolo"
-          f={f}
-          righe={[{ parole: [{ t: INDIRIZZO, da: piano.indirizzo }], size: 88, font: stile.caratteri.testo, peso: 800, sottolinea: { da: piano.sottolinea, durata: 10, colore: stile.colori.accento, seme: 8 } }]}
-          style={{ alignSelf: allinea }}
-        />
+        <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: invito, transform: `translateY(${(1 - invito) * 16}px)` }}>
+          <LogoMark size={64} color={stile.colori.testo} livello={livello} />
+          <div data-impaginazione="sottotitolo" style={{ fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: 44 / stile.larghezza, color: stile.colori.accento }}>
+            {INVITO} ↓
+          </div>
+        </div>
       </div>
     </>
   );

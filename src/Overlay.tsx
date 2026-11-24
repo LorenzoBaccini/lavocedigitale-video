@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 
-import { pop } from "./anim";
+import { corpo, pop } from "./anim";
+import { clamp01 } from "./editoriale/regia";
 import { SU_CARTA } from "./editoriale/carta/stile";
 import { scenaFerma } from "./editoriale/fermo";
 import { FINE_DETTAGLIO } from "./editoriale/ganci/dettaglio";
@@ -41,6 +42,9 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
   const ridondante = ferma !== undefined || (scritto && !(gancio === "dettaglio" && locale < FINE_DETTAGLIO));
   // anticipo di 2 frame: al cambio di blocco il sottotitolo non resta mai trasparente
   const entrata = pop(locale, blocco.da - 2, 16);
+  // una riga sola: il corpo scende con la lunghezza del blocco, cosi' il sottotitolo resta nella sua fascia
+  const testoBlocco = blocco.parole.map((p) => p.t).join(" ");
+  const size = corpo(testoBlocco, 84, 18, stile.larghezza, 56);
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ backgroundImage: GRAIN, opacity: grafica ? stile.grana.sulleGrafiche : stile.grana.sulSet, mixBlendMode: "overlay", backgroundPosition: `${(f * 37) % 300}px ${(f * 53) % 300}px` }} />
@@ -53,10 +57,16 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
       )}
       {!ridondante && (
         <div data-impaginazione="sottotitolo" style={{ position: "absolute", bottom: SOTTOTITOLO_BASSO, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center", opacity: Math.min(1, entrata * 1.5), transform: `scale(${0.92 + 0.08 * entrata})` }}>
-          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "0 18px", fontFamily: sotto.carattere ?? stile.caratteri.testo, fontWeight: 800, fontSize: 64, lineHeight: 1.15, letterSpacing: -1, color: sotto.testo, textShadow: sotto.ombra, ...(sotto.pillola && { background: sotto.pillola.fondo, borderRadius: sotto.pillola.raggio, padding: sotto.pillola.imbottitura }) }}>
-            {blocco.parole.map((p, j) => (
-              <span key={j} style={{ color: p.chiave ? sotto.chiave : undefined, textShadow: p.chiave ? sotto.bagliore : undefined }}>{p.t}</span>
-            ))}
+          <div style={{ display: "flex", justifyContent: "center", flexWrap: "nowrap", whiteSpace: "nowrap", gap: "0 18px", fontFamily: sotto.carattere ?? stile.caratteri.testo, fontWeight: 800, fontSize: size, lineHeight: 1.15, letterSpacing: -1, color: sotto.testo, textShadow: sotto.ombra, ...(sotto.pillola && { background: sotto.pillola.fondo, borderRadius: sotto.pillola.raggio, padding: sotto.pillola.imbottitura }) }}>
+            {blocco.parole.map((p, j) => {
+              // la parola si accende quando la voce la dice; la chiave scatta piu' forte
+              const t = p.da === undefined ? 1 : clamp01((locale - p.da) / 8);
+              const detta = p.da === undefined || locale >= p.da;
+              const scatto = 1 + (p.chiave ? 0.14 : 0.06) * Math.sin(Math.PI * t);
+              return (
+                <span key={j} style={{ display: "inline-block", opacity: detta ? 1 : 0.35, transform: `scale(${scatto})`, color: p.chiave ? sotto.chiave : undefined, textShadow: p.chiave ? sotto.bagliore : undefined }}>{p.t}</span>
+              );
+            })}
           </div>
         </div>
       )}

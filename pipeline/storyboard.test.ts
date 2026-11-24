@@ -209,8 +209,10 @@ test("claude -p non riceve i segreti del job", () => {
     ELEVENLABS_API_KEY: "x",
     TELEGRAM_BOT_TOKEN: "x",
     GITHUB_TOKEN: "x",
+    USER: "runner",
   });
-  assert.deepEqual(Object.keys(env).sort(), ["CLAUDE_CODE_OAUTH_TOKEN", "HOME", "PATH"]);
+  // USER serve in locale: su macOS la CLI legge il login dal portachiavi dell'utente
+  assert.deepEqual(Object.keys(env).sort(), ["CLAUDE_CODE_OAUTH_TOKEN", "HOME", "PATH", "USER"]);
 });
 
 test("errore di claude -p: lo stderr se c'e', altrimenti l'inizio di stdout, al massimo 300 caratteri", () => {

@@ -22,7 +22,7 @@ export const argomentiClaude = (): string[] => ["-p", "--output-format", "text",
 
 /** L'ambiente di `claude -p`: solo cio' che serve alla CLI, nessun segreto del job (AWS, Facebook, Buffer, ElevenLabs, Telegram). */
 export function ambienteClaude(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
-  const tieni = ["PATH", "HOME", "LANG", "TMPDIR", "CLAUDE_CODE_OAUTH_TOKEN"];
+  const tieni = ["PATH", "HOME", "USER", "LANG", "TMPDIR", "CLAUDE_CODE_OAUTH_TOKEN"];
   return Object.fromEntries(tieni.filter((k) => env[k] !== undefined).map((k) => [k, env[k]]));
 }
 

@@ -299,6 +299,8 @@ export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValid
     const n = contaParole(ultima.testo);
     if (!ultima.testo.trim().endsWith("?")) errori.push(`${u}.testo: la domanda finale finisce con «?»`);
     if (n > LIMITI.domandaParole) errori.push(`${u}.testo: la domanda finale ha ${n} parole, al massimo ${LIMITI.domandaParole}`);
+    const c = ultima.testo.trim().length;
+    if (c > LIMITI.domandaCaratteri) errori.push(`${u}.testo: la domanda finale ha ${c} caratteri, al massimo ${LIMITI.domandaCaratteri}`);
   }
   frasi.slice(0, -1).forEach((f, i) => {
     if (èDizionario(f) && èDizionario(f.scena) && f.scena.tipo === "chiusura") errori.push(`frasi[${i}].scena.tipo: la chiusura è solo l'ultima frase`);

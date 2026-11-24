@@ -401,3 +401,10 @@ test("le parole contano anche la domanda finale", () => {
   sb.frasi[1].chiave = "può";
   assert.ok(errori(sb).includes("copione: 51 parole, la durata lunga ne vuole da 56 a 72, domanda finale compresa"));
 });
+
+test("la domanda finale sta in 80 caratteri: oltre non entra nella fascia della chiusura integrata", () => {
+  const sb = nuovo();
+  sb.frasi[7].testo = "Preferiresti disattivare definitivamente l'aggiornamento automatico oppure tenerlo?";
+  sb.frasi[7].chiave = "tenerlo";
+  assert.ok(errori(sb).some((e) => e.startsWith("frasi[7].testo: la domanda finale ha 83 caratteri, al massimo 80")));
+});

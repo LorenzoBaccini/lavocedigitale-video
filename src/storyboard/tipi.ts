@@ -125,6 +125,8 @@ export const LIMITI = {
   gancioParole: 10,
   /** la domanda finale a chi guarda */
   domandaParole: 12,
+  /** oltre, la domanda non sta nella fascia della chiusura integrata */
+  domandaCaratteri: 80,
   toniMarcati: 2,
   titolo: 24,
   evidenza: 16,

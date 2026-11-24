@@ -100,3 +100,10 @@ test("tempi della voce che non tornano con le parole: si ripiega sulla stima", (
 test("le frasi si spezzano in blocchi da due parole, il ritmo dei sottotitoli dei video brevi", () => {
   assert.deepEqual(testi(blocchiSottotitolo("Il sistema appena installato nasce senza difese.", "", 90)), ["Il sistema", "appena installato", "nasce senza difese."]);
 });
+
+test("un blocco di piu' parole non supera 24 caratteri: sta su una riga senza scendere sotto il corpo minimo", () => {
+  for (const frase of ["Addio pagamenti senza autenticazione.", "Disattiva l'aggiornamento automatico dalle impostazioni."]) {
+    const blocchi = blocchiSottotitolo(frase, "", 120);
+    for (const t of testi(blocchi)) assert.ok(t.split(" ").length === 1 || t.length <= 24, `${t} (${t.length})`);
+  }
+});

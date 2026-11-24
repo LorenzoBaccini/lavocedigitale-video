@@ -44,7 +44,7 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
   const entrata = pop(locale, blocco.da - 2, 16);
   // una riga sola: il corpo scende con la lunghezza del blocco, cosi' il sottotitolo resta nella sua fascia
   const testoBlocco = blocco.parole.map((p) => p.t).join(" ");
-  const size = corpo(testoBlocco, 84, 18, stile.larghezza, 56);
+  const size = corpo(testoBlocco, 84, 18, stile.larghezza, 44);
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ backgroundImage: GRAIN, opacity: grafica ? stile.grana.sulleGrafiche : stile.grana.sulSet, mixBlendMode: "overlay", backgroundPosition: `${(f * 37) % 300}px ${(f * 53) % 300}px` }} />

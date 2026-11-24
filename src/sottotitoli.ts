@@ -48,6 +48,9 @@ function costoBlocco(n: number, totale: number, legato: boolean): number {
   return legato ? 60 : Infinity;
 }
 
+/** Un blocco di piu' parole sta in una riga a corpo leggibile (`Overlay`): oltre si spezza. */
+export const CARATTERI_BLOCCO = 24;
+
 // Blocchi da 1-3 parole, il più vicino possibile a 2; i tagli cadono solo fra parole non legate.
 function dimensioni(parole: string[]): number[] {
   const n = parole.length;
@@ -59,6 +62,7 @@ function dimensioni(parole: string[]): number[] {
     // a parità di costo vince il blocco più corto in testa: il blocco lungo cade a fine proposizione
     for (let j = i + 1; j <= n; j++) {
       if (!taglio(j)) continue;
+      if (j - i > 1 && parole.slice(i, j).join(" ").length > CARATTERI_BLOCCO) continue;
       const legato = parole.slice(i, j - 1).some((p, k) => legate(p, parole[i + k + 1]));
       const costo = costoBlocco(j - i, n, legato) + migliore[j].costo;
       if (costo < migliore[i].costo) migliore[i] = { costo, prima: j - i };

@@ -58,7 +58,7 @@ export const Titolo: React.FC<{ nome: string; f: number; righe: Riga[]; style: C
   return (
     <div data-impaginazione={nome} style={{ ...style, display: "flex", flexDirection: "column", alignItems: allinea, gap: 4 }}>
       {righe.map((riga, r) => (
-        <div key={r} style={{ ...(sinistra && riga.parole.some((p) => p.colpo) && { paddingRight: RISERVA_COLPO }), position: "relative", display: "inline-flex", flexWrap: "wrap", justifyContent: allinea, gap: `0 ${riga.size * 0.24}px`, fontFamily: riga.font ?? stile.caratteri.titolo, fontStyle: riga.corsivo ? "italic" : "normal", fontWeight: riga.peso ?? 600, fontSize: riga.size, lineHeight: 1.12, letterSpacing: -riga.size * 0.012, color: colore, textShadow: ombra, fontFeatureSettings: '"kern", "liga", "lnum"' }}>
+        <div key={r} style={{ ...(sinistra && riga.parole.some((p) => p.colpo) && { paddingRight: RISERVA_COLPO }), position: "relative", display: "inline-flex", flexWrap: "wrap", justifyContent: allinea, gap: `0 ${riga.size * 0.24}px`, fontFamily: riga.font ?? stile.caratteri.titolo, fontStyle: riga.corsivo ? "italic" : "normal", fontWeight: riga.peso ?? 600, fontSize: riga.size, ...(stile.maiuscole && !riga.font && { textTransform: "uppercase" }), lineHeight: 1.12, letterSpacing: -riga.size * 0.012, color: colore, textShadow: ombra, fontFeatureSettings: '"kern", "liga", "lnum"' }}>
           {riga.parole.map((p, j) => (
             <span key={j} style={{ position: "relative", display: "inline-block", ...stileParola(f, p), ...(sinistra && { transformOrigin: "left center" }) }}>
               {p.t}

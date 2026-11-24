@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { Variante } from "../src/editoriale/variante.ts";
-import { scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
+import { ATTIVI, scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
@@ -206,8 +206,9 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   dip.generaSuoni();
   const problemi = await dip.controllaImpaginazione(conVariante(variante));
   if (problemi.length > 0) {
-    // la voce e' gia' pagata: prima di saltare si riprova con l'aspetto del video approvato, stessa durata e frase finale
-    const sicura: Variante = { ...variante, stile: VARIANTE_BASE.stile, gancio: VARIANTE_BASE.gancio, chiusura: VARIANTE_BASE.chiusura };
+    // la voce e' gia' pagata: prima di saltare si riprova con l'aspetto del video approvato, nello stile della rubrica
+    const stileSicuro = ATTIVI.stile.includes(VARIANTE_BASE.stile) ? VARIANTE_BASE.stile : ATTIVI.stile[0];
+    const sicura: Variante = { ...variante, stile: stileSicuro, gancio: VARIANTE_BASE.gancio, chiusura: VARIANTE_BASE.chiusura };
     const aspetto = (v: Variante) => `${v.stile}/${v.gancio}/${v.chiusura}`;
     const diversa = aspetto(sicura) !== aspetto(variante);
     if (!diversa || (await dip.controllaImpaginazione(conVariante(sicura))).length > 0) {

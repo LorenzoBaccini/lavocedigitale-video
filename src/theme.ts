@@ -13,3 +13,5 @@ export const SERIF = "Lora, Georgia, serif";
 export const SANS = "Inter, system-ui, sans-serif";
 export const GROTESK = '"Space Grotesk", Inter, system-ui, sans-serif';
 export const MONO = '"JetBrains Mono", ui-monospace, monospace';
+export const ARCHIVO = 'Archivo, Inter, system-ui, sans-serif';
+export const ARCHIVO_BLACK = '"Archivo Black", Archivo, Impact, sans-serif';

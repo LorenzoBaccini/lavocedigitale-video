@@ -53,7 +53,7 @@ test("stile e gancio evitano gli ultimi 2 video; gancio testo gli ultimi 3; chiu
 });
 
 test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate non ancora costruiti restano fuori", () => {
-  assert.deepEqual(ATTIVI.stile, ["scrivania", "studio", "notte", "schermo"]);
+  assert.deepEqual(ATTIVI.stile, ["cronaca"], "la rubrica ha un solo stile, la sua firma");
   assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "diviso"]);
   assert.deepEqual(ATTIVI.chiusura, ["cartolina", "integrata"]);
   assert.deepEqual(ATTIVI.durata, ["corta", "media", "lunga"]);
@@ -142,5 +142,6 @@ test("le scelte delle dimensioni non vanno di pari passo", () => {
   assert.ok(coppia("stile", "chiusura") > ATTIVI.stile.length, "stile e chiusura");
   assert.ok(coppia("durata", "gancioTesto") > ATTIVI.durata.length, "durata e gancio testo");
   const combinazioni = new Set(video.map((v) => [v.stile, v.gancio, v.durata, v.gancioTesto, v.chiusura].join("|")));
-  assert.ok(combinazioni.size > 100, `${combinazioni.size} combinazioni di stile, gancio, durata, gancio testo e chiusura`);
+  const possibili = ATTIVI.stile.length * ATTIVI.gancio.length * ATTIVI.durata.length * ATTIVI.gancioTesto.length * ATTIVI.chiusura.length;
+  assert.ok(combinazioni.size > 0.6 * possibili, `${combinazioni.size} combinazioni su ${possibili} di stile, gancio, durata, gancio testo e chiusura`);
 });

@@ -56,7 +56,13 @@ export const Overlay: React.FC<{ storyboard: Storyboard; timing: Timing; linea: 
           <LogoMark size={LOGO.lato} color={grafica ? stile.colori.inchiostro.testo : pienoBlocco > 0 ? mescola(stile.colori.testo, coloriDiviso(stile).testo, pienoBlocco) : stile.colori.testo} livello={livelloVoce(timing, linea, f)} />
         </div>
       )}
-      {i === 0 && (
+      {stile.nastro && (i === 0 || chiusura) && (
+        // il nastro segnaletico della rubrica: apre e chiude il video, sopra il logo e lontano dai contenuti
+        <div style={{ position: "absolute", top: 92, left: -60, right: -60, height: 84, transform: `rotate(-3deg) translateX(${(1 - pop(f - linea.inizi[i], 0, 14)) * -40}px)`, background: `repeating-linear-gradient(-45deg, ${stile.colori.accento} 0 44px, ${stile.colori.fondo} 44px 88px)`, boxShadow: "0 10px 30px rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div data-impaginazione="nastro" style={{ background: stile.colori.accento, color: inchiostroSu(stile.colori.accento), fontFamily: stile.caratteri.titolo, fontSize: 46, letterSpacing: 3, padding: "8px 30px" }}>{stile.nastro}</div>
+        </div>
+      )}
+      {i === 0 && !stile.nastro && (
         // l'etichetta di rubrica: c'e' gia' al fotogramma 0, che e' anche l'anteprima del Reel
         <div style={{ position: "absolute", top: 130, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
           <div data-impaginazione="etichetta" style={{ fontFamily: stile.caratteri.testo, fontWeight: 900, fontSize: 64 / stile.larghezza, letterSpacing: 1, padding: "12px 34px", borderRadius: 14, background: stile.colori.accento, color: inchiostroSu(stile.colori.accento), boxShadow: "0 10px 30px rgba(0,0,0,0.35)", transform: `rotate(-3deg) scale(${0.92 + 0.08 * pop(f, 0, 9) + 0.025 * Math.sin(f / 5)})` }}>

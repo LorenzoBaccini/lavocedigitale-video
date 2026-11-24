@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 
 import { improntaMescolata as hash } from "../src/editoriale/impronta.ts";
-import type { NomeDurata, Variante } from "../src/editoriale/variante.ts";
+import type { NomeDurata, Valori, Variante } from "../src/editoriale/variante.ts";
 import { ATTIVI } from "../src/editoriale/variante.ts";
 import type { VoceStorico } from "./storico.ts";
 
@@ -88,9 +88,9 @@ export function confronta(impronta: Impronta, recenti: VoceStorico[]): { slug: s
 // Come in scegliVariante: senza stile la voce e' di prima degli stili, cioe' scrivania.
 const valore = (v: Partial<Variante>, dim: "stile" | "gancio") => (dim === "stile" ? (v.stile ?? "scrivania") : v.gancio);
 
-function cambia<K extends "stile" | "gancio">(dim: K, slug: string, tentativo: number, provate: Variante[], recenti: Partial<Variante>[]): Variante[K] {
-  const nonProvate = (ATTIVI[dim] as readonly Variante[K][]).filter((o) => !provate.some((p) => p[dim] === o));
-  const opzioni = nonProvate.length > 0 ? nonProvate : (ATTIVI[dim] as readonly Variante[K][]);
+function cambia<K extends "stile" | "gancio">(dim: K, slug: string, tentativo: number, provate: Variante[], recenti: Partial<Variante>[], attivi: Valori): Variante[K] {
+  const nonProvate = (attivi[dim] as readonly Variante[K][]).filter((o) => !provate.some((p) => p[dim] === o));
+  const opzioni = nonProvate.length > 0 ? nonProvate : (attivi[dim] as readonly Variante[K][]);
   const pesca = (libere: readonly Variante[K][]) => libere[hash(`${slug}:somiglianza:${dim}:${tentativo}`) % libere.length];
   for (let profondita = CONFRONTATI; profondita > 0; profondita--) {
     const usate = new Set(recenti.slice(0, profondita).map((v) => valore(v, dim)));
@@ -105,11 +105,13 @@ function cambia<K extends "stile" | "gancio">(dim: K, slug: string, tentativo: n
  * nuovo con quel gancio e' fra gli ultimi `CONFRONTATI`, verso un gancio non usato con quello stile. Voce e copione sono gia' pagati:
  * frase finale e durata restano, come musica, luce, apertura e chiusura.
  */
-export function prossimaVariante(slug: string, attuale: Variante, tentativo: number, provate: Variante[], recenti: Partial<Variante>[]): Variante {
-  const stile = cambia("stile", slug, tentativo, provate, recenti);
+export function prossimaVariante(slug: string, attuale: Variante, tentativo: number, provate: Variante[], recenti: Partial<Variante>[], attivi: Valori = ATTIVI): Variante {
+  // con uno stile solo (la firma della rubrica) resta il gancio a cambiare l'aspetto
+  const unoStile = attivi.stile.length === 1;
+  const stile = unoStile ? attivi.stile[0] : cambia("stile", slug, tentativo, provate, recenti, attivi);
   const conStile = recenti.slice(0, CONFRONTATI).filter((v) => valore(v, "stile") === stile);
   const coppiaRecente = conStile.some((v) => v.gancio === attuale.gancio);
-  const gancio = tentativo >= 3 || coppiaRecente ? cambia("gancio", slug, tentativo, provate, conStile) : attuale.gancio;
+  const gancio = unoStile || tentativo >= 3 || coppiaRecente ? cambia("gancio", slug, tentativo, provate, conStile, attivi) : attuale.gancio;
   return { ...attuale, stile, gancio };
 }
 

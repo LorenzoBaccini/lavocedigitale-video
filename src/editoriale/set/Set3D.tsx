@@ -12,6 +12,6 @@ export const Set3D: React.FC<PropsScrivania> = (props) => {
   // lo schermo ha le sue scene a tutto quadro (SCENE_SCHERMO): arrivare qui vorrebbe dire montare il 3D per sbaglio
   if (stile.set === "schermo") throw new Error("lo stile schermo non monta il set 3D");
   if (stile.set === "fondale") return <Fondale {...props} dettagli={dettagli} colore={stile.colori.superficie} />;
-  if (stile.set === "notturno") return <Notturno {...props} dettagli={dettagli} fondo={stile.colori.fondo} />;
+  if (stile.set === "notturno") return <Notturno {...props} dettagli={dettagli} fondo={stile.colori.fondo} luci={stile.luciSet} />;
   return <Scrivania {...props} dettagli={dettagli} />;
 };

@@ -45,7 +45,8 @@ export const ATTIVI: Valori = {
   musica: NOMI_TEMI,
   luce: LUCI,
   apertura: APERTURE,
-  stile: ["scrivania", "studio", "notte", "schermo"],
+  // dal 24 novembre i video sono solo di cronaca tech: lo stile e' la firma della rubrica, sempre lo stesso
+  stile: ["cronaca"],
   // dettaglio parte sul primo piano e scrive il gancio dopo: il fotogramma 0 deve gia' dirlo
   gancio: ["scena", "parola", "diviso"],
   chiusura: ["cartolina", "integrata"],

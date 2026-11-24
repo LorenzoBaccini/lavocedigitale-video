@@ -137,7 +137,7 @@ test("i problemi d'impaginazione si contano una volta e nel motivo ne vanno al m
   const motivo = esito.motivo ?? "";
   assert.equal(motivo.match(/si sovrappone/g)?.length, 5);
   assert.match(motivo, /^impaginazione: frase 1 \(allarme\): titolo: si sovrappone/);
-  assert.match(motivo, /e altri 3, anche scrivania\/scena\/cartolina non passa$/);
+  assert.match(motivo, /e altri 3, anche cronaca\/scena\/cartolina non passa$/);
 });
 
 test("un crash del controllo d'impaginazione chiude con errore notificato e senza render", async () => {
@@ -400,7 +400,7 @@ test("le sequenze dei recenti vanno allo storyboard, la variante evita le ultime
   assert.equal(esito.variante?.apertura, "alta");
   assert.ok(!["sera", "calda"].includes(esito.variante?.luce ?? ""));
   assert.deepEqual((f.chiamate.render[0][0] as PropsNotizia).variante, esito.variante);
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile studio · gancio ${esito.variante?.gancio} · chiusura (cartolina|integrata) · gancio testo \\w+ · durata media · musica notturno`));
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), new RegExp(`Variante: stile cronaca · gancio ${esito.variante?.gancio} · chiusura (cartolina|integrata) · gancio testo \\w+ · durata media · musica notturno`));
 });
 
 test("lo storyboard di Claude arriva alla voce e al render cosi' com'e', domanda finale compresa", async () => {
@@ -419,9 +419,9 @@ test("la variante si sceglie prima dello storyboard: c'e' nel resoconto anche se
   });
   const esito = await eseguiPipeline(SLUG, { prova: true }, f.dip);
   assert.equal(esito.stato, "saltato");
-  assert.equal(esito.variante?.stile, "studio");
+  assert.equal(esito.variante?.stile, "cronaca");
   assert.equal(esito.variante?.durata, "media");
-  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile studio/);
+  assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Variante: stile cronaca/);
 });
 
 test("lo storico registra stile, gancio, chiusura, gancio testo e durata; le voci vecchie senza quei campi non fanno cadere la scelta", async () => {
@@ -530,7 +530,9 @@ test("somiglianza: troppo simile cambia variante con la stessa voce e lo stesso 
   assert.equal(f.n("scriviStoryboard"), 1);
   assert.equal(f.n("controllaImpaginazione"), 2);
   const resa = f.chiamate.render[0][0] as PropsNotizia;
-  assert.notEqual(resa.variante?.stile, prima?.stile);
+  // con lo stile unico della rubrica cambia il gancio
+  assert.equal(resa.variante?.stile, prima?.stile);
+  assert.notEqual(resa.variante?.gancio, prima?.gancio);
   assert.equal(resa.variante?.gancioTesto, prima?.gancioTesto);
   assert.equal(resa.variante?.durata, prima?.durata);
   assert.deepEqual(resa.timing, (f.chiamate.controllaImpaginazione[0][0] as PropsNotizia).timing);
@@ -554,19 +556,19 @@ test("somiglianza: un errore di ffmpeg salta il controllo, il video si pubblica 
   assert.match(String(f.chiamate.sendMessageToOwner[0][0]), /Somiglianza: controllo saltato: ffmpeg è uscito con codice 1/);
 });
 
-test("se la variante scelta non passa l'impaginazione si riprova con scrivania/scena/cartolina, con la stessa voce", async () => {
-  const f = finte({ controllaImpaginazione: async (props) => (props.variante?.stile === "scrivania" ? [] : ["frase 2 (data), fine: titolo: fuori dai margini"]) });
+test("se la variante scelta non passa l'impaginazione si riprova con cronaca/scena/cartolina, con la stessa voce", async () => {
+  const f = finte({ controllaImpaginazione: async (props) => (props.variante?.gancio === "scena" && props.variante?.chiusura === "cartolina" ? [] : ["frase 2 (data), fine: titolo: fuori dai margini"]) });
   const esito = await eseguiPipeline(SLUG, { prova: false }, f.dip);
   const prima = (f.chiamate.controllaImpaginazione[0][0] as PropsNotizia).variante!;
-  assert.notEqual(prima.stile, "scrivania", "lo slug di prova deve scegliere un altro stile");
+  assert.notEqual(prima.gancio, "scena", "lo slug di prova deve scegliere un altro gancio");
   assert.equal(esito.stato, "pubblicato");
   assert.equal(f.n("voce"), 1);
   assert.equal(f.n("scriviStoryboard"), 1);
   const resa = (f.chiamate.render[0][0] as PropsNotizia).variante!;
-  assert.deepEqual(resa, { ...prima, stile: "scrivania", gancio: "scena", chiusura: "cartolina" });
+  assert.deepEqual(resa, { ...prima, stile: "cronaca", gancio: "scena", chiusura: "cartolina" });
   assert.deepEqual((f.chiamate.controllaImpaginazione[1][0] as PropsNotizia).variante, resa);
   assert.deepEqual(JSON.parse(f.chiamate.scriviStorico[0][0] as string).recenti[0].variante, resa);
-  assert.ok(String(f.chiamate.sendMessageToOwner[0][0]).includes(`Impaginazione: ${prima.stile}/${prima.gancio}/${prima.chiusura} scartata (frase 2 (data): titolo: fuori dai margini), ripiego su scrivania/scena/cartolina`));
+  assert.ok(String(f.chiamate.sendMessageToOwner[0][0]).includes(`Impaginazione: ${prima.stile}/${prima.gancio}/${prima.chiusura} scartata (frase 2 (data): titolo: fuori dai margini), ripiego su cronaca/scena/cartolina`));
 });
 
 test("se anche la variante sicura non passa l'impaginazione salta, senza un'altra voce", async () => {
@@ -577,15 +579,15 @@ test("se anche la variante sicura non passa l'impaginazione salta, senza un'altr
   assert.equal(f.n("voce"), 1);
   assert.equal(f.n("scriviStoryboard"), 1);
   assert.equal(f.n("render"), 0);
-  assert.equal(esito.motivo, "impaginazione: titolo fuori, anche scrivania/scena/cartolina non passa");
+  assert.equal(esito.motivo, "impaginazione: titolo fuori, anche cronaca/scena/cartolina non passa");
 });
 
 test("una variante gia' sicura che non passa l'impaginazione salta subito", async () => {
-  // con lo storico vuoto questo slug sceglie scrivania/scena/cartolina
-  const slug = "articolo-di-prova-31";
+  // con lo storico vuoto questo slug sceglie cronaca/scena/cartolina
+  const slug = "articolo-di-prova-14";
   const f = finte({ leggiArticolo: async () => ({ ...articolo, slug }), controllaImpaginazione: async () => ["titolo fuori"] });
   const esito = await eseguiPipeline(slug, { prova: true }, f.dip);
-  assert.deepEqual([esito.variante?.stile, esito.variante?.gancio, esito.variante?.chiusura], ["scrivania", "scena", "cartolina"]);
+  assert.deepEqual([esito.variante?.stile, esito.variante?.gancio, esito.variante?.chiusura], ["cronaca", "scena", "cartolina"]);
   assert.equal(f.n("controllaImpaginazione"), 1);
   assert.equal(esito.motivo, "impaginazione: titolo fuori");
 });

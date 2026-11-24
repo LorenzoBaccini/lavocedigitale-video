@@ -32,23 +32,20 @@
   parola sola lunga e tonda («autenticazione» su un'app, «manomissione» col router), il caso peggiore della stima della
   larghezza della chiave. Serve al gancio
   `parola` (niente testo fuori dai margini) e agli altri formati: `--gancio=parola --scene=gancio --passo=5`.
-- `chiusura-corta.storyboard.json`: un copione da durata corta al limite inferiore (4 frasi, 29 parole prima della
-  chiusura) con un allarme sul telefono subito prima della chiusura: il caso della chiusura integrata che ferma una
-  scena 3D corta. In mezzo un `simbolo` (euro barrato), così solo 2 scene su 3 stanno su un dispositivo. Passa la
-  validazione e la varietà con `durata: corta` e ogni frase finale (con `media` no: 4 frasi). Si prova con
-  frasi cortissime:
-  `--secondi=1.2 --chiusura=integrata --scene=chiusura --passo=5`. Come le altre fixture finisce con `TESTO_CHIUSURA`:
-  la frase finale della variante la mette la pipeline (`conFraseFinale`).
-- `durata-corta.storyboard.json` e `durata-lunga.storyboard.json`: i due estremi di `LIMITI_DURATA` in parole dette.
-  La corta ha 4 frasi e 29 parole prima della chiusura (32 con «Link nel post.»: gancio e oggetto sul telefono, in mezzo
-  un `simbolo`), la lunga 9 frasi e 81 (88 con le frasi finali da 7 parole, otto tipi di scena diversi). Passano
-  `validaStoryboard` con ogni frase finale, solo nella loro durata, ed `erroriVarieta` senza video recenti
-  (`src/storyboard/durata.test.ts`): non controllano le cifre, perché non hanno un articolo. Il controllo, in ogni stile e con le due chiusure:
-  `controlla-impaginazione.ts fixtures/durata-corta.storyboard.json --stile=notte --chiusura=integrata --passo=5`.
-- Le durate delle altre fixture, per chi le valida: `windows10`, le `tutte-le-scene`, `matrice-NN`,
-  `rischio-portatile` e `ganci-lunghi` sono medie con ogni frase finale, `chiusura-corta` è corta. `matrice.py`
-  aggiunge un teaser ai gruppi con meno di 47 parole prima della chiusura (`matrice-10` e `-13`), perché restino medie anche
-  con «Link nel post.».
+- `chiusura-corta.storyboard.json`: un copione corto con un allarme sul telefono subito prima della chiusura: il caso
+  della chiusura integrata che ferma una scena 3D corta. Si prova con frasi cortissime:
+  `--secondi=1.2 --chiusura=integrata --scene=chiusura --passo=5`.
+- Le fixture d'impaginazione (`tutte-le-scene*`, `scene-nuove*`, `matrice-NN`, `rischio-portatile`, `ganci-lunghi`,
+  `chiusura-corta`) finiscono con una domanda: corta («Tu lo sapevi?») o la più lunga ammessa, 12 parole. Hanno testi al
+  limite apposta e non rispettano le regole del copione (gancio, durata): i test le validano solo nei campi e nelle scene.
+  `windows10` resta il video approvato di prima, con la sua voce (`windows10.timing.json`).
+- `veloce.storyboard.json`: il copione del format veloce (gancio di 7 parole, toni, domanda finale), una lunga da 8 frasi
+  e 69 parole; è la base dei test di validazione e del post. `durata-media` sono le sue frasi senza la terza e la quarta.
+- `durata-corta.storyboard.json` e `durata-lunga.storyboard.json`: le due durate nel format veloce, 4 frasi e 30 parole,
+  8 frasi e 72 (il massimo della lunga). Passano `validaStoryboard` solo nella loro durata ed `erroriVarieta` senza video
+  recenti (`src/storyboard/durata.test.ts`).
+- `matrice.py` non rigenera più le matrici del repo: emette ancora `oggetto: "nessuno"` nelle scene `oggetto`, che la
+  validazione scarta dal 13 novembre (le fixture sono state corrette a mano).
 - `scene-nuove.storyboard.json`: le scene senza dispositivi. Tre `simbolo` (uno con `barrato`, uno con il
   titolo al limite di 24 caratteri e l'occhiello al limite di 32, uno corto) e due `passi` (uno da quattro passi con
   testi al limite di 28 caratteri, tre con pittogramma e uno senza per provare l'allineamento, uno da due senza) e due

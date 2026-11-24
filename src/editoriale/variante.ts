@@ -46,7 +46,8 @@ export const ATTIVI: Valori = {
   luce: LUCI,
   apertura: APERTURE,
   stile: ["scrivania", "studio", "notte", "schermo"],
-  gancio: ["scena", "parola", "dettaglio", "diviso"],
+  // dettaglio parte sul primo piano e scrive il gancio dopo: il fotogramma 0 deve gia' dirlo
+  gancio: ["scena", "parola", "diviso"],
   chiusura: ["cartolina", "integrata"],
   gancioTesto: GANCI_TESTO,
   durata: ["corta", "media", "lunga"],

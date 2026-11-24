@@ -582,7 +582,7 @@ test("se anche la variante sicura non passa l'impaginazione salta, senza un'altr
 
 test("una variante gia' sicura che non passa l'impaginazione salta subito", async () => {
   // con lo storico vuoto questo slug sceglie scrivania/scena/cartolina
-  const slug = "articolo-di-prova-116";
+  const slug = "articolo-di-prova-31";
   const f = finte({ leggiArticolo: async () => ({ ...articolo, slug }), controllaImpaginazione: async () => ["titolo fuori"] });
   const esito = await eseguiPipeline(slug, { prova: true }, f.dip);
   assert.deepEqual([esito.variante?.stile, esito.variante?.gancio, esito.variante?.chiusura], ["scrivania", "scena", "cartolina"]);

@@ -54,7 +54,7 @@ test("stile e gancio evitano gli ultimi 2 video; gancio testo gli ultimi 3; chiu
 
 test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate non ancora costruiti restano fuori", () => {
   assert.deepEqual(ATTIVI.stile, ["scrivania", "studio", "notte", "schermo"]);
-  assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "dettaglio", "diviso"]);
+  assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "diviso"]);
   assert.deepEqual(ATTIVI.chiusura, ["cartolina", "integrata"]);
   assert.deepEqual(ATTIVI.durata, ["corta", "media", "lunga"]);
   assert.deepEqual(ATTIVI.gancioTesto, ["errore", "segreto", "posta", "smentita", "situazione"]);

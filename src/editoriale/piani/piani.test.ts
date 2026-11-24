@@ -34,7 +34,7 @@ const senzaVoce = (sb: Storyboard, secondi: number) => {
 };
 const tutte = [leggi("tutte-le-scene.storyboard.json"), leggi("tutte-le-scene-2.storyboard.json"), leggi("tutte-le-scene-3.storyboard.json"), leggi("scene-nuove.storyboard.json"), leggi("scene-nuove-2.storyboard.json"), props.storyboard] as Storyboard[];
 
-test("nessuna inquadratura resta ferma oltre 2,5 s, con la voce vera e con frasi lunghe", () => {
+test("nessuna inquadratura resta ferma oltre 1,5 s, con la voce vera e con frasi lunghe", () => {
   const casi = [...props.storyboard.frasi.map((_, i) => scena(i)), ...tutte.flatMap((sb) => [...senzaVoce(sb, 3), ...senzaVoce(sb, 7)])];
   for (const p of casi) {
     const { eventi } = pianoScena(p, p.durata);
@@ -55,6 +55,7 @@ test("il gancio scrive la frase detta, la chiave in grande; il sottotitolo non l
   assert.deepEqual(piano.parole.map((w) => w.t), ["Devi", "reinstallare", "Windows", "10", "da", "zero?"]);
   assert.deepEqual(piano.grande, [2, 4]);
   assert.deepEqual(piano.testi, [{ testo: "Devi reinstallare Windows 10 da zero?", da: 0 }]);
+  assert.ok(piano.parole.every((w) => w.da === 0), "il gancio e' intero al fotogramma 0: e' anche l'anteprima del Reel");
   // prima dell'allarme arriva la notifica, e la camera va da lei fino allo stacco
   assert.ok(piano.notifica !== undefined && piano.notifica < p.durata);
   assert.equal(piano.spinta.a, p.durata);

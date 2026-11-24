@@ -150,6 +150,25 @@ export const FOLEY: Record<string, () => Stereo> = {
     });
     return conStanza(x, -30, 0.2);
   },
+  // stacco fra due frasi: aria che passa veloce, dal grave all'acuto
+  whoosh: () => {
+    const n = campioni(0.25);
+    const grave = passaBanda(rumore(n, 81), 700, 0.7);
+    const acuto = passaBanda(rumore(n, 82), 2600, 0.8);
+    const x = grave.map((v, i) => {
+      const t = i / n;
+      return (v * (1 - t) + acuto[i] * t) * Math.sin(Math.PI * t ** 0.7) ** 2;
+    });
+    return conStanza(x, -24, 0.08);
+  },
+  // la chiave detta: uno scatto di legno brevissimo
+  tick: () => {
+    const n = campioni(0.045);
+    const x = Float64Array.from({ length: n }, (_, i) => notaLegno(tempo(i), 1760) * Math.exp(-tempo(i) / 0.008));
+    return conStanza(x, -27, 0.05);
+  },
+  // il primo fotogramma: un colpo basso e secco che apre il video
+  colpo: () => conStanza(colpo(0.32, 52, 70, 83, 260), -15, 0.1),
   // tono di stanza in loop: rumore scuro quasi impercettibile, toglie il silenzio digitale fra le parole
   stanza: () => {
     const n = campioni(STANZA_S);

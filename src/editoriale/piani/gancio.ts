@@ -2,7 +2,7 @@ import type { ScenaDi } from "../../scenes/props.ts";
 import type { Piano } from "../piano.ts";
 import { accentiMancanti } from "../regia.ts";
 import type { ParolaTitolo } from "../titoli.ts";
-import { codaInTempo, entroLettura, intera, paroleTitolo, testoDi } from "../titoli.ts";
+import { entroLettura, intera, paroleTitolo, testoDi } from "../titoli.ts";
 
 /** Oltre questi caratteri la frase detta non sta come titolo: si scrivono titolo ed evidenza. */
 export const FRASE_TITOLO_MAX = 64;
@@ -28,11 +28,12 @@ export function pianoGancio(s: ScenaDi<"gancio">, durata: number): PianoGancio {
   const { voce } = s;
   const frase = voce.parole.map((p) => p.t).join(" ");
   const usaFrase = frase.length <= FRASE_TITOLO_MAX && voce.parole.length > 0;
-  // la frase detta va con la voce, parola per parola, e l'ultima parola resta da leggere; titolo ed evidenza scritti
-  // restano da leggere prima dello stacco
-  const parole = usaFrase ? codaInTempo(voce.parole.map(({ t, da }) => ({ t, da })), durata) : entroLettura([...paroleTitolo(s.titolo, voce, 3), ...paroleTitolo(s.evidenza, voce, 12)], durata);
+  // la frase detta e' intera al fotogramma 0 (e' l'anteprima del Reel, e chi guarda muto la legge subito); titolo ed
+  // evidenza scritti restano da leggere prima dello stacco
+  const parole = usaFrase ? voce.parole.map(({ t }) => ({ t, da: 0 })) : entroLettura([...paroleTitolo(s.titolo, voce, 3), ...paroleTitolo(s.evidenza, voce, 12)], durata);
   const grande: [number, number] = usaFrase ? [Math.max(0, voce.chiave), Math.max(voce.chiave + 1, voce.chiaveFine)] : [0, paroleTitolo(s.titolo, voce, 3).length];
-  const kDa = parole[grande[0]]?.da ?? 0;
+  // sottolineatura e spinta restano sulla voce: arrivano quando la chiave si dice
+  const kDa = (usaFrase ? voce.parole[grande[0]]?.da : parole[grande[0]]?.da) ?? 0;
   const sottolinea = Math.min(durata - 12, kDa + 4);
   const ultima = voce.parole[voce.parole.length - 1]?.da ?? 0;
   const notifica = s.contesto.messaggioSeguente !== undefined ? Math.max(8, Math.min(ultima + 8, durata - 16)) : undefined;

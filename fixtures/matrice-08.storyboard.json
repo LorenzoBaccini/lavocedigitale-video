@@ -130,8 +130,8 @@
    }
   },
   {
-   "testo": "Trovi tutto su la voce digitale punto it, il link è nel post.",
-   "chiave": "link",
+   "testo": "E tu lo reinstalleresti da zero oppure passeresti subito a quello nuovo?",
+   "chiave": "quello nuovo",
    "scena": {
     "tipo": "chiusura"
    }

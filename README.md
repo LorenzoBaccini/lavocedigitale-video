@@ -1,7 +1,13 @@
 # lavocedigitale-video
 
 Il generatore dei video verticali di [La Voce Digitale](https://lavocedigitale.it): da un articolo
-appena pubblicato a un Reel 9:16 (1080×1920, 30 fps, 15-40 s secondo la durata) per Facebook e X.
+appena pubblicato a un Reel 9:16 (1080×1920, 30 fps, 12-30 s secondo la durata) per Facebook e X.
+
+Il format (dal 24 novembre 2026, «format veloce», spec in `docs/superpowers/specs/2026-11-24-format-veloce-design.md`)
+è pensato per chi scorre il feed, spesso a video muto: il gancio è un'affermazione vera di al massimo 10 parole già
+scritta al fotogramma 0, il video dà la soluzione intera e finisce con una domanda a chi guarda; la voce recita (un
+`tono` per frase) ed è accelerata a 1,1×; i sottotitoli vanno a due parole per volta, con la parola detta che si accende;
+ogni stacco ha un whoosh, la chiave un tick e uno scatto di scala, le frasi lunghe un taglio di zoom.
 
 Remotion + three.js per le scene, `claude -p` per il copione, ElevenLabs per la voce, Node 22 con
 `--experimental-strip-types` (niente build, niente `typescript` fra le dipendenze).
@@ -72,22 +78,26 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    Subito dopo si sceglie la **variante** (`src/editoriale/variante.ts`): dipende solo dallo slug e
    dallo storico, quindi viene prima dello storyboard, che scrive nella sua durata. Vedi
    [Varianti e stili](#varianti-e-stili).
-1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md`, la durata della
-   variante (vedi [La durata](#la-durata)) e le sequenze degli ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
+1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md`, la durata e la famiglia di gancio
+   della variante (`gancioTesto`: errore, segreto, posta, smentita, situazione, `DESCRIZIONE_GANCI`; vedi
+   [La durata](#la-durata)) e le sequenze degli ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
    (`src/storyboard/cifre.ts`: ogni numero deve stare nell'articolo) sono un solo controllo, con un
    ritentativo. La CLI gira senza strumenti, senza MCP, con modello fissato, con un ambiente ridotto
    (nessun segreto del job) e in una cartella temporanea; l'articolo sta fra `<articolo>` e
    `</articolo>`, dichiarato materiale e non istruzioni.
-   Il copione finisce sempre con `TESTO_CHIUSURA` (lo pretendono prompt e validazione); subito dopo la
-   validazione `conFraseFinale` (`src/storyboard/fraseFinale.ts`) mette al suo posto la frase finale della
-   variante: voce, sottotitolo, storyboard dell'artifact e props vedono solo quella. Vedi [Le chiusure](#le-chiusure).
-2. **Voce** (`pipeline/voce-elevenlabs.ts`): una sola chiamata all'endpoint `with-timestamps`;
+   La validazione vuole il gancio di al massimo 10 parole e senza «?», l'ultima frase una domanda di al massimo 12
+   parole con scena `chiusura`, nessuna frase con «link» o «articolo», nessuna parentesi quadra nel testo, i `tono`
+   dell'elenco e al massimo due fra `sussurrato` e `ironico`. Vedi [Le chiusure](#le-chiusure).
+2. **Voce** (`pipeline/voce-elevenlabs.ts`): una sola chiamata all'endpoint `with-timestamps`, con il tag
+   eleven_v3 del `tono` davanti a ogni frase (`[serious]`, `[whispers]`…, `TAG_TONO` in `src/storyboard/tipi.ts`) e
+   stabilità 0,5; poi ffmpeg accelera l'mp3 a 1,1× (`RITMO`) e i tempi si dividono per 1,1. I tag tornano
+   nell'allineamento con un loro intervallo e non diventano parole;
    `pipeline/allineamento.ts` ricava le parole e le assegna alle frasi, ffmpeg taglia una clip per
    frase. Se ElevenLabs fallisce il video salta: nessuna voce di riserva.
 3. **Controllo d'impaginazione** (`pipeline/controlla-impaginazione.ts`): fotogrammi a inizio, metà
    e fine di ogni frase; `src/impaginazione.ts` segnala testo fuori dai margini, sul logo, sulla zona
    del sottotitolo o a cavallo di uno schermo 3D. Se c'è un problema la voce è già pagata: si riprova una volta con
-   l'aspetto del video approvato (scrivania/scena/cartolina, stessa durata e frase finale), e il video salta solo se
+   l'aspetto del video approvato (scrivania/scena/cartolina, stessa durata e famiglia di gancio), e il video salta solo se
    non passa neanche quello. Le scene con testo
    sopra e sotto un oggetto 3D (rischio, telefono) tengono l'oggetto nella fascia in ogni fotogramma con
    `fraLeQuote` (`src/editoriale/set/geometria.ts`); i titoli animati appoggiati in basso partono da
@@ -96,12 +106,20 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    Subito dopo, il **controllo di somiglianza** (`pipeline/somiglianza.ts`): se il video somiglia troppo a uno
    degli ultimi 3 cambia stile e gancio, con la stessa voce. Vedi [Il controllo di somiglianza](#il-controllo-di-somiglianza).
 4. **Render** (`pipeline/render.ts`): Remotion in `swangle`, con la variante uscita dal controllo di somiglianza.
+   Il ritmo (`src/editoriale/ritmo.ts`, `RitmoScena.tsx`) scala la scena intera: tagli di zoom fra 1 e 1,035 a metà
+   delle frasi oltre 2 s, scatto di 0,03 sulla chiave, il gancio che avanza piano; mai oltre 1,065. Come spinte e
+   lampi è un movimento transitorio: il controllo d'impaginazione misura la scena senza (a 1,065 un testo sul margine
+   di 80 px resta a ~50 px dal bordo). Il colpo apre il video, un whoosh ogni stacco, un tick ogni chiave
+   (`suoniRitmo`, foley in `suoni/foley.ts`).
 5. **S3**: `video/<slug>.mp4` nel bucket delle immagini, servito su
    `https://lavocedigitale.it/images/video/<slug>.mp4`. Poi lo storico, prima dei post: se non si
    scrive, non si posta.
 6. **Post**: Reel su Facebook (`pipeline/canali/facebook.ts`), X via Buffer
-   (`pipeline/canali/buffer.ts`) con il testo di `pipeline/post-video.ts` (la domanda del gancio, il
-   link, gli hashtag, nei 280 caratteri di X). Poi il resoconto di solo testo su Telegram privato.
+   (`pipeline/canali/buffer.ts`) con il testo di `pipeline/post-video.ts` (il gancio, la domanda finale, gli
+   hashtag, nei 280 caratteri di X: se non ci sta via gli hashtag, poi la domanda). Il link all'articolo va nel
+   primo commento: sotto il reel su Facebook (serve anche `pages_manage_engagement` sul token), come risposta in
+   thread su X. Se il commento non passa il post resta, con un ⚠ nel resoconto (su X esce il video col link nel
+   testo). Poi il resoconto di solo testo su Telegram privato.
 
 Ogni errore chiude il job con il resoconto su Telegram; se il job cade fuori da node (setup,
 timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta
@@ -110,11 +128,11 @@ timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta
 ## Varianti e stili
 
 Ogni video ha una variante con otto dimensioni: `musica`, `luce`, `apertura`, `stile`, `gancio`,
-`chiusura`, `fraseFinale`, `durata`. La pipeline la sceglie deterministica dallo slug (FNV-1a con
+`chiusura`, `gancioTesto`, `durata`. La pipeline la sceglie deterministica dallo slug (FNV-1a con
 rimescolamento finale, `improntaMescolata`), fra i
 valori non usati dagli ultimi video dello storico. Quanti video escludono dipende dalla dimensione
 (`PROFONDITA`): `stile` e `gancio` gli ultimi 2 (non una rotazione fissa, che diventerebbe un ciclo
-riconoscibile), `chiusura`, `fraseFinale` e `durata` l'ultimo, `musica`, `luce` e `apertura` n-1 (in n
+riconoscibile), `gancioTesto` gli ultimi 3, `chiusura` e `durata` l'ultimo, `musica`, `luce` e `apertura` n-1 (in n
 video di fila passano tutte). Nello storico una voce senza `stile` vale `scrivania`: i video pubblicati
 prima degli stili lo erano. Per le altre dimensioni nuove un valore assente non esclude niente.
 
@@ -236,34 +254,32 @@ sale da sotto come in un feed; il controllo d'impaginazione la spegne come le al
 
 ### La durata
 
-La durata è l'unica dimensione che cambia il copione invece dell'aspetto: Claude non la sceglie, la pipeline gliela
-chiede. Per questo la variante si sceglie prima dello storyboard (`pipeline/main.ts`) e `scriviStoryboard` riceve
-`variante.durata` e `variante.fraseFinale`.
+Durata e famiglia di gancio sono le dimensioni che cambiano il copione invece dell'aspetto: Claude non le sceglie, la
+pipeline gliele chiede. Per questo la variante si sceglie prima dello storyboard (`pipeline/main.ts`) e
+`scriviStoryboard` riceve `variante.durata` e `variante.gancioTesto`.
 
-| durata | frasi (chiusura inclusa) | parole dette | secondi circa |
+| durata | frasi (domanda inclusa) | parole dette | secondi circa |
 |---|---|---|---|
-| corta | 4-5 | 32-46 | 15-21 |
-| media | 6-8 | 50-72 | 23-32 |
-| lunga | 8-9 | 72-88 | 32-40 |
+| corta | 4-5 | 28-40 | 11-16 |
+| media | 5-7 | 40-56 | 16-22 |
+| lunga | 7-8 | 56-72 | 22-28 |
 
 I numeri stanno in un posto solo, `LIMITI_DURATA` (`src/storyboard/tipi.ts`). Il prompt li scrive da lì
-(`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata, fraseFinale)` li
+(`sezioneDurata`, prima dell'articolo, anche nel ritentativo) e `validaStoryboard(storyboard, durata)` li
 applica. `agent-video.md` ha la stessa tabella perché Claude veda le tre durate e le regole di scrittura di ognuna
 (regola 20), e quattro esempi (due medie, una corta, una lunga): `durata.test.ts` controlla che la tabella coincida con
-`LIMITI_DURATA` e che ogni esempio passi nella durata che dichiara con ognuna delle tre frasi finali, varietà compresa
+`LIMITI_DURATA` e che ogni esempio passi nella durata che dichiara, varietà compresa
 (una notifica al massimo, non più di metà delle scene su un dispositivo). Claude imita gli esempi: solo uno usa
-`allarme`, e insieme mostrano le quattro scene senza schermi (`simbolo`, `passi`, `flusso`, `mappa`). `media` è la durata
-di prima con il tetto delle parole sceso a 72, perché non si sovrapponga a `lunga` oltre il confine.
+`allarme`, e insieme mostrano le quattro scene senza schermi (`simbolo`, `passi`, `flusso`, `mappa`) e i toni.
 
-Le parole contate sono quelle dette: le frasi prima della chiusura più la frase finale della variante (7, 3 o 7 parole),
-non `TESTO_CHIUSURA`, che il copione deve comunque avere e che `conFraseFinale` sostituisce dopo la validazione. A
-Claude il prompt dà solo le parole prima della chiusura, i limiti meno la frase scelta (`paroleContenuto`).
+Le parole contate sono tutte quelle dette, domanda finale compresa: la scrive Claude. La voce a 1,1× legge circa 2,6
+parole al secondo.
 
 Le regole di varietà non dipendono dal numero di scene e non vanno scalate. «Mai lo stesso tipo di fila» vale con
 qualunque lunghezza. La somiglianza con i video recenti è una quota sulla sequenza più lunga: con 3 scene (corta da 4
 frasi) il 70 % vuole tutte e 3 uguali, 2 su 3 passano; contro un video più lungo una corta non arriva mai alla soglia
-(3 posizioni su 6 o più). `windows10`, la fixture del video approvato (8 frasi, 64 parole prima della chiusura), è
-una media con ogni frase finale, come `VARIANTE_BASE.durata`.
+(3 posizioni su 6 o più). `veloce`, la fixture del format veloce (8 frasi, 69 parole), è una lunga; `windows10`,
+quella del video approvato prima del format veloce, resta per l'impaginazione (la sua voce è in `windows10.timing.json`).
 
 Il job ha `timeout-minutes: 90` (era 75): una lunga sono fino a 9 scene e 40 secondi, e il render (circa 43 minuti per
 un video medio sui runner da 2 vCPU) cresce con loro. Il ruolo AWS dura 7200 s dal passo delle credenziali, che viene
@@ -315,31 +331,16 @@ domande da 64 caratteri con la chiave da 18 all'inizio, in mezzo e in fondo.
 
 ### Le chiusure
 
-La chiusura dura circa la metà di prima: la frase finale parlata è corta, la coda pure, la scena finale è veloce.
-
-**La frase finale** (`variante.fraseFinale`, 0, 1 o 2) indicizza `FRASI_CHIUSURA` in `storyboard/tipi.ts`, ognuna con
-la sua chiave: «Tutto su la voce digitale punto it.» (chiave l'indirizzo, a schermo `lavocedigitale.it`), «Link nel
-post.», «Il resto è nel link del post.». L'indirizzo non serve dirlo ogni volta: è scritto nella cartolina e nella fascia.
-La frase che Claude scrive oggi («Trovi tutto su la voce digitale punto it, il link è nel post.», `TESTO_CHIUSURA`) non è
-fra le tre: resta solo il testo che la validazione si aspetta, e il prompt non cambia. La pipeline sostituisce l'ultima
-frase dopo la validazione e prima della voce (`conFraseFinale`, puro e provato): ElevenLabs legge la frase scelta, il
-sottotitolo dell'ultima scena (con la cartolina) o la fascia (con l'integrata) la scrivono. Con la cartolina il
-sottotitolo di ogni frase resta visibile: la ridondanza lo nasconde solo se ripete parola per parola testata e indirizzo
-scritti (`fraseFinale.test.ts`).
-
-La coda dopo l'ultima parola è di 0,8 s (`CODA_S` in `linea.ts`, prima 1,2): la musica esce in tutta la coda, lineare,
-dopo l'ultima parola (`USCITA` in `mix.ts` ne è derivata; prima 1 s su una coda di 1,2). Stima con la voce di oggi
-(`out/durate-chiusure.ts`, fuori da git: il ritmo per sillaba della frase di oggi nelle voci già pagate, per le sillabe
-della frase nuova, più attacco e 0,35 s di silenzio finale): «Tutto su …» 3,2–3,5 s parlate, «Link nel post.» 1,1–1,2 s,
-«Il resto è nel link del post.» 2,2–2,4 s; con la coda la chiusura dura 4,0–4,3 s, 1,9–2,0 s e 3,0–3,2 s, contro 6,3–6,9 s
-di prima. Le sillabe chiuse di «Link nel post» si dicono più lente della media: quella stima è per difetto.
+L'ultima frase è una domanda a chi guarda, scritta da Claude (regola 6 di `agent-video.md`): sì o no, una scelta fra
+due, la propria esperienza. La domanda è scritta per intero entro 4 frame (chi guarda muto la legge mentre la voce la
+dice). Nessun invito a commentare, condividere o mettere like, né scritto né detto: dal 2019 Meta penalizza
+l'engagement bait anche dentro il video; una domanda genuina sull'esperienza di chi guarda invece è ammessa
+(`piani/chiusura.ts`, fonti in `docs/superpowers/specs/2026-11-25-viralita.md`). Dopo l'ultima parola la chiusura resta 1,5 s (`CODA_S` in `linea.ts`): il tempo di leggere la
+domanda; la musica esce in tutta la coda.
 
 **cartolina** (`scenes/Chiusura.tsx`): la scheda finale sulla superficie delle grafiche dello stile (`Foglio`: carta,
-poster, griglia, scheda). Marchio e testata entrano in 6 frame dal primo (`ENTRATA_CHIUSURA`), l'indirizzo è scritto
-entro 20 frame anche se la voce lo dice dopo, e la sottolineatura parte quando la voce lo dice (`piani/chiusura.ts`). Prima
-la testata partiva al frame 4 in 10 frame e l'indirizzo aspettava la voce (un secondo e mezzo). La cartolina quindi cambia:
-la regressione a pixel quasi identici vale per le scene prima della chiusura, non per lei. La testata è a
-`100 / larghezza` px: col mono della notte (1,2) sta su una riga, negli altri stili resta 100.
+poster, griglia, scheda). La domanda in grande (96 px fino a 40 caratteri, 82 oltre, divisi per la `larghezza` dello
+stile), in fondo marchio e indirizzo piccoli.
 
 **integrata**: nessuna scena finale. In `Notizia` l'ultima scena di contenuto resta montata anche per la durata della
 chiusura dentro `Ferma` (`editoriale/Ferma.tsx`): oltre la sua fine vede sempre il suo ultimo frame (lo stesso trucco della
@@ -347,11 +348,11 @@ chiusura dentro `Ferma` (`editoriale/Ferma.tsx`): oltre la sua fine vede sempre 
 sequenza) e si avvicina piano del 2 % (`scalaFerma` in `editoriale/fermo.ts`). Non esce con la spinta, lo scorrimento o il
 lampo dello stile: la chiusura non è un cambio di scena. Sopra, la scena ferma si vela (il `velo` dello stile al 35 %) e
 la fascia (`scenes/ChiusuraIntegrata.tsx`) sale dal basso in 6 frame, nel velo dello stile col filo dell'accento in cima:
-il logo a 180 px, la frase detta (46 px, diviso per la `larghezza` dello stile) senza l'indirizzo («Tutto su», «Link nel post», «Il resto è nel link del post»,
-`attaccoChiusura`) e sotto l'indirizzo a 88 px, sottolineato quando la voce lo dice (tempi della cartolina). La fascia sta nel terzo basso, da
+la domanda (58 px fino a 45 caratteri, 48 oltre, divisi per la `larghezza` dello stile) e sotto, quando la voce ha
+finito, il marchio piccolo con l'indirizzo (tempi della cartolina). La fascia sta nel terzo basso, da
 `FONDO_UTILE - 10` (1350) per 290 px: sopra ci sono i titoli bassi delle scene, che finiscono prima di `FONDO_UTILE`, e
 una fascia più alta li coprirebbe in quasi ogni scena del set. Prende il posto del sottotitolo, che durante la chiusura
-integrata non c'è (`Overlay`): la fascia scrive la frase scelta e l'indirizzo, anche quando la frase non lo dice. I suoi testi si misurano come sottotitolo (nella sua zona,
+integrata non c'è (`Overlay`): la fascia scrive la domanda e l'indirizzo. I suoi testi si misurano come sottotitolo (nella sua zona,
 mai sopra), e la fascia pubblica il suo ingombro pieno (`data-ingombro="fascia"`): il controllo d'impaginazione segnala
 ogni testo della scena ferma che le finisse sotto. Niente fruscio della carta: non c'è un foglio. Sotto la fascia
 grana e vignettatura seguono la scena ferma, non la chiusura (`Overlay`). Vale uguale in schermo: la fascia è 2D e
@@ -546,7 +547,7 @@ farebbe un tentativo della pipeline.
 ## Rifare in locale un video del runner, senza ripagare
 
 Ogni run carica l'artifact `video-<run id>` (3 giorni): articolo, risposte di Claude, storyboard,
-props, `voce.mp3`, `allineamento.json`, `timing.json` e, in prova, l'mp4.
+props, `voce-originale.mp3` (come l'ha data ElevenLabs), `voce.mp3` (accelerata), `allineamento.json`, `timing.json` e, in prova, l'mp4.
 
 ```
 gh run download <run id> -n video-<run id> -D out/runner
@@ -559,7 +560,7 @@ node --experimental-strip-types pipeline/controlla-impaginazione.ts out/<slug>/p
 node --experimental-strip-types pipeline/render.ts out/<slug>/props.json out/<slug>/<slug>.mp4
 ```
 
-`--riusa` rifà clip e timing da `voce.mp3` e `allineamento.json` senza chiamare ElevenLabs.
+`--riusa` rifà clip e timing da `voce-originale.mp3` e `allineamento.json` senza chiamare ElevenLabs (le cartelle di prima del format veloce hanno solo `voce.mp3`: lì non funziona).
 
 ## Dove sta cosa
 

@@ -68,3 +68,16 @@ test("senza impronta (controllo saltato) la voce non ha il campo", () => {
   const storyboard = { slug: "a", frasi: [{ testo: "Fine.", chiave: "Fine", scena: { tipo: "chiusura" } }] } as unknown as Storyboard;
   assert.equal("impronta" in riassunto(storyboard, VARIANTE_BASE, "2026-11-10"), false);
 });
+
+test("lo storico ricorda che cosa si vede nel gancio e nei reperti, e le sequenze recenti lo portano", () => {
+  const storyboard = {
+    slug: "a",
+    frasi: [
+      { testo: "Gancio.", chiave: "Gancio", scena: { tipo: "gancio", titolo: "t", evidenza: "e", sottotitolo: "s", oggetto: "smartphone", reperto: "telefono" } },
+      { testo: "Poi.", chiave: "Poi", scena: { tipo: "reperto", etichetta: "e", titolo: "t", reperto: "carta" } },
+      { testo: "Fine?", chiave: "Fine", scena: { tipo: "chiusura" } },
+    ],
+  } as unknown as Storyboard;
+  const letto = analizzaStorico(JSON.stringify(aggiungi(STORICO_VUOTO, riassunto(storyboard, VARIANTE_BASE, "2026-11-25"))));
+  assert.deepEqual(sequenzeRecenti(letto), [["gancio:reperto:telefono", "reperto:carta"]]);
+});

@@ -7,7 +7,7 @@ import { Portatile } from "./Portatile";
 import type { PropsSet } from "./Scrivania";
 
 // Quasi buio: due luci di taglio da dietro (ciano a sinistra, magenta a destra), un riempimento debole, lo schermo che illumina.
-const Luci: React.FC<{ chiave: number }> = ({ chiave }) => {
+export const LuciNotte: React.FC<{ chiave: number; sinistra: string; destra: string }> = ({ chiave, sinistra, destra }) => {
   const schermo = puntoSchermo(1280, 800).addScaledVector(NORMALE, 1.5);
   return (
     <>
@@ -19,17 +19,17 @@ const Luci: React.FC<{ chiave: number }> = ({ chiave }) => {
         penumbra={0.9}
         intensity={280 * chiave}
         decay={2}
-        color={CIANO}
+        color={sinistra}
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
       />
-      <spotLight position={[8, 5, -5]} angle={0.75} penumbra={0.9} intensity={300 * chiave} decay={2} color={MAGENTA} />
+      <spotLight position={[8, 5, -5]} angle={0.75} penumbra={0.9} intensity={300 * chiave} decay={2} color={destra} />
       <pointLight position={schermo.toArray()} color="#bcd2ff" intensity={1.6} distance={7} decay={2} />
       <Environment resolution={128}>
-        <Lightformer form="rect" intensity={1.2} color={CIANO} position={[-7, 3, -2]} rotation-y={Math.PI / 2} scale={[6, 1.2, 1]} />
-        <Lightformer form="rect" intensity={1.2} color={MAGENTA} position={[7, 3, -2]} rotation-y={-Math.PI / 2} scale={[6, 1.2, 1]} />
+        <Lightformer form="rect" intensity={1.2} color={sinistra} position={[-7, 3, -2]} rotation-y={Math.PI / 2} scale={[6, 1.2, 1]} />
+        <Lightformer form="rect" intensity={1.2} color={destra} position={[7, 3, -2]} rotation-y={-Math.PI / 2} scale={[6, 1.2, 1]} />
         <Lightformer form="rect" intensity={0.15} color="#ffffff" position={[0, 9, 2]} rotation-x={Math.PI / 2} scale={[10, 6, 1]} />
       </Environment>
     </>
@@ -37,7 +37,7 @@ const Luci: React.FC<{ chiave: number }> = ({ chiave }) => {
 };
 
 // Il piano: scuro, satinato (riflette morbido le luci colorate), abbastanza largo da perdersi nel buio.
-const Piano: React.FC = () => (
+export const PianoNotte: React.FC = () => (
   <mesh rotation-x={-Math.PI / 2} receiveShadow>
     <planeGeometry args={[80, 80]} />
     <meshStandardMaterial color="#0c0e12" roughness={0.38} metalness={0.35} />
@@ -45,10 +45,10 @@ const Piano: React.FC = () => (
 );
 
 /** Il set della notte: gli stessi dispositivi della scrivania, senza taccuino, su un piano scuro nel buio. */
-export const Notturno: React.FC<PropsSet & { fondo: string }> = ({ camera, schermo, notifica, orologio, luce = 1, dettagli, fondo, children }) => (
+export const Notturno: React.FC<PropsSet & { fondo: string; luci?: { sinistra: string; destra: string } }> = ({ camera, schermo, notifica, orologio, luce = 1, dettagli, fondo, luci = { sinistra: CIANO, destra: MAGENTA }, children }) => (
   <Palco camera={camera} fondo={fondo}>
-    <Luci chiave={luce} />
-    <Piano />
+    <LuciNotte chiave={luce} sinistra={luci.sinistra} destra={luci.destra} />
+    <PianoNotte />
     <Portatile schermo={schermo} notifica={notifica} orologio={{ ora: dettagli.ora, data: orologio }} />
     {children}
   </Palco>

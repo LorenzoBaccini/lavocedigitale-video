@@ -25,7 +25,7 @@ test("esce solo nella coda della chiusura, dopo l'ultima parola, e in modo linea
   const fineVoce = 2 * 30;
   // fino all'ultimo frame della voce la musica non ha ancora cominciato a uscire (resta sotto la voce)
   assert.ok(Math.abs(volumeSottofondo(fineVoce - 1, timing, linea) - (1 - DUCKING)) < 1e-9);
-  assert.equal(linea.totale - fineVoce, 24);
-  const meta = volumeSottofondo(fineVoce + 12, timing, linea);
+  assert.equal(linea.totale - fineVoce, 45);
+  const meta = volumeSottofondo(fineVoce + 22, timing, linea);
   assert.ok(meta > 0.45 && meta < 0.55, String(meta));
 });

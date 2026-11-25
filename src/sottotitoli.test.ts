@@ -9,11 +9,11 @@ const FRASE = "Ti servono una chiavetta da almeno otto giga, e la stessa lingua 
 const FINE_PROPOSIZIONE = /[,.;:?!]$/;
 const testi = (blocchi: Blocco[]) => blocchi.map((b) => b.parole.map((p) => p.t).join(" "));
 
-test("nessun blocco supera 4 parole, 1 sola solo se è tutta la proposizione", () => {
+test("nessun blocco supera 3 parole, 1 sola solo se è tutta la proposizione", () => {
   const blocchi = blocchiSottotitolo(FRASE, "otto giga", 120);
   assert.ok(blocchi.length > 1);
   blocchi.forEach((b, i) => {
-    assert.ok(b.parole.length >= 1 && b.parole.length <= 4, `${b.parole.length} parole`);
+    assert.ok(b.parole.length >= 1 && b.parole.length <= 3, `${b.parole.length} parole`);
     if (b.parole.length === 1 && i > 0) assert.match(blocchi[i - 1].parole.at(-1)!.t, FINE_PROPOSIZIONE);
   });
   assert.equal(blocchi.flatMap((b) => b.parole.map((p) => p.t)).join(" "), FRASE);
@@ -32,7 +32,7 @@ test("la chiave è marcata anche con maiuscole diverse", () => {
   assert.deepEqual(parole.map((p) => p.chiave), [false, false, true, true]);
 });
 
-test("una frase di 3 parole è un solo blocco", () => {
+test("una frase di 3 parole è un solo blocco, al ritmo di due parole per blocco le frasi lunghe si spezzano", () => {
   const blocchi = blocchiSottotitolo("Nasce già scoperto.", "scoperto", 40);
   assert.equal(blocchi.length, 1);
   assert.deepEqual(blocchi[0], {
@@ -50,12 +50,12 @@ test("non spezza a cavallo di una virgola", () => {
 
 test("un blocco non comincia con la fine della proposizione precedente", () => {
   const blocchi = blocchiSottotitolo("Ora puoi installare il sistema, ma attento.", "sistema", 90);
-  assert.deepEqual(testi(blocchi), ["Ora puoi installare", "il sistema,", "ma attento."]);
+  assert.deepEqual(testi(blocchi), ["Ora puoi", "installare il sistema,", "ma attento."]);
 });
 
 test("una proposizione di una parola è un blocco da 1", () => {
   const blocchi = blocchiSottotitolo("Attenzione: il supporto è finito.", "supporto", 60);
-  assert.deepEqual(testi(blocchi), ["Attenzione:", "il supporto è finito."]);
+  assert.deepEqual(testi(blocchi), ["Attenzione:", "il supporto", "è finito."]);
 });
 
 test("la data intera resta in un blocco", () => {
@@ -74,24 +74,36 @@ test("numero e unità, nome e versione non si separano", () => {
   }
 });
 
-test("si arriva a 5 parole solo per tenere unita una sequenza", () => {
+test("si arriva a 4 parole solo per tenere unita una sequenza", () => {
   for (const frase of [FRASE, "Ma dal 14 ottobre 2025 niente più aggiornamenti di sicurezza.", "Dal 14 ottobre 2025 stop."]) {
     for (const b of blocchiSottotitolo(frase, "", 120)) {
-      if (b.parole.length > 4) assert.match(b.parole.map((p) => p.t).join(" "), /\d/);
-      assert.ok(b.parole.length <= 5);
+      if (b.parole.length > 3) assert.match(b.parole.map((p) => p.t).join(" "), /\d/);
+      assert.ok(b.parole.length <= 4);
     }
   }
-  assert.deepEqual(testi(blocchiSottotitolo("Dal 14 ottobre 2025 stop.", "", 60)), ["Dal 14 ottobre 2025 stop."]);
+  assert.deepEqual(testi(blocchiSottotitolo("Dal 14 ottobre 2025 stop.", "", 60)), ["Dal 14 ottobre 2025", "stop."]);
 });
 
 test("con i tempi della voce ogni blocco entra quando si dice la sua prima parola", () => {
   const frase = "Si può ancora installare, ma c'è un problema.";
   const inizi = [5, 9, 14, 22, 40, 44, 49, 53];
   const blocchi = blocchiSottotitolo(frase, "", 80, inizi);
-  assert.deepEqual(testi(blocchi), ["Si può ancora installare,", "ma c'è un problema."]);
-  assert.deepEqual(blocchi.map((b) => [b.da, b.a]), [[0, 40], [40, 80]]);
+  assert.deepEqual(testi(blocchi), ["Si può", "ancora installare,", "ma c'è", "un problema."]);
+  assert.deepEqual(blocchi.map((b) => [b.da, b.a]), [[0, 14], [14, 40], [40, 49], [49, 80]]);
+  assert.deepEqual(blocchi.flatMap((b) => b.parole.map((p) => p.da)), inizi, "ogni parola sa quando la voce la dice");
 });
 
 test("tempi della voce che non tornano con le parole: si ripiega sulla stima", () => {
   assert.deepEqual(blocchiSottotitolo(FRASE, "", 120, [0, 10]), blocchiSottotitolo(FRASE, "", 120));
+});
+
+test("le frasi si spezzano in blocchi da due parole, il ritmo dei sottotitoli dei video brevi", () => {
+  assert.deepEqual(testi(blocchiSottotitolo("Il sistema appena installato nasce senza difese.", "", 90)), ["Il sistema", "appena installato", "nasce senza difese."]);
+});
+
+test("un blocco di piu' parole non supera 24 caratteri: sta su una riga senza scendere sotto il corpo minimo", () => {
+  for (const frase of ["Addio pagamenti senza autenticazione.", "Disattiva l'aggiornamento automatico dalle impostazioni."]) {
+    const blocchi = blocchiSottotitolo(frase, "", 120);
+    for (const t of testi(blocchi)) assert.ok(t.split(" ").length === 1 || t.length <= 24, `${t} (${t.length})`);
+  }
 });

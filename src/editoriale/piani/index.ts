@@ -14,6 +14,7 @@ import { pianoMappa } from "./mappa.ts";
 import { pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
 import { pianoPassi } from "./passi.ts";
+import { pianoReperto } from "./reperto.ts";
 import { pianoRischio } from "./rischio.ts";
 import { pianoSimbolo } from "./simbolo.ts";
 import { pianoTeaser } from "./teaser.ts";
@@ -52,6 +53,8 @@ export function pianoScena(p: PropsScena<Scena>, durata: number): Piano {
       return pianoPassi(p, durata);
     case "simbolo":
       return pianoSimbolo(p, durata);
+    case "reperto":
+      return pianoReperto(p, durata);
     case "teaser":
       return pianoTeaser(p, durata);
     case "chiusura":

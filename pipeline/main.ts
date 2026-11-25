@@ -4,10 +4,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { Variante } from "../src/editoriale/variante.ts";
-import { scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
+import { ATTIVI, scegliVariante, VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import { costruisciLinea } from "../src/linea.ts";
 import type { PropsNotizia } from "../src/Notizia.tsx";
-import { conFraseFinale } from "../src/storyboard/fraseFinale.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { FPS } from "../src/theme.ts";
 import type { Timing } from "../src/timing.ts";
@@ -49,8 +48,8 @@ export interface Dipendenze {
   render: (props: PropsNotizia, uscita: string) => Promise<void>;
   /** Restituisce l'URL pubblico del video caricato. */
   caricaVideo: (file: string, slug: string) => Promise<string>;
-  postReelToFacebook: (videoUrl: string, description: string) => Promise<FacebookResult>;
-  postVideoToX: (text: string, videoUrl: string) => Promise<BufferResult>;
+  postReelToFacebook: (videoUrl: string, description: string, commento?: string) => Promise<FacebookResult>;
+  postVideoToX: (text: string, videoUrl: string, commento?: string) => Promise<BufferResult>;
   sendMessageToOwner: (text: string) => Promise<TelegramResult>;
 }
 
@@ -87,17 +86,17 @@ async function cronometra<T>(fn: () => Promise<T>): Promise<[T, number]> {
   return [valore, Math.round((Date.now() - inizio) / 1000)];
 }
 
-async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postId?: string; error?: string }>): Promise<string> {
+async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postId?: string; error?: string; avviso?: string }>): Promise<string> {
   try {
     const r = await pubblica();
-    return r.ok ? `✓ ${nome}: pubblicato (${r.postId ?? "id n/d"})` : `✗ ${nome}: ${r.error}`;
+    return r.ok ? `✓ ${nome}: pubblicato (${r.postId ?? "id n/d"})${r.avviso ? ` ⚠ ${r.avviso}` : ""}` : `✗ ${nome}: ${r.error}`;
   } catch (e) {
     return `✗ ${nome}: ${messaggio(e)}`;
   }
 }
 
 export const rigaVariante = (v: Variante): string =>
-  [`stile ${v.stile}`, `gancio ${v.gancio}`, `chiusura ${v.chiusura}`, `frase finale ${v.fraseFinale + 1}`, `durata ${v.durata}`, `musica ${v.musica}`, `luce ${v.luce}`, `apertura ${v.apertura}`].join(" · ");
+  [`stile ${v.stile}`, `gancio ${v.gancio}`, `chiusura ${v.chiusura}`, `gancio testo ${v.gancioTesto}`, `durata ${v.durata}`, `musica ${v.musica}`, `luce ${v.luce}`, `apertura ${v.apertura}`].join(" · ");
 
 export function resoconto(slug: string, esito: Esito): string {
   const t = esito.tempi;
@@ -181,9 +180,9 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
 
   let storyboard: Storyboard;
   try {
-    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), { durata: variante.durata, fraseFinale: variante.fraseFinale }));
-    // la validazione ha visto la frase del copione: la frase finale della variante la sostituisce prima della voce
-    storyboard = conFraseFinale({ ...storyboard, slug }, variante.fraseFinale);
+    [storyboard, esito.tempi.storyboard] = await cronometra(() => dip.scriviStoryboard(articolo, sequenzeRecenti(storico), { durata: variante.durata, gancioTesto: variante.gancioTesto }));
+    // lo slug decide i percorsi: vale quello dell'articolo
+    storyboard = { ...storyboard, slug };
   } catch (e) {
     if (!(e instanceof StoryboardScartato)) throw e;
     Object.assign(esito, { stato: "saltato", motivo: e.motivo });
@@ -207,8 +206,9 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
   dip.generaSuoni();
   const problemi = await dip.controllaImpaginazione(conVariante(variante));
   if (problemi.length > 0) {
-    // la voce e' gia' pagata: prima di saltare si riprova con l'aspetto del video approvato, stessa durata e frase finale
-    const sicura: Variante = { ...variante, stile: VARIANTE_BASE.stile, gancio: VARIANTE_BASE.gancio, chiusura: VARIANTE_BASE.chiusura };
+    // la voce e' gia' pagata: prima di saltare si riprova con l'aspetto del video approvato, nello stile della rubrica
+    const stileSicuro = ATTIVI.stile.includes(VARIANTE_BASE.stile) ? VARIANTE_BASE.stile : ATTIVI.stile[0];
+    const sicura: Variante = { ...variante, stile: stileSicuro, gancio: VARIANTE_BASE.gancio, chiusura: VARIANTE_BASE.chiusura };
     const aspetto = (v: Variante) => `${v.stile}/${v.gancio}/${v.chiusura}`;
     const diversa = aspetto(sicura) !== aspetto(variante);
     if (!diversa || (await dip.controllaImpaginazione(conVariante(sicura))).length > 0) {
@@ -247,8 +247,8 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
 
   const url = await dip.caricaVideo(p.video, slug);
   esito.file = url;
-  const testo = buildVideoPost(articolo, storyboard);
-  const aMano = `Il post va fatto a mano con l'URL dell'mp4: ${url}\nTesto: ${testo}`;
+  const { testo, commento } = buildVideoPost(articolo, storyboard);
+  const aMano = `Il post va fatto a mano con l'URL dell'mp4: ${url}\nTesto: ${testo}\nPrimo commento: ${commento}`;
   // Prima dei post: senza lo slug nello storico, dopo la scadenza dell'mp4 un nuovo lancio ripubblicherebbe.
   const errStorico = await scriviConUnRitentativo(() => dip.scriviStorico(JSON.stringify(aggiungi(storico, riassunto(storyboard, scelta.variante, oggi(), scelta.impronta)))));
   if (errStorico) {
@@ -257,8 +257,8 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
     return;
   }
   // In sequenza e ognuno nel suo try: un canale che fallisce non ferma l'altro.
-  esito.righe.push(await canale("Facebook", () => dip.postReelToFacebook(url, testo)));
-  esito.righe.push(await canale("X", () => dip.postVideoToX(testo, url)));
+  esito.righe.push(await canale("Facebook", () => dip.postReelToFacebook(url, testo, commento)));
+  esito.righe.push(await canale("X", () => dip.postVideoToX(testo, url, commento)));
   const almenoUno = esito.righe.some((r) => r.startsWith("✓"));
   if (almenoUno) {
     esito.stato = "pubblicato";

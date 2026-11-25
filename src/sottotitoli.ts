@@ -1,6 +1,8 @@
 export interface Parola {
   t: string;
   chiave: boolean;
+  /** il frame, locale alla frase, in cui la voce la dice; solo con i tempi della voce */
+  da?: number;
 }
 
 export interface Blocco {
@@ -36,15 +38,20 @@ function marcaChiave(parole: string[], chiave: string): boolean[] {
   return segnate;
 }
 
+// Il ritmo dei video brevi: due parole per blocco, tre se serve; quattro solo per tenere unita una data o un numero.
 function costoBlocco(n: number, totale: number, legato: boolean): number {
   if (n === totale && n === 1) return 0;
-  if (n === 1) return 10;
-  if (n === 5 && !legato) return Infinity;
-  if (n > 5) return legato ? 50 : Infinity;
-  return (n - 3) ** 2 + 0.5;
+  if (n === 1) return 3;
+  if (n === 2) return 0.5;
+  if (n === 3) return 1.5;
+  if (n === 4) return legato ? 20 : Infinity;
+  return legato ? 60 : Infinity;
 }
 
-// Blocchi da 2-4 parole, il più vicino possibile a 3 e il meno possibile; i tagli cadono solo fra parole non legate.
+/** Un blocco di piu' parole sta in una riga a corpo leggibile (`Overlay`): oltre si spezza. */
+export const CARATTERI_BLOCCO = 24;
+
+// Blocchi da 1-3 parole, il più vicino possibile a 2; i tagli cadono solo fra parole non legate.
 function dimensioni(parole: string[]): number[] {
   const n = parole.length;
   const taglio = (i: number) => i === n || !legate(parole[i - 1], parole[i]);
@@ -52,9 +59,10 @@ function dimensioni(parole: string[]): number[] {
   migliore[n].costo = 0;
   for (let i = n - 1; i >= 0; i--) {
     if (i > 0 && !taglio(i)) continue;
-    // a parità di costo vince il blocco più lungo in testa
-    for (let j = n; j > i; j--) {
+    // a parità di costo vince il blocco più corto in testa: il blocco lungo cade a fine proposizione
+    for (let j = i + 1; j <= n; j++) {
       if (!taglio(j)) continue;
+      if (j - i > 1 && parole.slice(i, j).join(" ").length > CARATTERI_BLOCCO) continue;
       const legato = parole.slice(i, j - 1).some((p, k) => legate(p, parole[i + k + 1]));
       const costo = costoBlocco(j - i, n, legato) + migliore[j].costo;
       if (costo < migliore[i].costo) migliore[i] = { costo, prima: j - i };
@@ -95,7 +103,8 @@ export function blocchiSottotitolo(testo: string, chiave: string, frames: number
       entrate.push(entrate.length ? Math.max(entrate[entrate.length - 1] + 1, inizi[prima]) : 0);
       prima += g.length;
     }
-    return gruppi.map((parole, j) => ({ parole, da: entrate[j], a: entrate[j + 1] ?? frames }));
+    let k = 0;
+    return gruppi.map((parole, j) => ({ parole: parole.map((p) => ({ ...p, da: inizi[k++] })), da: entrate[j], a: entrate[j + 1] ?? frames }));
   }
   const caratteri = gruppi.map((g) => g.reduce((s, p) => s + p.t.length, 0));
   const totale = caratteri.reduce((a, b) => a + b, 0) || 1;

@@ -20,13 +20,14 @@ test("la fase va da 0 a 1 e si ferma agli estremi, anche con durata nulla", () =
 });
 
 test("nessun accento in piu' se i cambiamenti sono abbastanza fitti", () => {
-  assert.deepEqual(accentiMancanti([20, 60, 110], 150), []);
+  assert.deepEqual(accentiMancanti([20, 60, 100, 140], 150), []);
 });
 
 test("un vuoto troppo lungo si spezza in parti uguali, fine scena compresa", () => {
-  assert.deepEqual(accentiMancanti([10], 150), [80]);
-  assert.deepEqual(accentiMancanti([10], 180), [67, 123]);
-  assert.deepEqual(accentiMancanti([], 200), [67, 133]);
+  assert.equal(PAUSA_MAX, 45, "mai fermi oltre un secondo e mezzo");
+  assert.deepEqual(accentiMancanti([], 90), [45]);
+  assert.deepEqual(accentiMancanti([10], 100), [55]);
+  assert.deepEqual(accentiMancanti([], 120), [40, 80]);
   for (const durata of [80, 150, 240, 400]) {
     const eventi = [12, 30];
     assert.ok(pausaPiuLunga([...eventi, ...accentiMancanti(eventi, durata)], durata) <= PAUSA_MAX, `durata ${durata}`);

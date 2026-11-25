@@ -1,5 +1,6 @@
-import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
-import { contaParole, DISPOSITIVI, FORME_MAPPA, FRASI_CHIUSURA, LIMITI, LIMITI_DURATA, OGGETTI, paroleContenuto, PEZZI, SCHERMATE, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
+import type { NomeDurata } from "../editoriale/variante.ts";
+import { normalizza } from "../sottotitoli.ts";
+import { contaParole, DISPOSITIVI, FORME_MAPPA, CON_MESSAGGIO, CON_MITTENTE, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, REPERTI, SCHERMATE, SIMBOLI, TONI, TONI_MARCATI } from "./tipi.ts";
 import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -18,6 +19,15 @@ function testo(o: Dict, campo: string, percorso: string, max: number, errori: st
   } else if (v.length > max) {
     errori.push(`${percorso}.${campo}: ${v.length} caratteri, massimo ${max}`);
   }
+}
+
+/** Il reperto e i testi che porta: il messaggio e il mittente solo sui reperti che li mostrano. */
+function campiReperto(s: Dict, p: string, e: string[]): void {
+  if (!REPERTI.includes(s.reperto as never)) e.push(`${p}.reperto: deve essere uno tra ${REPERTI.join(", ")}`);
+  testo(s, "messaggio", p, LIMITI.notifica, e, true);
+  testo(s, "mittente", p, LIMITI.mittente, e, true);
+  if (s.messaggio !== undefined && !CON_MESSAGGIO.includes(s.reperto as never)) e.push(`${p}.messaggio: il messaggio solo con ${CON_MESSAGGIO.join(" o ")}`);
+  if (s.mittente !== undefined && !CON_MITTENTE.includes(s.reperto as never)) e.push(`${p}.mittente: il mittente solo con telefono, chiamata o email`);
 }
 
 function oggetto(o: Dict, percorso: string, errori: string[]): void {
@@ -131,6 +141,7 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "sottotitolo", p, LIMITI.sottotitolo, e);
     oggetto(s, p, e);
     unoTra(s, "schermata", SCHERMATE, p, e);
+    if (s.reperto !== undefined || s.messaggio !== undefined || s.mittente !== undefined) campiReperto(s, p, e);
   },
   allarme: (s, p, e) => {
     testo(s, "sopra", p, LIMITI.etichetta, e);
@@ -225,8 +236,17 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "titolo", p, LIMITI.titolo, e);
     if (s.barrato !== undefined && typeof s.barrato !== "boolean") e.push(`${p}.barrato: vero o falso`);
   },
+  reperto: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    testo(s, "titolo", p, LIMITI.titolo, e);
+    campiReperto(s, p, e);
+  },
   chiusura: () => {},
 };
+
+const RIMANDI = new Set(["link", "articolo", "articoli"]);
+// engagement bait: Meta abbassa la distribuzione dei video che chiedono di commentare, condividere, taggare o seguire
+const ESCA = /\b(comment[aio]\w*|condivid\w*|tagga\w*|like|iscriviti|segui(ci|mi|teci)|fammi sapere|fatemi sapere|scrivilo|scrivetelo)\b/i;
 
 function validaFrase(frase: unknown, i: number, errori: string[]): number {
   const p = `frasi[${i}]`;
@@ -241,6 +261,15 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
       errori.push(`${p}.chiave: deve comparire nel testo della frase`);
     }
   }
+  if (typeof frase.testo === "string") {
+    // ElevenLabs leggerebbe «[beta]» come un tag di regia
+    if (/[[\]]/.test(frase.testo)) errori.push(`${p}.testo: nessuna parentesi quadra nel testo`);
+    if (frase.testo.split(/[^\p{L}]+/u).some((w) => RIMANDI.has(normalizza(w)))) {
+      errori.push(`${p}.testo: niente rimandi al link o all'articolo, il video dà la soluzione intera`);
+    }
+    if (ESCA.test(frase.testo)) errori.push(`${p}.testo: non chiedere commenti, like, condivisioni o follow, Meta lo penalizza; la domanda basta`);
+  }
+  unoTra(frase, "tono", TONI, p, errori);
   const scena = frase.scena;
   if (!èDizionario(scena)) {
     errori.push(`${p}.scena: oggetto richiesto`);
@@ -252,11 +281,8 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
   return typeof frase.testo === "string" ? contaParole(frase.testo) : 0;
 }
 
-/**
- * `durata` e `fraseFinale`: quelle della variante. Le parole sono quelle dette: le frasi prima della chiusura piu' la
- * frase finale scelta; l'ultima frase del copione resta comunque `TESTO_CHIUSURA`, la sostituzione viene dopo.
- */
-export function validaStoryboard(input: unknown, durata: NomeDurata, fraseFinale: FraseFinale): EsitoValidazione {
+/** `durata`: quella della variante. Le parole contano tutte le frasi, domanda finale compresa. */
+export function validaStoryboard(input: unknown, durata: NomeDurata): EsitoValidazione {
   const limiti = LIMITI_DURATA[durata];
   const errori: string[] = [];
   if (!èDizionario(input)) return { ok: false, errori: ["storyboard: oggetto richiesto"] };
@@ -270,21 +296,42 @@ export function validaStoryboard(input: unknown, durata: NomeDurata, fraseFinale
     errori.push(`frasi: ${frasi.length} frasi, la durata ${durata} ne vuole da ${limiti.frasi.min} a ${limiti.frasi.max}`);
   }
 
-  const conteggi = frasi.map((f, i) => validaFrase(f, i, errori));
-  const prima = conteggi.slice(0, -1).reduce((a, b) => a + b, 0);
-  const dette = prima + contaParole(FRASI_CHIUSURA[fraseFinale].testo);
+  const dette = frasi.map((f, i) => validaFrase(f, i, errori)).reduce((a, b) => a + b, 0);
   if (dette < limiti.parole.min || dette > limiti.parole.max) {
-    const ammesse = paroleContenuto(durata, fraseFinale);
-    errori.push(`copione: ${prima} parole prima della chiusura (${dette} dette con la frase finale), la durata ${durata} ne vuole da ${ammesse.min} a ${ammesse.max} prima della chiusura`);
+    errori.push(`copione: ${dette} parole, la durata ${durata} ne vuole da ${limiti.parole.min} a ${limiti.parole.max}, domanda finale compresa`);
+  }
+
+  const prima = frasi[0];
+  if (èDizionario(prima) && typeof prima.testo === "string") {
+    const n = contaParole(prima.testo);
+    if (n > LIMITI.gancioParole) errori.push(`frasi[0].testo: il gancio ha ${n} parole, al massimo ${LIMITI.gancioParole}`);
+    if (prima.testo.trim().endsWith("?")) errori.push("frasi[0].testo: il gancio è un'affermazione, non una domanda");
   }
 
   const ultima = frasi.at(-1);
+  const u = `frasi[${frasi.length - 1}]`;
   if (èDizionario(ultima) && èDizionario(ultima.scena) && ultima.scena.tipo !== "chiusura") {
-    errori.push(`frasi[${frasi.length - 1}].scena.tipo: l'ultima scena deve essere chiusura`);
+    errori.push(`${u}.scena.tipo: l'ultima scena deve essere chiusura`);
   }
-  if (èDizionario(ultima) && typeof ultima.testo === "string" && ultima.testo.trim() !== TESTO_CHIUSURA) {
-    errori.push(`frasi[${frasi.length - 1}].testo: l'ultima frase deve essere «${TESTO_CHIUSURA}»`);
+  if (èDizionario(ultima) && typeof ultima.testo === "string" && frasi.length > 1) {
+    const n = contaParole(ultima.testo);
+    if (!ultima.testo.trim().endsWith("?")) errori.push(`${u}.testo: la domanda finale finisce con «?»`);
+    if (n > LIMITI.domandaParole) errori.push(`${u}.testo: la domanda finale ha ${n} parole, al massimo ${LIMITI.domandaParole}`);
+    const c = ultima.testo.trim().length;
+    if (c > LIMITI.domandaCaratteri) errori.push(`${u}.testo: la domanda finale ha ${c} caratteri, al massimo ${LIMITI.domandaCaratteri}`);
   }
+  frasi.slice(0, -1).forEach((f, i) => {
+    if (èDizionario(f) && èDizionario(f.scena) && f.scena.tipo === "chiusura") errori.push(`frasi[${i}].scena.tipo: la chiusura è solo l'ultima frase`);
+  });
+
+  const marcati = frasi.filter((f) => èDizionario(f) && TONI_MARCATI.includes(f.tono as never)).length;
+  if (marcati > LIMITI.toniMarcati) {
+    errori.push(`toni: ${marcati} frasi fra ${TONI_MARCATI.slice(0, -1).join(", ")} e ${TONI_MARCATI.at(-1)}, al massimo ${LIMITI.toniMarcati}`);
+  }
+  // una voce che non cambia mai tono suona piatta: almeno meta' delle frasi va recitata
+  const recitate = frasi.filter((f) => èDizionario(f) && f.tono !== undefined && f.tono !== "deciso").length;
+  const minimo = Math.ceil(frasi.length / 2);
+  if (recitate < minimo) errori.push(`toni: ${recitate} frasi recitate su ${frasi.length}, almeno ${minimo}: dai un tono a piu' frasi`);
 
   return errori.length ? { ok: false, errori } : { ok: true, storyboard: input as unknown as Storyboard };
 }
@@ -297,17 +344,34 @@ export const SOGLIA_SOMIGLIANZA = 0.7;
 /** Quanti video recenti si confrontano. */
 export const VIDEO_CONFRONTATI = 5;
 
+/**
+ * Il segno di una scena nello storico: il tipo, e per gancio e reperto anche che cosa si vede
+ * (`gancio:smartphone`, `gancio:reperto:telefono`, `reperto:carta`). Lo storico vecchio ha solo il tipo.
+ */
+export function segnoScena(s: Scena): string {
+  if (s.tipo === "reperto") return `reperto:${s.reperto}`;
+  if (s.tipo === "gancio") return s.reperto ? `gancio:reperto:${s.reperto}` : `gancio:${s.oggetto}`;
+  return s.tipo;
+}
+const tipoDi = (segno: string) => segno.split(":")[0];
+const repertiDi = (segni: string[]) => segni.flatMap((s) => /reperto:(\w+)$/.exec(s)?.[1] ?? []);
+
+/** Quanti video recenti contano per l'apertura e per i reperti gia' usati. */
+export const VIDEO_SENZA_RIPETERE = 2;
+
 /** Quota di posizioni con lo stesso tipo, sulla sequenza piu' lunga: 1 = stessa sequenza. */
 export function somiglianza(a: string[], b: string[]): number {
   const n = Math.max(a.length, b.length);
   if (n === 0) return 1;
   let uguali = 0;
-  for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] === b[i]) uguali++;
+  for (let i = 0; i < Math.min(a.length, b.length); i++) if (tipoDi(a[i]) === tipoDi(b[i])) uguali++;
   return uguali / n;
 }
 
 /** Le notifiche sono un'eccezione: una sola per video. */
 export const MASSIMO_ALLARMI = 1;
+/** I reperti sono il colpo del video: se ogni frase ne ha uno, non colpisce piu'. */
+export const MASSIMO_REPERTI = 2;
 /** Al massimo meta' delle scene (chiusura esclusa) su un dispositivo, il resto su carta. */
 export const massimoSuDispositivo = (scene: number) => Math.ceil(scene / 2);
 
@@ -336,6 +400,19 @@ export function erroriVarieta(storyboard: Storyboard, recenti: string[][]): stri
   const allarmi = sequenza.filter((t) => t === "allarme").length;
   if (allarmi > MASSIMO_ALLARMI) {
     errori.push(`sequenza: ${allarmi} scene «allarme», al massimo ${MASSIMO_ALLARMI}: la notifica solo se l'articolo parla di un messaggio vero, per le altre frasi scegli un'altra scena`);
+  }
+  const segni = storyboard.frasi.filter((f) => f.scena.tipo !== "chiusura").map((f) => segnoScena(f.scena));
+  const ultimi = recenti.slice(0, VIDEO_SENZA_RIPETERE);
+  if (segni[0] && ultimi.some((r) => r[0] === segni[0])) {
+    errori.push(`apertura: il video comincia come uno degli ultimi ${VIDEO_SENZA_RIPETERE} (${segni[0]}): apri su un altro oggetto o su un altro reperto della notizia`);
+  }
+  const giaUsati = new Set(repertiDi(ultimi.flat()));
+  for (const r of new Set(repertiDi(segni))) {
+    if (giaUsati.has(r)) errori.push(`reperto: «${r}» è già negli ultimi ${VIDEO_SENZA_RIPETERE} video: scegli un altro reperto o un'altra scena`);
+  }
+  const reperti = repertiDi(segni).length;
+  if (reperti > MASSIMO_REPERTI) {
+    errori.push(`sequenza: ${reperti} scene «reperto», al massimo ${MASSIMO_REPERTI}: tienilo per il momento in cui succede il fatto`);
   }
   const sui = storyboard.frasi.filter((f) => suDispositivo(f.scena)).length;
   const tetto = massimoSuDispositivo(sequenza.length);

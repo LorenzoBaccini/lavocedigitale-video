@@ -4,6 +4,10 @@ import { spawnSync } from "node:child_process";
 
 import type { Variante } from "../src/editoriale/variante.ts";
 import { ATTIVI, VARIANTE_BASE } from "../src/editoriale/variante.ts";
+import type { Valori } from "../src/editoriale/variante.ts";
+
+/** La rotazione fra piu' stili, com'era prima della rubrica unica: la logica resta e si prova qui. */
+const PIU_STILI: Valori = { ...ATTIVI, stile: ["scrivania", "studio", "notte", "schermo"], gancio: ["scena", "parola", "dettaglio", "diviso"] };
 import type { Impronta } from "./somiglianza.ts";
 import {
   CONFRONTATI,
@@ -89,23 +93,23 @@ test("il confronto riporta il video piu' vicino", () => {
 test("la variante successiva cambia lo stile, non uno degli ultimi 3 se si puo', e lascia voce e copione", () => {
   const v: Variante = { ...VARIANTE_BASE, stile: "scrivania", gancio: "scena" };
   const recenti = [{ stile: "studio" }, { stile: "scrivania" }, {}] as Partial<Variante>[];
-  const n = prossimaVariante("slug", v, 2, [v], recenti);
+  const n = prossimaVariante("slug", v, 2, [v], recenti, PIU_STILI);
   assert.ok(["notte", "schermo"].includes(n.stile));
   assert.equal(n.gancio, "scena");
-  assert.equal(n.fraseFinale, v.fraseFinale);
+  assert.equal(n.gancioTesto, v.gancioTesto);
   assert.equal(n.durata, v.durata);
   assert.equal(n.musica, v.musica);
-  assert.deepEqual(prossimaVariante("slug", v, 2, [v], recenti), n);
+  assert.deepEqual(prossimaVariante("slug", v, 2, [v], recenti, PIU_STILI), n);
 });
 
 test("se tutti gli stili sono fra i recenti accorcia la memoria ma non ripete uno stile gia' provato", () => {
   const v: Variante = { ...VARIANTE_BASE, stile: "notte" };
   const recenti = ATTIVI.stile.map((stile) => ({ stile })) as Partial<Variante>[];
   for (let t = 0; t < 20; t++) {
-    const n = prossimaVariante(`s${t}`, v, 2, [v], recenti);
+    const n = prossimaVariante(`s${t}`, v, 2, [v], recenti, PIU_STILI);
     assert.notEqual(n.stile, "notte");
   }
-  const n = prossimaVariante("x", { ...v, stile: "studio" }, 3, [v, { ...v, stile: "studio" }], recenti);
+  const n = prossimaVariante("x", { ...v, stile: "studio" }, 3, [v, { ...v, stile: "studio" }], recenti, PIU_STILI);
   assert.ok(!["notte", "studio"].includes(n.stile));
 });
 
@@ -113,7 +117,7 @@ test("se lo stile nuovo con lo stesso gancio e' fra gli ultimi 3 cambia gia' al 
   const v: Variante = { ...VARIANTE_BASE, stile: "notte", gancio: "scena" };
   const recenti = [{ stile: "scrivania", gancio: "scena" }, { stile: "studio", gancio: "scena" }, { stile: "schermo", gancio: "scena" }] as Partial<Variante>[];
   for (let t = 0; t < 20; t++) {
-    const n = prossimaVariante(`s${t}`, v, 2, [v], recenti);
+    const n = prossimaVariante(`s${t}`, v, 2, [v], recenti, PIU_STILI);
     assert.equal(n.stile, "schermo");
     assert.notEqual(n.gancio, "scena");
   }
@@ -122,15 +126,15 @@ test("se lo stile nuovo con lo stesso gancio e' fra gli ultimi 3 cambia gia' al 
 test("una coppia stile+gancio oltre il terzo video non conta: il gancio resta", () => {
   const v: Variante = { ...VARIANTE_BASE, stile: "notte", gancio: "scena" };
   const recenti = [{ stile: "scrivania", gancio: "parola" }, { stile: "studio", gancio: "parola" }, { stile: "notte", gancio: "parola" }, { stile: "schermo", gancio: "scena" }] as Partial<Variante>[];
-  const n = prossimaVariante("x", v, 2, [v], recenti);
+  const n = prossimaVariante("x", v, 2, [v], recenti, PIU_STILI);
   assert.equal(n.stile, "schermo");
   assert.equal(n.gancio, "scena");
 });
 
 test("al terzo tentativo cambia anche il gancio", () => {
   const v1: Variante = { ...VARIANTE_BASE, stile: "scrivania", gancio: "scena" };
-  const v2 = prossimaVariante("slug", v1, 2, [v1], []);
-  const v3 = prossimaVariante("slug", v2, 3, [v1, v2], []);
+  const v2 = prossimaVariante("slug", v1, 2, [v1], [], PIU_STILI);
+  const v3 = prossimaVariante("slug", v2, 3, [v1, v2], [], PIU_STILI);
   assert.notEqual(v3.gancio, "scena");
   assert.ok(![v1.stile, v2.stile].includes(v3.stile));
 });
@@ -185,7 +189,7 @@ test("troppo simile: cambia variante, rifa' l'impaginazione e si ferma alla prim
   assert.deepEqual(f.chiamate.impaginazione, [`${v2.stile}/${v2.gancio}`]);
   assert.equal(f.chiamate.impronta.length, 2);
   assert.match(r.riga, /cambiata variante 1 volta/);
-  assert.match(r.riga, new RegExp(`${v2.stile}/scena`));
+  assert.match(r.riga, new RegExp(`ok con ${v2.stile}/${v2.gancio}`));
 });
 
 test("dopo 3 tentativi tutti sotto soglia tiene la piu' lontana e lo dice", async () => {
@@ -281,4 +285,13 @@ test("ffmpeg vero: un'immagine illeggibile e' un errore, non un'impronta", { ski
 
 test("la soglia sta fra 0 e 1", () => {
   assert.ok(SOGLIA > 0 && SOGLIA < 1);
+});
+
+
+test("con lo stile unico della rubrica la variante successiva resta nello stile e cambia il gancio", () => {
+  const unico: Valori = { ...ATTIVI, stile: ["cronaca"] };
+  const v: Variante = { ...VARIANTE_BASE, stile: "cronaca", gancio: "scena" };
+  const n = prossimaVariante("slug", v, 2, [v], [], unico);
+  assert.equal(n.stile, "cronaca");
+  assert.notEqual(n.gancio, "scena");
 });

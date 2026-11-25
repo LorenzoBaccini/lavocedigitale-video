@@ -6,17 +6,18 @@ import { ATTIVI, VARIANTE_BASE } from "../src/editoriale/variante.ts";
 import { avvisiNonAttivi, dettagliDaArgomenti, momentiDi, varianteDaArgomenti } from "./controlla-impaginazione.ts";
 
 test("un valore valido ma non ancora attivo si controlla con un avviso: il fotogramma mostra quello di base", () => {
-  assert.deepEqual(avvisiNonAttivi(VARIANTE_BASE), []);
-  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "schermo", durata: "corta" }), [], "oggi ogni durata e' attiva");
+  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "cronaca" }), []);
+  assert.deepEqual(avvisiNonAttivi(VARIANTE_BASE), ["stile scrivania non ancora attivo: si vede scrivania"], "gli stili di prima restano controllabili, con l'avviso");
+  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "cronaca", durata: "corta" }), [], "oggi ogni durata e' attiva");
   const soloMedia = { ...ATTIVI, durata: ["media"] as const };
-  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "schermo", durata: "corta" }, soloMedia), ["durata corta non ancora attivo: si vede media"]);
+  assert.deepEqual(avvisiNonAttivi({ ...VARIANTE_BASE, stile: "cronaca", durata: "corta" }, soloMedia), ["durata corta non ancora attivo: si vede media"]);
 });
 
 test("--variante sovrascrive solo i campi dati, sulla variante delle props", () => {
   assert.deepEqual(varianteDaArgomenti([], undefined), VARIANTE_BASE);
   assert.deepEqual(varianteDaArgomenti(["--variante=luce:sera,apertura:alta"], undefined), { ...VARIANTE_BASE, luce: "sera", apertura: "alta" });
   const props = { ...VARIANTE_BASE, musica: "notturno", luce: "sera", apertura: "radente" } as const;
-  assert.deepEqual(varianteDaArgomenti(["--variante=luce:mattino,fraseFinale:0"], props), { ...props, luce: "mattino", fraseFinale: 0 });
+  assert.deepEqual(varianteDaArgomenti(["--variante=luce:mattino,gancioTesto:errore"], props), { ...props, luce: "mattino", gancioTesto: "errore" });
 });
 
 test("valori sconosciuti di --variante ripiegano sull'aspetto approvato", () => {
@@ -31,7 +32,7 @@ test("--stile, --gancio, --chiusura e --durata forzano anche i valori non ancora
 });
 
 test("un valore sconosciuto di --stile e simili e' un errore, non un controllo silenzioso sullo stile di base", () => {
-  assert.throws(() => varianteDaArgomenti(["--stile=nott"], undefined), /--stile=nott: valori ammessi scrivania, studio, notte, schermo/);
+  assert.throws(() => varianteDaArgomenti(["--stile=nott"], undefined), /--stile=nott: valori ammessi scrivania, studio, notte, schermo, cronaca/);
   assert.throws(() => varianteDaArgomenti(["--durata=eterna"], undefined), /--durata/);
 });
 

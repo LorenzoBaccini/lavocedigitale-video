@@ -40,3 +40,19 @@ test("il wav ha la testata RIFF giusta", () => {
   assert.equal(b.readInt16LE(44 + 6), -32767);
   assert.equal(b.length, 44 + 8);
 });
+
+// conStanza aggiunge 0,2 s di coda di stanza
+test("i suoni del ritmo: whoosh di un quarto di secondo, tick brevissimo, colpo breve (piu' la coda di stanza)", () => {
+  assert.ok(FOLEY.whoosh, "whoosh");
+  const durata = (nome: string) => FOLEY[nome]()[0].length / SR;
+  assert.ok(durata("whoosh") >= 0.4 && durata("whoosh") <= 0.5, `whoosh ${durata("whoosh")}`);
+  assert.ok(durata("tick") <= 0.26, `tick ${durata("tick")}`);
+  assert.ok(durata("colpo") <= 0.55, `colpo ${durata("colpo")}`);
+});
+
+test("la crepa del reperto: breve, con uno schiocco acuto in testa", () => {
+  const [s] = FOLEY.crepa();
+  assert.ok(s.length / SR <= 0.75, `crepa ${s.length / SR}`);
+  const picco = (a: number, b: number) => s.slice(Math.round(a * SR), Math.round(b * SR)).reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+  assert.ok(picco(0, 0.03) > 2 * picco(0.3, 0.4), "lo schiocco sta in testa");
+});

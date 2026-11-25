@@ -1,4 +1,4 @@
-export const NOMI_STILI = ["scrivania", "studio", "notte", "schermo"] as const;
+export const NOMI_STILI = ["scrivania", "studio", "notte", "schermo", "cronaca"] as const;
 export type NomeStile = (typeof NOMI_STILI)[number];
 
 /** Come si passa da una scena all'altra. */
@@ -64,4 +64,10 @@ export interface Stile {
   transizione: Transizione;
   set: NomeSet;
   grafiche: Grafiche;
+  /** le due luci di taglio del set notturno; assente: ciano e magenta della notte */
+  luciSet?: { sinistra: string; destra: string };
+  /** titoli in maiuscolo */
+  maiuscole?: boolean;
+  /** il nastro segnaletico in testa al gancio e alla chiusura, con la scritta della rubrica; assente: l'etichetta della famiglia di gancio */
+  nastro?: string;
 }

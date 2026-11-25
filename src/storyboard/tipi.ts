@@ -1,4 +1,4 @@
-import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
+import type { NomeDurata } from "../editoriale/variante.ts";
 
 export type Oggetto = "portatile" | "chiavetta" | "smartphone" | "router" | "carta" | "nessuno";
 
@@ -19,6 +19,23 @@ export const PEZZI: readonly Pezzo[] = ["tessera", "documento", "lettore", "pin"
 /** I pittogrammi disegnati a tratto: un insieme chiuso, generico, senza marchi. */
 export type Simbolo = "lucchetto" | "batteria" | "wifi" | "segnale" | "posizione" | "altoparlante" | "documento" | "euro" | "calendario" | "scudo";
 export const SIMBOLI: readonly Simbolo[] = ["lucchetto", "batteria", "wifi", "segnale", "posizione", "altoparlante", "documento", "euro", "calendario", "scudo"];
+
+/**
+ * Gli oggetti grandi della scena `reperto`, ognuno con la sua reazione: il telefono con l'SMS si crepa, la chiamata
+ * in arrivo diventa rossa, la mail si marchia, la carta si spezza, il lucchetto si apre, i soldi volano via.
+ */
+export type Reperto = "telefono" | "chiamata" | "email" | "carta" | "lucchetto" | "soldi";
+export const REPERTI: readonly Reperto[] = ["telefono", "chiamata", "email", "carta", "lucchetto", "soldi"];
+/** I reperti che mostrano un testo della notizia: `messaggio` (l'SMS, l'oggetto della mail) e `mittente` (chi scrive o chiama). */
+export const CON_MESSAGGIO: readonly Reperto[] = ["telefono", "email"];
+export const CON_MITTENTE: readonly Reperto[] = ["telefono", "chiamata", "email"];
+
+/** I campi del reperto, nella scena `reperto` e nel gancio che si apre su un reperto. */
+export interface CampiReperto {
+  reperto: Reperto;
+  messaggio?: string;
+  mittente?: string;
+}
 
 /** Un passo della scena `passi`: il testo e, se serve, un pittogramma piccolo. */
 export interface Passo {
@@ -52,7 +69,8 @@ export interface PezzoSulTavolo {
 }
 
 export type Scena =
-  | { tipo: "gancio"; titolo: string; evidenza: string; sottotitolo: string; oggetto: Oggetto; schermata?: Schermata }
+  /** con `reperto` il gancio si apre sul reperto della notizia invece che sulla scrivania */
+  | ({ tipo: "gancio"; titolo: string; evidenza: string; sottotitolo: string; oggetto: Oggetto; schermata?: Schermata } & Partial<CampiReperto>)
   | { tipo: "allarme"; sopra: string; titolo: string; notifica?: string; mittente?: string; azione?: string; dispositivo?: Dispositivo }
   | { tipo: "oggetto"; etichetta: string; titolo: string; evidenza?: string; conferma?: string; indica?: string; oggetto: Oggetto; schermata?: Schermata; menu?: string[] }
   | { tipo: "data"; etichetta: string; data: string; barrato?: string; timbro?: string }
@@ -69,12 +87,34 @@ export type Scena =
   /** `luoghi`: uno con `punto` e `area`, due (partenza e arrivo) con `percorso` */
   | { tipo: "mappa"; etichetta: string; titolo: string; forma: FormaMappa; luoghi: string[] }
   | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
+  | ({ tipo: "reperto"; etichetta: string; titolo: string } & CampiReperto)
   | { tipo: "chiusura" };
+
+/** Come la voce dice la frase: diventa un tag di eleven_v3 davanti alla frase, mai nel `testo`. */
+export type Tono = "deciso" | "entusiasta" | "curioso" | "serio" | "sussurrato" | "sorpreso" | "ironico" | "drammatico" | "malizioso" | "ridendo" | "sospirando";
+export const TONI: readonly Tono[] = ["deciso", "entusiasta", "curioso", "serio", "sussurrato", "sorpreso", "ironico", "drammatico", "malizioso", "ridendo", "sospirando"];
+export const TAG_TONO: Record<Tono, string> = {
+  deciso: "",
+  entusiasta: "[excited]",
+  curioso: "[curious]",
+  serio: "[serious]",
+  sussurrato: "[whispers]",
+  sorpreso: "[surprised]",
+  ironico: "[sarcastic]",
+  drammatico: "[dramatically]",
+  malizioso: "[mischievously]",
+  ridendo: "[laughs]",
+  sospirando: "[sighs]",
+};
+/** Le reazioni forti: stancano se ripetute, al massimo `LIMITI.toniMarcati` per video. */
+export const TONI_MARCATI: readonly Tono[] = ["sussurrato", "ironico", "drammatico", "ridendo", "sospirando"];
 
 export interface Frase {
   testo: string;
   chiave: string;
   scena: Scena;
+  /** assente: `deciso` */
+  tono?: Tono;
 }
 
 export interface Storyboard {
@@ -84,46 +124,33 @@ export interface Storyboard {
   frasi: Frase[];
 }
 
-/** L'ultima frase che Claude scrive e la validazione pretende; la pipeline la sostituisce con una di `FRASI_CHIUSURA`. */
-export const TESTO_CHIUSURA = "Trovi tutto su la voce digitale punto it, il link è nel post.";
-
-/**
- * Le frasi finali dette davvero, indicizzate da `fraseFinale` della variante, con la loro chiave. Corte: l'indirizzo
- * e' scritto nella cartolina e nella fascia, non serve dirlo ogni volta.
- */
-export const FRASI_CHIUSURA = [
-  { testo: "Tutto su la voce digitale punto it.", chiave: "la voce digitale punto it" },
-  { testo: "Link nel post.", chiave: "Link nel post" },
-  { testo: "Il resto è nel link del post.", chiave: "link del post" },
-] as const;
-
 export interface LimitiDurata {
-  /** chiusura inclusa */
+  /** domanda finale inclusa */
   frasi: { min: number; max: number };
-  /** dette: le frasi prima della chiusura piu' la frase finale della variante, non `TESTO_CHIUSURA` */
+  /** tutte le frasi, domanda finale compresa */
   parole: { min: number; max: number };
-  /** circa, a 2,35 parole al secondo: lo legge solo il prompt */
+  /** circa, a 2,6 parole al secondo (voce a 1,1x): lo legge solo il prompt */
   secondi: { min: number; max: number };
 }
 
 /** Frasi e parole dette per ogni durata della variante: il prompt chiede quella scelta, la validazione la applica. */
 export const LIMITI_DURATA: Record<NomeDurata, LimitiDurata> = {
-  corta: { frasi: { min: 4, max: 5 }, parole: { min: 32, max: 46 }, secondi: { min: 15, max: 21 } },
-  media: { frasi: { min: 6, max: 8 }, parole: { min: 50, max: 72 }, secondi: { min: 23, max: 32 } },
-  lunga: { frasi: { min: 8, max: 9 }, parole: { min: 72, max: 88 }, secondi: { min: 32, max: 40 } },
+  corta: { frasi: { min: 4, max: 5 }, parole: { min: 28, max: 40 }, secondi: { min: 11, max: 16 } },
+  media: { frasi: { min: 5, max: 7 }, parole: { min: 40, max: 56 }, secondi: { min: 16, max: 22 } },
+  lunga: { frasi: { min: 7, max: 8 }, parole: { min: 56, max: 72 }, secondi: { min: 22, max: 28 } },
 };
 
 export const contaParole = (testo: string): number => testo.trim().split(/\s+/).filter(Boolean).length;
 
-/** Le parole che Claude scrive prima della chiusura: i limiti della durata meno la frase finale scelta. */
-export function paroleContenuto(durata: NomeDurata, fraseFinale: FraseFinale): { min: number; max: number } {
-  const { min, max } = LIMITI_DURATA[durata].parole;
-  const n = contaParole(FRASI_CHIUSURA[fraseFinale].testo);
-  return { min: min - n, max: max - n };
-}
-
 export const LIMITI = {
   testoFrase: 160,
+  /** il gancio: un'affermazione che si legge in un colpo d'occhio */
+  gancioParole: 10,
+  /** la domanda finale a chi guarda */
+  domandaParole: 12,
+  /** oltre, la domanda non sta nella fascia della chiusura integrata */
+  domandaCaratteri: 80,
+  toniMarcati: 3,
   titolo: 24,
   evidenza: 16,
   etichetta: 32,

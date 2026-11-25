@@ -24,7 +24,8 @@ def esatto(n: int, seme: int = 0) -> str:
     return out[:-1] + "e" if out.endswith(" ") else out
 
 
-CHIUSURA = {"testo": "Trovi tutto su la voce digitale punto it, il link è nel post.", "chiave": "link", "scena": {"tipo": "chiusura"}}
+# la domanda finale piu' lunga ammessa (12 parole): la chiusura piu' larga da impaginare
+CHIUSURA = {"testo": "E tu lo reinstalleresti da zero oppure passeresti subito a quello nuovo?", "chiave": "quello nuovo", "scena": {"tipo": "chiusura"}}
 
 
 def frase(testo: str, chiave: str, scena: dict) -> dict:

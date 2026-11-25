@@ -1,3 +1,4 @@
+import { CRONACA } from "./cronaca";
 import { NOTTE } from "./notte";
 import { SCHERMO } from "./schermo";
 import { SCRIVANIA } from "./scrivania";
@@ -10,7 +11,7 @@ export { StileVideo, useStile } from "./StileVideo";
 export { allineaFlesso, allineaTesto } from "./allinea";
 
 // studio qui e' la tinta cobalto; il video vero prende la sua dallo slug (stileDelVideo).
-export const STILI: Record<NomeStile, Stile> = { scrivania: SCRIVANIA, studio: studio("cobalto"), notte: NOTTE, schermo: SCHERMO };
+export const STILI: Record<NomeStile, Stile> = { scrivania: SCRIVANIA, studio: studio("cobalto"), notte: NOTTE, schermo: SCHERMO, cronaca: CRONACA };
 
 /** Lo stile di un video: quello della variante, con le scelte che dipendono dallo slug (la tinta dello studio). */
 export const stileDelVideo = (nome: NomeStile, slug: string): Stile => (nome === "studio" ? studio(tintaDi(slug)) : STILI[nome]);

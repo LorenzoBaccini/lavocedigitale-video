@@ -3,38 +3,35 @@ import { useCurrentFrame } from "remotion";
 
 import { Foglio } from "../editoriale/carta/Foglio";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { ENTRATA_CHIUSURA, INDIRIZZO, pianoChiusura, TESTATA } from "../editoriale/piani/chiusura";
+import { domandaScritta, INDIRIZZO, pianoChiusura } from "../editoriale/piani/chiusura";
 import { fase, uscita } from "../editoriale/regia";
 import { allineaFlesso, useStile } from "../editoriale/stili";
-import { Titolo } from "../editoriale/Titolo";
 import { MARGINE } from "../impaginazione";
 import { LogoMark } from "../Logo";
 import { LivelloVoce } from "../voce";
 import type { ScenaDi } from "./props";
 
-// La chiusura: il marchio stampato (le barre seguono la voce), la testata, l'indirizzo sottolineato a pennarello. Niente aloni.
+// La chiusura: la domanda a chi guarda, grande; in fondo il marchio e l'indirizzo, piccoli.
 export const Chiusura: React.FC<ScenaDi<"chiusura">> = (props) => {
   const f = useCurrentFrame();
   const stile = useStile();
   const livello = useContext(LivelloVoce);
   const { durata } = props;
   const piano = pianoChiusura(props, durata);
-  const t = fase(f, piano.testata, piano.testata + ENTRATA_CHIUSURA);
+  const domanda = domandaScritta(props);
+  const t = uscita(fase(f, 0, piano.domanda));
+  const allinea = allineaFlesso(stile);
+  const inchiostro = stile.colori.inchiostro.testo;
   return (
     <Foglio tipo="liscia" spinta={spintaFoglio(f, durata, piano.stacchi)}>
-      <div style={{ position: "absolute", top: 600, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allineaFlesso(stile) }}>
-        <div style={{ opacity: t, transform: `translateY(${(1 - uscita(t)) * 14}px)` }}>
-          <LogoMark size={300} color={stile.colori.inchiostro.testo} livello={livello} />
+      <div style={{ position: "absolute", top: 470, left: MARGINE, right: MARGINE, display: "flex", flexDirection: "column", alignItems: allinea }}>
+        <div data-impaginazione="titolo" style={{ fontFamily: stile.caratteri.titolo, fontWeight: 800, fontSize: (domanda.length <= 40 ? 96 : 82) / stile.larghezza, lineHeight: 1.12, color: inchiostro, textAlign: allinea === "center" ? "center" : "left", opacity: t, transform: `translateY(${(1 - t) * 24}px) scale(${0.94 + 0.06 * t})` }}>
+          {domanda}
         </div>
-        <div data-impaginazione="titolo" style={{ marginTop: 40, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: 100 / stile.larghezza, lineHeight: 1.1, color: stile.colori.inchiostro.testo, opacity: t }}>{TESTATA}</div>
-        <div style={{ width: 120, height: 3, background: stile.colori.inchiostro.testo, opacity: 0.6 * t, margin: "34px 0 30px" }} />
-        <Titolo
-          nome="indirizzo"
-          f={f}
-          tinta="grafica"
-          righe={[{ parole: [{ t: INDIRIZZO, da: piano.indirizzo }], size: 68, font: stile.caratteri.testo, peso: 600, sottolinea: { da: piano.sottolinea, durata: 10, colore: stile.colori.accentoSuChiaro, seme: 8 } }]}
-          style={{ alignSelf: "stretch" }}
-        />
+      </div>
+      <div style={{ position: "absolute", top: 1180, left: MARGINE, right: MARGINE, display: "flex", alignItems: "center", justifyContent: allinea, gap: 22, opacity: 0.75 * t }}>
+        <LogoMark size={90} color={inchiostro} livello={livello} />
+        <div data-impaginazione="indirizzo" style={{ fontFamily: stile.caratteri.testo, fontWeight: 700, fontSize: 44 / stile.larghezza, color: inchiostro }}>{INDIRIZZO}</div>
       </div>
     </Foglio>
   );

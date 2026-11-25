@@ -1,7 +1,7 @@
 import { dispositivoDi, schermataDi } from "../src/editoriale/set/ambiente.ts";
 import type { Variante } from "../src/editoriale/variante.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
-import { VIDEO_CONFRONTATI } from "../src/storyboard/valida.ts";
+import { segnoScena, VIDEO_CONFRONTATI } from "../src/storyboard/valida.ts";
 import type { Impronta } from "./somiglianza.ts";
 import { èImpronta } from "./somiglianza.ts";
 
@@ -15,6 +15,8 @@ export interface ScenaStorico {
   tipo: string;
   dispositivo?: string;
   schermata?: string;
+  /** il segno della scena (`segnoScena`): che cosa si vede nel gancio e nei reperti; assente nelle voci vecchie */
+  segno?: string;
 }
 
 export interface VoceStorico {
@@ -68,7 +70,9 @@ export function analizzaStorico(testo: string | null): Storico {
 export function riassunto(storyboard: Storyboard, variante: Variante, data: string, impronta?: Impronta): VoceStorico {
   const scene = storyboard.frasi.map(({ scena, testo }): ScenaStorico => {
     if (scena.tipo === "allarme" || scena.tipo === "rischio") return { tipo: scena.tipo, dispositivo: dispositivoDi(scena, testo) };
-    if (scena.tipo === "gancio" || scena.tipo === "oggetto") return { tipo: scena.tipo, schermata: schermataDi(scena, testo) };
+    if (scena.tipo === "gancio") return { tipo: scena.tipo, schermata: schermataDi(scena, testo), segno: segnoScena(scena) };
+    if (scena.tipo === "oggetto") return { tipo: scena.tipo, schermata: schermataDi(scena, testo) };
+    if (scena.tipo === "reperto") return { tipo: scena.tipo, segno: segnoScena(scena) };
     return { tipo: scena.tipo };
   });
   return { slug: storyboard.slug, data, scene, variante, ...(impronta && { impronta }) };
@@ -83,4 +87,4 @@ export function aggiungi(storico: Storico, voce: VoceStorico): Storico {
 
 /** Le sequenze di tipi (chiusura esclusa) degli ultimi video, per il prompt e per il controllo di varieta'. */
 export const sequenzeRecenti = (storico: Storico): string[][] =>
-  storico.recenti.slice(0, VIDEO_CONFRONTATI).map((v) => v.scene.map((s) => s.tipo).filter((t) => t !== "chiusura"));
+  storico.recenti.slice(0, VIDEO_CONFRONTATI).map((v) => v.scene.filter((s) => s.tipo !== "chiusura").map((s) => (typeof s.segno === "string" ? s.segno : s.tipo)));

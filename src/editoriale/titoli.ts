@@ -88,6 +88,11 @@ export function entroIl(parole: ParolaTitolo[], limite: number): ParolaTitolo[] 
 
 // larghezza media di un carattere del serif, in em; stima per eccesso (meglio una riga in piu' che una in meno)
 const CARATTERE = 0.52;
+// le maiuscole sono piu' larghe delle minuscole su cui e' tarata `Stile.larghezza`
+const MAIUSCOLE = 1.2;
+
+/** Larghezza dei caratteri dei titoli dello stile per `altezzaRighe`, maiuscolo compreso. */
+export const carattereTitoli = (stile: { larghezza: number; maiuscole?: boolean }) => stile.larghezza * (stile.maiuscole ? MAIUSCOLE : 1);
 
 /**
  * Altezza stimata di un blocco di righe del `Titolo` largo `larghezza`: ogni riga va a capo quante volte serve.

@@ -3,7 +3,7 @@ import { TITOLO_TOP } from "../../impaginazione";
 import type { PianoGancio } from "../piani/gancio";
 import type { Stile } from "../stili";
 import type { Riga } from "../Titolo";
-import { altezzaRighe } from "../titoli";
+import { altezzaRighe, carattereTitoli } from "../titoli";
 
 const DURATA_SOTTOLINEATURA = 9;
 const MARGINE_SCHERMO = 36;
@@ -19,6 +19,6 @@ export function titoloGancio(piano: PianoGancio, stile: Stile): { righe: Riga[];
     return [{ parole: scelte, size: corpo(testo, 136, 11, stile.larghezza, 76), peso: 700, sottolinea: { da: piano.sottolinea, durata: DURATA_SOTTOLINEATURA, colore: stile.colori.accento, seme: 4 } }];
   };
   const righe = [...riga(0, grande[0], false), ...riga(grande[0], grande[1], true), ...riga(grande[1], parole.length, false)];
-  const limite = TITOLO_TOP + altezzaRighe(righe.map((r) => ({ testo: r.parole.map((p) => p.t).join(" "), size: r.size })), undefined, stile.larghezza) + MARGINE_SCHERMO;
+  const limite = TITOLO_TOP + altezzaRighe(righe.map((r) => ({ testo: r.parole.map((p) => p.t).join(" "), size: r.size })), undefined, carattereTitoli(stile)) + MARGINE_SCHERMO;
   return { righe, limite };
 }

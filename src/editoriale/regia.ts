@@ -14,8 +14,8 @@ export const conPeso = (t: number) => {
   return 1 + (c + 1) * (s - 1) ** 3 + c * (s - 1) ** 2;
 };
 
-/** Un'inquadratura ferma oltre questi frame (~2,5 s) riceve un secondo accento. */
-export const PAUSA_MAX = 75;
+/** Un'inquadratura ferma oltre questi frame (1,5 s) riceve un secondo accento. */
+export const PAUSA_MAX = 45;
 
 /**
  * Accenti da aggiungere perche' fra due cambiamenti visibili non passino piu' di `max` frame:

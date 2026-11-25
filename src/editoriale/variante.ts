@@ -8,15 +8,15 @@ export const LUCI = ["calda", "chiara", "mattino", "sera"] as const;
 export const APERTURE = ["classica", "radente", "alta"] as const;
 export const GANCI = ["scena", "parola", "dettaglio", "diviso"] as const;
 export const CHIUSURE = ["cartolina", "integrata"] as const;
-/** l'indice della frase finale parlata in `FRASI_CHIUSURA` (storyboard/tipi.ts) */
-export const FRASI_FINALI = [0, 1, 2] as const;
+/** La famiglia del gancio scritto: il prompt la chiede a Claude (agent-video.md). */
+export const GANCI_TESTO = ["errore", "segreto", "posta", "smentita", "situazione"] as const;
 export const DURATE = ["corta", "media", "lunga"] as const;
 
 export type NomeLuce = (typeof LUCI)[number];
 export type NomeApertura = (typeof APERTURE)[number];
 export type NomeGancio = (typeof GANCI)[number];
 export type NomeChiusura = (typeof CHIUSURE)[number];
-export type FraseFinale = (typeof FRASI_FINALI)[number];
+export type NomeGancioTesto = (typeof GANCI_TESTO)[number];
 export type NomeDurata = (typeof DURATE)[number];
 
 /** L'aspetto di un video: tutto cio' che la pipeline sceglie dallo slug, indipendente dal copione. */
@@ -27,7 +27,7 @@ export interface Variante {
   stile: NomeStile;
   gancio: NomeGancio;
   chiusura: NomeChiusura;
-  fraseFinale: FraseFinale;
+  gancioTesto: NomeGancioTesto;
   durata: NomeDurata;
 }
 
@@ -35,20 +35,23 @@ export type Dimensione = keyof Variante;
 export type Valori = { [K in Dimensione]: readonly Variante[K][] };
 
 /** L'aspetto del video approvato (windows10): e' quello di chi non dichiara una variante. */
-export const VARIANTE_BASE: Variante = { musica: "caldo", luce: "calda", apertura: "classica", stile: "scrivania", gancio: "scena", chiusura: "cartolina", fraseFinale: 2, durata: "media" };
+export const VARIANTE_BASE: Variante = { musica: "caldo", luce: "calda", apertura: "classica", stile: "scrivania", gancio: "scena", chiusura: "cartolina", gancioTesto: "posta", durata: "media" };
 
 /** Tutti i valori validi: le props e le opzioni del controllo d'impaginazione possono forzarne uno qualsiasi. */
-export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APERTURE, stile: NOMI_STILI, gancio: GANCI, chiusura: CHIUSURE, fraseFinale: FRASI_FINALI, durata: DURATE };
+export const DIMENSIONI: Valori = { musica: NOMI_TEMI, luce: LUCI, apertura: APERTURE, stile: NOMI_STILI, gancio: GANCI, chiusura: CHIUSURE, gancioTesto: GANCI_TESTO, durata: DURATE };
 
 // Solo i valori gia' costruiti, elencati a mano: un valore aggiunto a DIMENSIONI non va in produzione da solo.
 export const ATTIVI: Valori = {
   musica: NOMI_TEMI,
   luce: LUCI,
   apertura: APERTURE,
-  stile: ["scrivania", "studio", "notte", "schermo"],
-  gancio: ["scena", "parola", "dettaglio", "diviso"],
-  chiusura: ["cartolina", "integrata"],
-  fraseFinale: [0, 1, 2],
+  // dal 24 novembre i video sono solo di cronaca tech: lo stile e' la firma della rubrica, sempre lo stesso
+  stile: ["cronaca"],
+  // dettaglio parte sul primo piano e scrive il gancio dopo: il fotogramma 0 deve gia' dirlo
+  gancio: ["scena", "parola", "diviso"],
+  // la fascia integrata scrive la domanda piccola in basso: il finale la vuole in grande
+  chiusura: ["cartolina"],
+  gancioTesto: GANCI_TESTO,
   durata: ["corta", "media", "lunga"],
 };
 
@@ -60,7 +63,7 @@ export const PROFONDITA: { [K in Dimensione]: number } = {
   stile: 2,
   gancio: 2,
   chiusura: 1,
-  fraseFinale: 1,
+  gancioTesto: 3,
   durata: 1,
 };
 

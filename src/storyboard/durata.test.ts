@@ -2,127 +2,93 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { ATTIVI, DURATE, FRASI_FINALI } from "../editoriale/variante.ts";
-import type { FraseFinale, NomeDurata } from "../editoriale/variante.ts";
+import { ATTIVI, DURATE } from "../editoriale/variante.ts";
+import type { NomeDurata } from "../editoriale/variante.ts";
 import type { Frase, Storyboard } from "./tipi.ts";
-import { contaParole, FORME_MAPPA, FRASI_CHIUSURA, LIMITI_DURATA, paroleContenuto, SIMBOLI, TESTO_CHIUSURA } from "./tipi.ts";
+import { contaParole, FORME_MAPPA, LIMITI_DURATA, SIMBOLI } from "./tipi.ts";
 import { erroriVarieta, somiglianza, validaStoryboard } from "./valida.ts";
 
 const fixture = (nome: string): Storyboard => JSON.parse(readFileSync(new URL(`../../fixtures/${nome}.storyboard.json`, import.meta.url), "utf8"));
 const AGENTE = readFileSync(new URL("../../agent-video.md", import.meta.url), "utf8");
-/** Le parole prima della chiusura: quelle che Claude scrive. */
-const contenutoDi = (sb: Storyboard): number => sb.frasi.slice(0, -1).reduce((t, f) => t + contaParole(f.testo), 0);
+const paroleDi = (sb: Storyboard): number => sb.frasi.reduce((t, f) => t + contaParole(f.testo), 0);
 
-/** Un copione di `frasi` frasi con `contenuto` parole prima della chiusura, scene alternate, chiusura del copione. */
-function copione(frasi: number, contenuto: number): Storyboard {
+const DOMANDA = "Tu lo sapevi?";
+
+/** Un copione di `frasi` frasi con `parole` parole in tutto: gancio corto, scene alternate, domanda finale di 3 parole. */
+function copione(frasi: number, parole: number): Storyboard {
   const n = frasi - 1;
+  const contenuto = parole - contaParole(DOMANDA);
   const scene: Frase["scena"][] = [{ tipo: "teaser", testo: "Ancora" }, { tipo: "citazione", testo: "Una frase", fonte: "Fonte" }];
+  // il gancio sta nelle sue 10 parole: il resto va alle frasi dopo
+  const gancio = Math.min(10, Math.floor(contenuto / n));
+  const resto = contenuto - gancio;
   return {
     slug: "copione",
     frasi: [
-      ...Array.from({ length: n }, (_, i) => {
-        const k = Math.floor(contenuto / n) + (i < contenuto % n ? 1 : 0);
-        return { testo: Array(k).fill("parola").join(" "), chiave: "parola", scena: scene[i % 2] };
+      { testo: Array(gancio).fill("parola").join(" "), chiave: "parola", tono: "curioso", scena: scene[0] },
+      ...Array.from({ length: n - 1 }, (_, i) => {
+        const k = Math.floor(resto / (n - 1)) + (i < resto % (n - 1) ? 1 : 0);
+        return { testo: Array(k).fill("parola").join(" "), chiave: "parola", tono: "curioso", scena: scene[(i + 1) % 2] };
       }),
-      { testo: TESTO_CHIUSURA, chiave: "il link", scena: { tipo: "chiusura" } },
+      { testo: DOMANDA, chiave: "sapevi", tono: "curioso", scena: { tipo: "chiusura" } },
     ],
   };
 }
 
-const errori = (sb: Storyboard, durata: NomeDurata, fraseFinale: FraseFinale): string[] => {
-  const esito = validaStoryboard(sb, durata, fraseFinale);
+const errori = (sb: Storyboard, durata: NomeDurata): string[] => {
+  const esito = validaStoryboard(sb, durata);
   return esito.ok ? [] : esito.errori;
 };
-const valeOvunque = (sb: Storyboard, durata: NomeDurata): string[] => FRASI_FINALI.flatMap((i) => errori(sb, durata, i).map((e) => `${i}: ${e}`));
 
-test("i limiti per durata sono quelli della spec; media e' quella di prima col tetto a 72 parole", () => {
+test("i limiti per durata sono quelli della spec del format veloce", () => {
   assert.deepEqual(LIMITI_DURATA, {
-    corta: { frasi: { min: 4, max: 5 }, parole: { min: 32, max: 46 }, secondi: { min: 15, max: 21 } },
-    media: { frasi: { min: 6, max: 8 }, parole: { min: 50, max: 72 }, secondi: { min: 23, max: 32 } },
-    lunga: { frasi: { min: 8, max: 9 }, parole: { min: 72, max: 88 }, secondi: { min: 32, max: 40 } },
+    corta: { frasi: { min: 4, max: 5 }, parole: { min: 28, max: 40 }, secondi: { min: 11, max: 16 } },
+    media: { frasi: { min: 5, max: 7 }, parole: { min: 40, max: 56 }, secondi: { min: 16, max: 22 } },
+    lunga: { frasi: { min: 7, max: 8 }, parole: { min: 56, max: 72 }, secondi: { min: 22, max: 28 } },
   });
   assert.deepEqual(Object.keys(LIMITI_DURATA), [...DURATE]);
   assert.deepEqual(ATTIVI.durata, ["corta", "media", "lunga"]);
 });
 
-test("le parole prima della chiusura sono i limiti meno la frase finale scelta (7, 3 e 7 parole)", () => {
-  assert.deepEqual(FRASI_CHIUSURA.map((f) => contaParole(f.testo)), [7, 3, 7]);
-  assert.deepEqual(paroleContenuto("corta", 0), { min: 25, max: 39 });
-  assert.deepEqual(paroleContenuto("corta", 1), { min: 29, max: 43 });
-  assert.deepEqual(paroleContenuto("lunga", 2), { min: 65, max: 81 });
-});
-
 for (const durata of DURATE) {
-  const { frasi } = LIMITI_DURATA[durata];
+  const { frasi, parole } = LIMITI_DURATA[durata];
 
-  for (const fraseFinale of FRASI_FINALI) {
-    const parole = paroleContenuto(durata, fraseFinale);
-
-    test(`${durata}, frase finale ${fraseFinale}: accetta i due estremi di parole dette, rifiuta una in meno e una in piu'`, () => {
-      for (const f of [frasi.min, frasi.max]) {
-        for (const p of [parole.min, parole.max]) assert.deepEqual(errori(copione(f, p), durata, fraseFinale), [], `${f} frasi, ${p} parole`);
-      }
-      for (const p of [parole.min - 1, parole.max + 1]) {
-        const dette = p + contaParole(FRASI_CHIUSURA[fraseFinale].testo);
-        assert.deepEqual(
-          errori(copione(frasi.min, p), durata, fraseFinale),
-          [`copione: ${p} parole prima della chiusura (${dette} dette con la frase finale), la durata ${durata} ne vuole da ${parole.min} a ${parole.max} prima della chiusura`],
-          `${p} parole`,
-        );
-      }
-    });
-  }
+  test(`${durata}: accetta i due estremi di parole, rifiuta una in meno e una in piu'`, () => {
+    for (const f of [frasi.min, frasi.max]) {
+      for (const p of [parole.min, parole.max]) assert.deepEqual(errori(copione(f, p), durata), [], `${f} frasi, ${p} parole`);
+    }
+    for (const p of [parole.min - 1, parole.max + 1]) {
+      assert.deepEqual(errori(copione(frasi.min, p), durata), [`copione: ${p} parole, la durata ${durata} ne vuole da ${parole.min} a ${parole.max}, domanda finale compresa`], `${p} parole`);
+    }
+  });
 
   test(`${durata}: rifiuta una frase in meno o in piu'`, () => {
-    const parole = paroleContenuto(durata, 0);
     for (const f of [frasi.min - 1, frasi.max + 1]) {
       const p = Math.min(Math.max(parole.min, f * 3), parole.max);
-      assert.deepEqual(errori(copione(f, p), durata, 0), [`frasi: ${f} frasi, la durata ${durata} ne vuole da ${frasi.min} a ${frasi.max}`], `${f} frasi`);
+      assert.deepEqual(errori(copione(f, p), durata), [`frasi: ${f} frasi, la durata ${durata} ne vuole da ${frasi.min} a ${frasi.max}`], `${f} frasi`);
     }
   });
 }
 
-test("conta le parole dette, non TESTO_CHIUSURA: 19 parole piu' la chiusura del copione fanno 32, ma non sono una corta", () => {
-  const sb = copione(4, 19);
-  assert.equal(contenutoDi(sb) + contaParole(TESTO_CHIUSURA), 32);
-  for (const i of FRASI_FINALI) assert.ok(errori(sb, "corta", i).some((e) => e.startsWith("copione: 19 parole prima della chiusura")), `${i}`);
-});
-
-test("la frase finale scelta decide: lo stesso copione e' corta con «Link nel post.» e non con le altre", () => {
-  const sb = copione(4, 40);
-  assert.deepEqual(errori(sb, "corta", 1), []);
-  assert.equal(errori(sb, "corta", 0).length, 1);
-  assert.equal(errori(sb, "corta", 2).length, 1);
-});
-
-test("le fixture della durata stanno al limite e passano con ogni frase finale, solo nella loro durata", () => {
+test("le fixture della durata passano solo nella loro durata", () => {
   const corta = fixture("durata-corta");
-  assert.deepEqual([corta.frasi.length, contenutoDi(corta)], [4, 29], "29 + 3 = 32, il minimo con «Link nel post.»");
-  assert.deepEqual(valeOvunque(corta, "corta"), []);
+  assert.deepEqual([corta.frasi.length, paroleDi(corta)], [4, 30]);
+  assert.deepEqual(errori(corta, "corta"), []);
   assert.deepEqual(erroriVarieta(corta, []), []);
-  assert.notDeepEqual(valeOvunque(corta, "media"), []);
+  assert.notDeepEqual(errori(corta, "media"), []);
 
   const lunga = fixture("durata-lunga");
-  assert.deepEqual([lunga.frasi.length, contenutoDi(lunga)], [9, 81], "81 + 7 = 88, il massimo con le frasi finali da 7");
-  assert.deepEqual(valeOvunque(lunga, "lunga"), []);
+  assert.deepEqual([lunga.frasi.length, paroleDi(lunga)], [8, 72], "il massimo della lunga");
+  assert.deepEqual(errori(lunga, "lunga"), []);
   assert.deepEqual(erroriVarieta(lunga, []), []);
-  assert.notDeepEqual(valeOvunque(lunga, "media"), []);
+  assert.notDeepEqual(errori(lunga, "media"), []);
 });
 
-test("chiusura-corta (4 frasi, 29 parole prima della chiusura) e' una corta con ogni frase finale, non una media", () => {
-  const sb = fixture("chiusura-corta");
-  assert.deepEqual([sb.frasi.length, contenutoDi(sb)], [4, 29]);
-  assert.deepEqual(valeOvunque(sb, "corta"), []);
-  assert.deepEqual(erroriVarieta(sb, []), [], "la pipeline la accetterebbe: 2 scene su 3 su un dispositivo");
-  assert.equal(sb.frasi[2].scena.tipo, "allarme", "la scena 3D corta subito prima della chiusura");
-  assert.ok(errori(sb, "media", 0).some((e) => e.startsWith("frasi: 4 frasi")));
-});
-
-test("windows10 (8 frasi, 64 parole prima della chiusura) e' una media con ogni frase finale, come VARIANTE_BASE", () => {
-  const sb = fixture("windows10");
-  assert.deepEqual([sb.frasi.length, contenutoDi(sb)], [8, 64]);
-  assert.deepEqual(valeOvunque(sb, "media"), []);
-  assert.notDeepEqual(valeOvunque(sb, "lunga"), []);
+test("veloce (8 frasi, 69 parole) e' una lunga, non una media", () => {
+  const sb = fixture("veloce");
+  assert.deepEqual([sb.frasi.length, paroleDi(sb)], [8, 69]);
+  assert.deepEqual(errori(sb, "lunga"), []);
+  assert.notDeepEqual(errori(sb, "media"), []);
 });
 
 test("la tabella delle durate in agent-video.md e' quella di LIMITI_DURATA, senza conteggi di parole scritti a mano", () => {
@@ -138,25 +104,26 @@ const ESEMPI = [...AGENTE.matchAll(/durata (corta|media|lunga)[^\n]*\n\n```json\
   sb: JSON.parse(json) as Storyboard,
 }));
 
-test("ogni esempio di agent-video.md passa la validazione e la varieta' nella durata che dichiara, con ognuna delle tre frasi finali", () => {
+test("ogni esempio di agent-video.md passa la validazione e la varieta' nella durata che dichiara", () => {
   assert.equal(ESEMPI.length, 4);
   for (const d of DURATE) assert.ok(ESEMPI.some((e) => e.durata === d), `c'e' un esempio ${d}`);
   for (const { durata, sb } of ESEMPI) {
-    assert.deepEqual(valeOvunque(sb, durata), [], `${sb.slug} (${durata})`);
+    assert.deepEqual(errori(sb, durata), [], `${sb.slug} (${durata})`);
     assert.deepEqual(erroriVarieta(sb, []), [], `${sb.slug} (${durata})`);
   }
 });
 
-// Claude imita gli esempi: se tutti hanno la notifica, ogni video ha la notifica.
-test("negli esempi di agent-video.md la notifica e' l'eccezione e compaiono tutte le scene senza dispositivo", () => {
+// Claude imita gli esempi: se tutti hanno la notifica, ogni video ha la notifica; se nessuno ha un tono, non lo usa.
+test("negli esempi di agent-video.md la notifica e' l'eccezione, ci sono le scene senza dispositivo e i toni", () => {
   const conAllarme = ESEMPI.filter((e) => e.sb.frasi.some((f) => f.scena.tipo === "allarme"));
   assert.equal(conAllarme.length, 1, "un solo esempio con allarme");
   const tipi = new Set(ESEMPI.flatMap((e) => e.sb.frasi.map((f) => f.scena.tipo)));
-  for (const t of ["simbolo", "passi", "flusso", "mappa"]) assert.ok(tipi.has(t), t);
+  for (const t of ["simbolo", "passi", "flusso", "mappa", "reperto"]) assert.ok(tipi.has(t), t);
+  for (const e of ESEMPI) assert.ok(e.sb.frasi.some((f) => f.tono !== undefined && f.tono !== "deciso"), `${e.sb.slug}: almeno un tono`);
 });
 
 test("agent-video.md descrive le scene nuove, i pittogrammi e le forme della mappa", () => {
-  for (const t of ["simbolo", "passi", "flusso", "mappa"]) assert.ok(AGENTE.includes(`| \`${t}\` |`), `riga della tabella per ${t}`);
+  for (const t of ["simbolo", "passi", "flusso", "mappa", "reperto"]) assert.ok(AGENTE.includes(`| \`${t}\` |`), `riga della tabella per ${t}`);
   for (const s of [...SIMBOLI, ...FORME_MAPPA]) assert.ok(AGENTE.includes(`\`${s}\``), s);
 });
 

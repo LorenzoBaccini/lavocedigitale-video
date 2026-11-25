@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { argomentiTaglio, chiaveElevenLabs, chiediAElevenLabs, MODELLO, VOCE_ID } from "./voce-elevenlabs.ts";
+import { argomentiTaglio, chiaveElevenLabs, chiediAElevenLabs, MODELLO, RITMO, STABILITA, testoVoce, VOCE_ID } from "./voce-elevenlabs.ts";
 
 const CHIAVE = "sk_finta_123";
 const ALLINEAMENTO = { characters: ["a"], character_start_times_seconds: [0], character_end_times_seconds: [0.1] };
@@ -30,7 +30,7 @@ test("una chiamata con voce, modello, lingua e chiave nell'intestazione", async 
   const { url, init } = f.chiamate[0];
   assert.equal(url, `https://api.elevenlabs.io/v1/text-to-speech/${VOCE_ID}/with-timestamps?output_format=mp3_44100_128`);
   assert.equal((init.headers as Record<string, string>)["xi-api-key"], CHIAVE);
-  assert.deepEqual(JSON.parse(init.body as string), { text: "Ciao a tutti.", model_id: MODELLO, language_code: "it" });
+  assert.deepEqual(JSON.parse(init.body as string), { text: "Ciao a tutti.", model_id: MODELLO, language_code: "it", voice_settings: { stability: STABILITA } });
   assert.ok(init.signal);
 });
 
@@ -69,4 +69,13 @@ test("il taglio è esatto al campione, con dissolvenze di 10 ms e senza silenzio
   assert.deepEqual(a.slice(0, 4), ["-y", "-v", "error", "-i"]);
   assert.equal(a[a.indexOf("-af") + 1], "atrim=start=1.69:end=4.2,asetpts=PTS-STARTPTS,afade=t=in:d=0.01,afade=t=out:st=2.5:d=0.01");
   assert.equal(a.at(-1), "s1.wav");
+});
+
+test("il testo per la voce mette il tag del tono davanti a ogni frase; deciso e assente non hanno tag", () => {
+  assert.equal(testoVoce([{ testo: "A b.", tono: "serio" }, { testo: "C d." }, { testo: "E f?", tono: "deciso" }, { testo: "G.", tono: "sussurrato" }, { testo: "H.", tono: "ridendo" }]), "[serious] A b. C d. E f? [whispers] G. [laughs] H.");
+});
+
+test("stabilita' creative, la piu' espressiva, e voce a 1,1x", () => {
+  assert.equal(STABILITA, 0);
+  assert.equal(RITMO, 1.1);
 });

@@ -29,22 +29,22 @@ test("musica, luce e apertura evitano i valori degli ultimi n-1 video", () => {
   }
 });
 
-test("stile e gancio evitano gli ultimi 2 video; chiusura, frase finale e durata l'ultimo", () => {
+test("stile e gancio evitano gli ultimi 2 video; gancio testo gli ultimi 3; chiusura e durata l'ultimo", () => {
   assert.deepEqual(
-    { stile: PROFONDITA.stile, gancio: PROFONDITA.gancio, chiusura: PROFONDITA.chiusura, fraseFinale: PROFONDITA.fraseFinale, durata: PROFONDITA.durata },
-    { stile: 2, gancio: 2, chiusura: 1, fraseFinale: 1, durata: 1 },
+    { stile: PROFONDITA.stile, gancio: PROFONDITA.gancio, chiusura: PROFONDITA.chiusura, gancioTesto: PROFONDITA.gancioTesto, durata: PROFONDITA.durata },
+    { stile: 2, gancio: 2, chiusura: 1, gancioTesto: 3, durata: 1 },
   );
   const recenti: Partial<Variante>[] = [
-    { stile: "notte", gancio: "parola", chiusura: "integrata", fraseFinale: 0, durata: "corta" },
-    { stile: "studio", gancio: "diviso", chiusura: "cartolina", fraseFinale: 1, durata: "lunga" },
-    { stile: "schermo", gancio: "dettaglio", chiusura: "cartolina", fraseFinale: 2, durata: "media" },
+    { stile: "notte", gancio: "parola", chiusura: "integrata", gancioTesto: "errore", durata: "corta" },
+    { stile: "studio", gancio: "diviso", chiusura: "cartolina", gancioTesto: "segreto", durata: "lunga" },
+    { stile: "schermo", gancio: "dettaglio", chiusura: "cartolina", gancioTesto: "posta", durata: "media" },
   ];
   const scelte = SLUGS.map((s) => scegliVariante(s, recenti, DIMENSIONI));
   for (const v of scelte) {
     assert.ok(!["notte", "studio"].includes(v.stile));
     assert.ok(!["parola", "diviso"].includes(v.gancio));
     assert.equal(v.chiusura, "cartolina");
-    assert.notEqual(v.fraseFinale, 0);
+    assert.ok(!["errore", "segreto", "posta"].includes(v.gancioTesto));
     assert.notEqual(v.durata, "corta");
   }
   // il terzo video indietro non esclude piu': lo stile schermo e la durata lunga tornano possibili
@@ -53,11 +53,11 @@ test("stile e gancio evitano gli ultimi 2 video; chiusura, frase finale e durata
 });
 
 test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate non ancora costruiti restano fuori", () => {
-  assert.deepEqual(ATTIVI.stile, ["scrivania", "studio", "notte", "schermo"]);
-  assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "dettaglio", "diviso"]);
-  assert.deepEqual(ATTIVI.chiusura, ["cartolina", "integrata"]);
+  assert.deepEqual(ATTIVI.stile, ["cronaca"], "la rubrica ha un solo stile, la sua firma");
+  assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "diviso"]);
+  assert.deepEqual(ATTIVI.chiusura, ["cartolina"]);
   assert.deepEqual(ATTIVI.durata, ["corta", "media", "lunga"]);
-  assert.deepEqual(ATTIVI.fraseFinale, [0, 1, 2]);
+  assert.deepEqual(ATTIVI.gancioTesto, ["errore", "segreto", "posta", "smentita", "situazione"]);
   for (const s of SLUGS) {
     const v = scegliVariante(s, [{ stile: "scrivania", gancio: "scena", chiusura: "cartolina", durata: "media" }]);
     for (const k of Object.keys(ATTIVI) as (keyof Variante)[]) assert.ok(ATTIVI[k].includes(v[k] as never), `${s} ${k}`);
@@ -108,7 +108,7 @@ test("voci vecchie senza i campi nuovi non escludono niente, tranne lo stile che
 test("le props senza variante o con valori sconosciuti hanno l'aspetto approvato", () => {
   assert.deepEqual(varianteDi(undefined), VARIANTE_BASE);
   assert.deepEqual(varianteDi({ luce: "neon" as never, apertura: "alta" }), { ...VARIANTE_BASE, apertura: "alta" });
-  assert.deepEqual(varianteDi({ stile: "notte", durata: "eterna" as never, fraseFinale: 0 }), { ...VARIANTE_BASE, stile: "notte", fraseFinale: 0 });
+  assert.deepEqual(varianteDi({ stile: "notte", durata: "eterna" as never, gancioTesto: "smentita" }), { ...VARIANTE_BASE, stile: "notte", gancioTesto: "smentita" });
 });
 
 test("la variante di base e' il video di oggi", () => {
@@ -138,9 +138,10 @@ test("le scelte delle dimensioni non vanno di pari passo", () => {
   const coppia = (a: keyof Variante, b: keyof Variante) => new Set(video.map((v) => `${v[a]}|${v[b]}`)).size;
   // con valori legati ogni valore di una dimensione ne avrebbe uno solo dell'altra
   assert.ok(coppia("stile", "durata") > ATTIVI.stile.length, "stile e durata");
-  assert.ok(coppia("gancio", "fraseFinale") > ATTIVI.gancio.length, "gancio e frase finale");
-  assert.ok(coppia("stile", "chiusura") > ATTIVI.stile.length, "stile e chiusura");
-  assert.ok(coppia("durata", "fraseFinale") > ATTIVI.durata.length, "durata e frase finale");
-  const combinazioni = new Set(video.map((v) => [v.stile, v.gancio, v.durata, v.fraseFinale, v.chiusura].join("|")));
-  assert.ok(combinazioni.size > 100, `${combinazioni.size} combinazioni di stile, gancio, durata, frase finale e chiusura`);
+  assert.ok(coppia("gancio", "gancioTesto") > ATTIVI.gancio.length, "gancio e gancio testo");
+  assert.ok(coppia("gancio", "durata") > ATTIVI.gancio.length, "gancio e durata");
+  assert.ok(coppia("durata", "gancioTesto") > ATTIVI.durata.length, "durata e gancio testo");
+  const combinazioni = new Set(video.map((v) => [v.stile, v.gancio, v.durata, v.gancioTesto, v.chiusura].join("|")));
+  const possibili = ATTIVI.stile.length * ATTIVI.gancio.length * ATTIVI.durata.length * ATTIVI.gancioTesto.length * ATTIVI.chiusura.length;
+  assert.ok(combinazioni.size > 0.6 * possibili, `${combinazioni.size} combinazioni su ${possibili} di stile, gancio, durata, gancio testo e chiusura`);
 });

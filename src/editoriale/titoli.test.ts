@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { CRONACA } from "./stili/cronaca.ts";
 import { NOTTE } from "./stili/notte.ts";
-import { altezzaRighe, paroleInAccento, paroleTitolo } from "./titoli.ts";
+import { altezzaRighe, carattereTitoli, paroleInAccento, paroleTitolo } from "./titoli.ts";
 import type { Voce } from "./voce.ts";
 
 const voce = (parole: [string, number][]): Voce => ({ parole: parole.map(([t, da]) => ({ t, da, a: da + 5 })), chiave: 0, chiaveFine: 1 });
@@ -37,4 +38,13 @@ test("col mono della notte un titolo vicino all'a capo conta una riga in piu'", 
   const riga = [{ testo: "a".repeat(30), size: 56 }];
   assert.ok(Math.abs(altezzaRighe(riga, 920) - 56 * 1.12) < 1e-9);
   assert.ok(Math.abs(altezzaRighe(riga, 920, NOTTE.larghezza) - 2 * 56 * 1.12) < 1e-9);
+});
+
+test("coi titoli in maiuscolo la stima allarga i caratteri: la camera non sale sotto un titolo andato a capo", () => {
+  assert.equal(carattereTitoli(NOTTE), NOTTE.larghezza);
+  assert.ok(carattereTitoli(CRONACA) > CRONACA.larghezza * 1.15);
+  // 20 caratteri a 70 px: in minuscolo stanno in una riga, in maiuscolo no
+  const riga = [{ testo: "a".repeat(20), size: 70 }];
+  assert.ok(Math.abs(altezzaRighe(riga, 920, CRONACA.larghezza) - 70 * 1.12) < 1e-9);
+  assert.ok(Math.abs(altezzaRighe(riga, 920, carattereTitoli(CRONACA)) - 2 * 70 * 1.12) < 1e-9);
 });

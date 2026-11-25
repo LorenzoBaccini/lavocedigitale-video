@@ -25,6 +25,15 @@ function parola(caratteri: string[], inizi: number[], fini: number[], da: number
   return { testo: caratteri.slice(da, a).join(""), inizio: inizi[dentro[0]], fine: fini[dentro[dentro.length - 1]] };
 }
 
+// eleven_v3 restituisce anche i tag di regia («[whispers]»), con un loro intervallo: non sono parole dette
+const TAG = /^\[[^\]]*\]$/;
+
+/** I tempi divisi per `ritmo`: l'allineamento della voce accelerata con `atempo`. */
+export function accelera(allineamento: Allineamento, ritmo: number): Allineamento {
+  const scala = (t: number[]) => t.map((s) => arrotonda(s / ritmo));
+  return { characters: allineamento.characters, character_start_times_seconds: scala(allineamento.character_start_times_seconds), character_end_times_seconds: scala(allineamento.character_end_times_seconds) };
+}
+
 export function paroleDaAllineamento(allineamento: Allineamento): ParolaAllineata[] {
   const { characters: c, character_start_times_seconds: inizi, character_end_times_seconds: fini } = allineamento;
   const parole: ParolaAllineata[] = [];
@@ -33,7 +42,8 @@ export function paroleDaAllineamento(allineamento: Allineamento): ParolaAllineat
     const spazio = i === c.length || /\s/u.test(c[i]);
     if (!spazio && da < 0) da = i;
     if (spazio && da >= 0) {
-      parole.push(parola(c, inizi, fini, da, i));
+      const p = parola(c, inizi, fini, da, i);
+      if (!TAG.test(p.testo)) parole.push(p);
       da = -1;
     }
   }

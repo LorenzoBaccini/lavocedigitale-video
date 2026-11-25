@@ -121,7 +121,6 @@ const FORZABILI = ["stile", "gancio", "chiusura", "durata"] as const;
 export function varianteDaArgomenti(argomenti: string[], base: Variante | undefined): Variante {
   const valore = (nome: string) => argomenti.find((a) => a.startsWith(`--${nome}=`))?.slice(nome.length + 3);
   const campi: Record<string, unknown> = Object.fromEntries((valore("variante") ?? "").split(",").filter(Boolean).map((c) => c.split(":")));
-  if (campi.fraseFinale !== undefined) campi.fraseFinale = Number(campi.fraseFinale);
   for (const k of FORZABILI) {
     const v = valore(k);
     if (v === undefined) continue;

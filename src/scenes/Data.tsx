@@ -34,8 +34,9 @@ export const Data: React.FC<ScenaDi<"data">> = (props) => {
   const cy = GRIGLIA.y + Math.floor(pagina.casella / 7) * CELLA.h + CELLA.h / 2;
   const yBarrato = fondoGriglia + 40;
   // la larghezza del barrato, stimata sul corsivo: il segno e' a mano, non serve al pixel
-  const largo = Math.min(LARGHEZZA - 2 * MARGINE, (barrato?.length ?? 0) * CORPO_BARRATO * 0.47);
-  const barra = sottolineatura(largo, 21).map(([x, y]) => [LARGHEZZA / 2 - largo / 2 + x, yBarrato + CORPO_BARRATO * 0.68 + y] as [number, number]);
+  const corpoBarrato = CORPO_BARRATO / stile.larghezza;
+  const largo = Math.min(LARGHEZZA - 2 * MARGINE, (barrato?.length ?? 0) * corpoBarrato * 0.47 * stile.larghezza);
+  const barra = sottolineatura(largo, 21).map(([x, y]) => [LARGHEZZA / 2 - largo / 2 + x, yBarrato + corpoBarrato * 0.68 + y] as [number, number]);
   const colpo = piano.timbro === undefined ? 0 : fase(f, piano.timbro, piano.timbro + 3);
   return (
     <Foglio tipo="agenda" spinta={spintaFoglio(f, durata, piano.stacchi)}>
@@ -59,7 +60,7 @@ export const Data: React.FC<ScenaDi<"data">> = (props) => {
       {barrato && piano.scritto !== undefined && (
         <>
           <div style={{ position: "absolute", top: yBarrato, left: MARGINE, right: MARGINE, display: "flex", justifyContent: "center" }}>
-            <div data-impaginazione="barrato" style={{ fontFamily: stile.caratteri.titolo, fontStyle: "italic", fontWeight: 600, fontSize: CORPO_BARRATO, lineHeight: 1.2, color: stile.colori.inchiostro.testo, whiteSpace: "nowrap", opacity: fase(f, piano.scritto, piano.scritto + 6) }}>{barrato}</div>
+            <div data-impaginazione="barrato" style={{ fontFamily: stile.caratteri.titolo, fontStyle: "italic", fontWeight: 600, fontSize: corpoBarrato, lineHeight: 1.2, color: stile.colori.inchiostro.testo, whiteSpace: "nowrap", opacity: fase(f, piano.scritto, piano.scritto + 6) }}>{barrato}</div>
           </div>
           <SegnoInQuadro punti={barra} colore={stile.colori.accentoSuChiaro} spessore={9} progresso={(f - (piano.barra ?? 0)) / 12} />
         </>

@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { DISPOSITIVI, FORME_MAPPA, OGGETTI, SCHERMATE, SIMBOLI } from "./tipi.ts";
-import { validaStoryboard } from "./valida.ts";
+import { DISPOSITIVI, FORME_MAPPA, OGGETTI, REPERTI, SCHERMATE, SIMBOLI } from "./tipi.ts";
+import { erroriVarieta, validaStoryboard } from "./valida.ts";
 
 const leggi = (): any =>
   JSON.parse(readFileSync(new URL("../../fixtures/veloce.storyboard.json", import.meta.url), "utf8"));
@@ -139,13 +139,13 @@ test("le fixture con i testi al limite passano la validazione", () => {
 });
 
 // le scene senza dispositivo hanno le loro fixture al limite, `scene-nuove` e `scene-nuove-2`
-const SCENE_NUOVE = ["scene-nuove.storyboard.json", "scene-nuove-2.storyboard.json"].map(fixture);
+const SCENE_NUOVE = ["scene-nuove.storyboard.json", "scene-nuove-2.storyboard.json", "reperti.storyboard.json"].map(fixture);
 
 test("le fixture al limite coprono tutti i tipi di scena e tutti gli oggetti", () => {
   const scene = AL_LIMITE.flatMap((sb) => sb.frasi.map((f: any) => f.scena));
   const tipi = new Set([...AL_LIMITE, ...SCENE_NUOVE].flatMap((sb) => sb.frasi.map((f: any) => f.scena.tipo)));
   const oggetti = new Set([...scene, ...leggi().frasi.map((f: any) => f.scena)].map((s: any) => s.oggetto));
-  const TUTTI = ["gancio", "allarme", "oggetto", "data", "checklist", "rischio", "telefono", "documenti", "teaser", "numero", "confronto", "citazione", "simbolo", "passi", "flusso", "mappa", "chiusura"];
+  const TUTTI = ["gancio", "allarme", "oggetto", "data", "checklist", "rischio", "telefono", "documenti", "teaser", "numero", "confronto", "citazione", "simbolo", "passi", "flusso", "mappa", "reperto", "chiusura"];
   for (const t of TUTTI) assert.ok(tipi.has(t), t);
   for (const d of DISPOSITIVI) assert.ok(scene.some((s: any) => s.dispositivo === d) || d === "portatile", d);
   for (const sc of SCHERMATE) assert.ok(scene.some((s: any) => s.schermata === sc) || sc === "sistema", sc);
@@ -421,4 +421,33 @@ test("la domanda finale sta in 80 caratteri: oltre non entra nella fascia della 
   sb.frasi[7].testo = "Preferiresti disattivare definitivamente l'aggiornamento automatico oppure tenerlo?";
   sb.frasi[7].chiave = "tenerlo";
   assert.ok(errori(sb).some((e) => e.startsWith("frasi[7].testo: la domanda finale ha 83 caratteri, al massimo 80")));
+});
+
+test("reperto: un oggetto dell'elenco, messaggio solo sul telefono, al massimo due per video", () => {
+  const sb = leggi();
+  sb.frasi[4].scena = { tipo: "reperto", etichetta: "Il messaggio", titolo: "x".repeat(24), reperto: "telefono", messaggio: "y".repeat(64) };
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  sb.frasi[4].scena.reperto = "pistola";
+  assert.ok(errori(sb).includes(`frasi[4].scena.reperto: deve essere uno tra ${REPERTI.join(", ")}`));
+  sb.frasi[4].scena.reperto = "telefono";
+  sb.frasi[4].scena.messaggio = "y".repeat(65);
+  assert.ok(errori(sb).includes("frasi[4].scena.messaggio: 65 caratteri, massimo 64"));
+  sb.frasi[4].scena.reperto = "carta";
+  sb.frasi[4].scena.messaggio = "Paga 1,99 euro";
+  assert.ok(errori(sb).includes("frasi[4].scena.messaggio: il messaggio solo sul telefono"));
+  delete sb.frasi[4].scena.messaggio;
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  sb.frasi[2].scena = { tipo: "reperto", etichetta: "La carta", titolo: "Spezzata", reperto: "lucchetto" };
+  sb.frasi[6].scena = { tipo: "reperto", etichetta: "La carta", titolo: "Spezzata", reperto: "carta" };
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  assert.ok(erroriVarieta(sb, []).some((e) => e.startsWith("sequenza: 3 scene «reperto», al massimo 2")));
+});
+
+test("reperti: la fixture ha i tre reperti, testi al limite e un telefono senza messaggio", () => {
+  const sb = fixture("reperti.storyboard.json");
+  assert.deepEqual(erroriDiCampo(sb), []);
+  const reperti = sb.frasi.filter((f: any) => f.scena.tipo === "reperto").map((f: any) => f.scena);
+  for (const r of REPERTI) assert.ok(reperti.some((s: any) => s.reperto === r), r);
+  assert.ok(reperti.some((s: any) => s.titolo.length === 24 && s.etichetta.length === 32));
+  assert.ok(reperti.some((s: any) => s.reperto === "telefono" && s.messaggio === undefined));
 });

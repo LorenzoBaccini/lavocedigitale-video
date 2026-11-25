@@ -49,3 +49,10 @@ test("i suoni del ritmo: whoosh di un quarto di secondo, tick brevissimo, colpo 
   assert.ok(durata("tick") <= 0.26, `tick ${durata("tick")}`);
   assert.ok(durata("colpo") <= 0.55, `colpo ${durata("colpo")}`);
 });
+
+test("la crepa del reperto: breve, con uno schiocco acuto in testa", () => {
+  const [s] = FOLEY.crepa();
+  assert.ok(s.length / SR <= 0.75, `crepa ${s.length / SR}`);
+  const picco = (a: number, b: number) => s.slice(Math.round(a * SR), Math.round(b * SR)).reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+  assert.ok(picco(0, 0.03) > 2 * picco(0.3, 0.4), "lo schiocco sta in testa");
+});

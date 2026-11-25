@@ -1,6 +1,6 @@
 import type { NomeDurata } from "../editoriale/variante.ts";
 import { normalizza } from "../sottotitoli.ts";
-import { contaParole, DISPOSITIVI, FORME_MAPPA, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, SCHERMATE, SIMBOLI, TONI, TONI_MARCATI } from "./tipi.ts";
+import { contaParole, DISPOSITIVI, FORME_MAPPA, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, REPERTI, SCHERMATE, SIMBOLI, TONI, TONI_MARCATI } from "./tipi.ts";
 import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -226,6 +226,13 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "titolo", p, LIMITI.titolo, e);
     if (s.barrato !== undefined && typeof s.barrato !== "boolean") e.push(`${p}.barrato: vero o falso`);
   },
+  reperto: (s, p, e) => {
+    testo(s, "etichetta", p, LIMITI.etichetta, e);
+    testo(s, "titolo", p, LIMITI.titolo, e);
+    if (!REPERTI.includes(s.reperto as never)) e.push(`${p}.reperto: deve essere uno tra ${REPERTI.join(", ")}`);
+    testo(s, "messaggio", p, LIMITI.notifica, e, true);
+    if (s.messaggio !== undefined && s.reperto !== "telefono") e.push(`${p}.messaggio: il messaggio solo sul telefono`);
+  },
   chiusura: () => {},
 };
 
@@ -337,6 +344,8 @@ export function somiglianza(a: string[], b: string[]): number {
 
 /** Le notifiche sono un'eccezione: una sola per video. */
 export const MASSIMO_ALLARMI = 1;
+/** I reperti sono il colpo del video: se ogni frase ne ha uno, non colpisce piu'. */
+export const MASSIMO_REPERTI = 2;
 /** Al massimo meta' delle scene (chiusura esclusa) su un dispositivo, il resto su carta. */
 export const massimoSuDispositivo = (scene: number) => Math.ceil(scene / 2);
 
@@ -365,6 +374,10 @@ export function erroriVarieta(storyboard: Storyboard, recenti: string[][]): stri
   const allarmi = sequenza.filter((t) => t === "allarme").length;
   if (allarmi > MASSIMO_ALLARMI) {
     errori.push(`sequenza: ${allarmi} scene «allarme», al massimo ${MASSIMO_ALLARMI}: la notifica solo se l'articolo parla di un messaggio vero, per le altre frasi scegli un'altra scena`);
+  }
+  const reperti = sequenza.filter((t) => t === "reperto").length;
+  if (reperti > MASSIMO_REPERTI) {
+    errori.push(`sequenza: ${reperti} scene «reperto», al massimo ${MASSIMO_REPERTI}: tienilo per il momento in cui succede il fatto`);
   }
   const sui = storyboard.frasi.filter((f) => suDispositivo(f.scena)).length;
   const tetto = massimoSuDispositivo(sequenza.length);

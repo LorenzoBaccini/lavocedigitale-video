@@ -1,0 +1,10 @@
+{
+  "slug": "reperti",
+  "frasi": [
+    { "testo": "Arriva un SMS: il tuo pacco è in giacenza, paga un euro e novantanove per riceverlo.", "chiave": "paga", "tono": "malizioso", "scena": { "tipo": "reperto", "etichetta": "Il messaggio", "titolo": "Il pacco non esiste", "reperto": "telefono", "messaggio": "Pacco in giacenza. Paga 1,99 € entro oggi: consegna-pacchi.info" } },
+    { "testo": "Inserisci i dati della carta e in pochi minuti ti svuotano il conto.", "chiave": "svuotano", "tono": "drammatico", "scena": { "tipo": "reperto", "etichetta": "Cosa succede dopo", "titolo": "CONTO SVUOTATO IN MINUTI", "reperto": "carta" } },
+    { "testo": "Poi provano a entrare anche nella tua posta, con la stessa password.", "chiave": "password", "tono": "serio", "scena": { "tipo": "reperto", "etichetta": "Comune sportello accesso credenz", "titolo": "Sportello accesso creden", "reperto": "lucchetto" } },
+    { "testo": "Lo stesso SMS arriva senza testo leggibile a molti.", "chiave": "SMS", "scena": { "tipo": "reperto", "etichetta": "Schermo", "titolo": "Bloccato", "reperto": "telefono" } },
+    { "testo": "Ti è arrivato anche a te?", "chiave": "arrivato", "scena": { "tipo": "chiusura" } }
+  ]
+}

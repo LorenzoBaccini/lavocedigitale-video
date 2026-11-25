@@ -10,7 +10,7 @@ export interface TestoAschermo {
 
 /** Nomi dei foley generati da `suoni/foley.ts`. */
 // i segni a mano (pennarello, penna) sono muti: il loro fruscio sulle parole evidenziate disturbava la voce
-export type NomeFoley = "notifica" | "tonfo" | "timbro" | "clic" | "carta" | "whoosh" | "tick" | "colpo";
+export type NomeFoley = "notifica" | "tonfo" | "timbro" | "clic" | "carta" | "whoosh" | "tick" | "colpo" | "crepa";
 
 export interface Effetto {
   da: number;

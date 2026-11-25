@@ -118,12 +118,12 @@ test("negli esempi di agent-video.md la notifica e' l'eccezione, ci sono le scen
   const conAllarme = ESEMPI.filter((e) => e.sb.frasi.some((f) => f.scena.tipo === "allarme"));
   assert.equal(conAllarme.length, 1, "un solo esempio con allarme");
   const tipi = new Set(ESEMPI.flatMap((e) => e.sb.frasi.map((f) => f.scena.tipo)));
-  for (const t of ["simbolo", "passi", "flusso", "mappa"]) assert.ok(tipi.has(t), t);
+  for (const t of ["simbolo", "passi", "flusso", "mappa", "reperto"]) assert.ok(tipi.has(t), t);
   for (const e of ESEMPI) assert.ok(e.sb.frasi.some((f) => f.tono !== undefined && f.tono !== "deciso"), `${e.sb.slug}: almeno un tono`);
 });
 
 test("agent-video.md descrive le scene nuove, i pittogrammi e le forme della mappa", () => {
-  for (const t of ["simbolo", "passi", "flusso", "mappa"]) assert.ok(AGENTE.includes(`| \`${t}\` |`), `riga della tabella per ${t}`);
+  for (const t of ["simbolo", "passi", "flusso", "mappa", "reperto"]) assert.ok(AGENTE.includes(`| \`${t}\` |`), `riga della tabella per ${t}`);
   for (const s of [...SIMBOLI, ...FORME_MAPPA]) assert.ok(AGENTE.includes(`\`${s}\``), s);
 });
 

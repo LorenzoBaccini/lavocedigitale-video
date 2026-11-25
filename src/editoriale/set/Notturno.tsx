@@ -7,7 +7,7 @@ import { Portatile } from "./Portatile";
 import type { PropsSet } from "./Scrivania";
 
 // Quasi buio: due luci di taglio da dietro (ciano a sinistra, magenta a destra), un riempimento debole, lo schermo che illumina.
-const Luci: React.FC<{ chiave: number; sinistra: string; destra: string }> = ({ chiave, sinistra, destra }) => {
+export const LuciNotte: React.FC<{ chiave: number; sinistra: string; destra: string }> = ({ chiave, sinistra, destra }) => {
   const schermo = puntoSchermo(1280, 800).addScaledVector(NORMALE, 1.5);
   return (
     <>
@@ -37,7 +37,7 @@ const Luci: React.FC<{ chiave: number; sinistra: string; destra: string }> = ({ 
 };
 
 // Il piano: scuro, satinato (riflette morbido le luci colorate), abbastanza largo da perdersi nel buio.
-const Piano: React.FC = () => (
+export const PianoNotte: React.FC = () => (
   <mesh rotation-x={-Math.PI / 2} receiveShadow>
     <planeGeometry args={[80, 80]} />
     <meshStandardMaterial color="#0c0e12" roughness={0.38} metalness={0.35} />
@@ -47,8 +47,8 @@ const Piano: React.FC = () => (
 /** Il set della notte: gli stessi dispositivi della scrivania, senza taccuino, su un piano scuro nel buio. */
 export const Notturno: React.FC<PropsSet & { fondo: string; luci?: { sinistra: string; destra: string } }> = ({ camera, schermo, notifica, orologio, luce = 1, dettagli, fondo, luci = { sinistra: CIANO, destra: MAGENTA }, children }) => (
   <Palco camera={camera} fondo={fondo}>
-    <Luci chiave={luce} sinistra={luci.sinistra} destra={luci.destra} />
-    <Piano />
+    <LuciNotte chiave={luce} sinistra={luci.sinistra} destra={luci.destra} />
+    <PianoNotte />
     <Portatile schermo={schermo} notifica={notifica} orologio={{ ora: dettagli.ora, data: orologio }} />
     {children}
   </Palco>

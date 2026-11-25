@@ -20,6 +20,10 @@ export const PEZZI: readonly Pezzo[] = ["tessera", "documento", "lettore", "pin"
 export type Simbolo = "lucchetto" | "batteria" | "wifi" | "segnale" | "posizione" | "altoparlante" | "documento" | "euro" | "calendario" | "scudo";
 export const SIMBOLI: readonly Simbolo[] = ["lucchetto", "batteria", "wifi", "segnale", "posizione", "altoparlante", "documento", "euro", "calendario", "scudo"];
 
+/** Gli oggetti grandi della scena `reperto`, ognuno con la sua reazione: il telefono si crepa, la carta si spezza, il lucchetto si apre. */
+export type Reperto = "telefono" | "carta" | "lucchetto";
+export const REPERTI: readonly Reperto[] = ["telefono", "carta", "lucchetto"];
+
 /** Un passo della scena `passi`: il testo e, se serve, un pittogramma piccolo. */
 export interface Passo {
   testo: string;
@@ -69,6 +73,8 @@ export type Scena =
   /** `luoghi`: uno con `punto` e `area`, due (partenza e arrivo) con `percorso` */
   | { tipo: "mappa"; etichetta: string; titolo: string; forma: FormaMappa; luoghi: string[] }
   | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
+  /** `messaggio`: il testo dell'SMS sullo schermo, solo con `telefono` */
+  | { tipo: "reperto"; etichetta: string; titolo: string; reperto: Reperto; messaggio?: string }
   | { tipo: "chiusura" };
 
 /** Come la voce dice la frase: diventa un tag di eleven_v3 davanti alla frase, mai nel `testo`. */

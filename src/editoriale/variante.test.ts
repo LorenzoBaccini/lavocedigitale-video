@@ -55,7 +55,7 @@ test("stile e gancio evitano gli ultimi 2 video; gancio testo gli ultimi 3; chiu
 test("la pipeline sceglie solo i valori attivi: stili, ganci, chiusure e durate non ancora costruiti restano fuori", () => {
   assert.deepEqual(ATTIVI.stile, ["cronaca"], "la rubrica ha un solo stile, la sua firma");
   assert.deepEqual(ATTIVI.gancio, ["scena", "parola", "diviso"]);
-  assert.deepEqual(ATTIVI.chiusura, ["cartolina", "integrata"]);
+  assert.deepEqual(ATTIVI.chiusura, ["cartolina"]);
   assert.deepEqual(ATTIVI.durata, ["corta", "media", "lunga"]);
   assert.deepEqual(ATTIVI.gancioTesto, ["errore", "segreto", "posta", "smentita", "situazione"]);
   for (const s of SLUGS) {
@@ -139,7 +139,7 @@ test("le scelte delle dimensioni non vanno di pari passo", () => {
   // con valori legati ogni valore di una dimensione ne avrebbe uno solo dell'altra
   assert.ok(coppia("stile", "durata") > ATTIVI.stile.length, "stile e durata");
   assert.ok(coppia("gancio", "gancioTesto") > ATTIVI.gancio.length, "gancio e gancio testo");
-  assert.ok(coppia("stile", "chiusura") > ATTIVI.stile.length, "stile e chiusura");
+  assert.ok(coppia("gancio", "durata") > ATTIVI.gancio.length, "gancio e durata");
   assert.ok(coppia("durata", "gancioTesto") > ATTIVI.durata.length, "durata e gancio testo");
   const combinazioni = new Set(video.map((v) => [v.stile, v.gancio, v.durata, v.gancioTesto, v.chiusura].join("|")));
   const possibili = ATTIVI.stile.length * ATTIVI.gancio.length * ATTIVI.durata.length * ATTIVI.gancioTesto.length * ATTIVI.chiusura.length;

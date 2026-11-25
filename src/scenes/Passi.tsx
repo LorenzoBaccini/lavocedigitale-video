@@ -15,7 +15,7 @@ import type { ScenaDi } from "./props";
 
 const CERCHIO = 112;
 const SIMBOLO = 96;
-const ALTEZZA_MASSIMA = 240;
+const ALTEZZA_MASSIMA = 300;
 const RIGHE_TOP = SOTTO_OCCHIELLO;
 
 // I passi su un quaderno a quadretti: ogni numero si cerchia a penna quando la voce arriva al passo, con il suo
@@ -52,7 +52,7 @@ export const Passi: React.FC<ScenaDi<"passi">> = (props) => {
                     {passo.simbolo && <Pittogramma simbolo={passo.simbolo} lato={SIMBOLO} colore={stile.colori.inchiostro.testo} progresso={avanzamento(f, da + 4, 14)} spessore={8} />}
                   </div>
                 )}
-                <div data-impaginazione="voce" style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(passo.testo, 58, 22, stile.larghezza, 40), lineHeight: 1.12, color: stile.colori.inchiostro.testo }}>{passo.testo}</div>
+                <div data-impaginazione="voce" style={{ minWidth: 0, fontFamily: stile.caratteri.titolo, fontWeight: 700, fontSize: corpo(passo.testo, 70, 20, stile.larghezza, 40), lineHeight: 1.12, color: stile.colori.inchiostro.testo }}>{passo.testo}</div>
               </div>
             );
           })}

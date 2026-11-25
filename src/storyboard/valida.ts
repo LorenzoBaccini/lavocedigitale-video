@@ -245,6 +245,8 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
 };
 
 const RIMANDI = new Set(["link", "articolo", "articoli"]);
+// engagement bait: Meta abbassa la distribuzione dei video che chiedono di commentare, condividere, taggare o seguire
+const ESCA = /\b(comment[aio]\w*|condivid\w*|tagga\w*|like|iscriviti|segui(ci|mi|teci)|fammi sapere|fatemi sapere|scrivilo|scrivetelo)\b/i;
 
 function validaFrase(frase: unknown, i: number, errori: string[]): number {
   const p = `frasi[${i}]`;
@@ -265,6 +267,7 @@ function validaFrase(frase: unknown, i: number, errori: string[]): number {
     if (frase.testo.split(/[^\p{L}]+/u).some((w) => RIMANDI.has(normalizza(w)))) {
       errori.push(`${p}.testo: niente rimandi al link o all'articolo, il video dà la soluzione intera`);
     }
+    if (ESCA.test(frase.testo)) errori.push(`${p}.testo: non chiedere commenti, like, condivisioni o follow, Meta lo penalizza; la domanda basta`);
   }
   unoTra(frase, "tono", TONI, p, errori);
   const scena = frase.scena;

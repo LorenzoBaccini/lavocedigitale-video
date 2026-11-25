@@ -49,7 +49,7 @@ export const ATTIVI: Valori = {
   stile: ["cronaca"],
   // dettaglio parte sul primo piano e scrive il gancio dopo: il fotogramma 0 deve gia' dirlo
   gancio: ["scena", "parola", "diviso"],
-  // la fascia integrata scrive la domanda piccola in basso: il finale deve chiedere il commento in grande
+  // la fascia integrata scrive la domanda piccola in basso: il finale la vuole in grande
   chiusura: ["cartolina"],
   gancioTesto: GANCI_TESTO,
   durata: ["corta", "media", "lunga"],

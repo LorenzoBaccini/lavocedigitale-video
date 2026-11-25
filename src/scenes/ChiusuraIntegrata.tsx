@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useCurrentFrame } from "remotion";
 
-import { domandaScritta, ENTRATA_CHIUSURA, INVITO, pianoChiusura } from "../editoriale/piani/chiusura";
+import { domandaScritta, ENTRATA_CHIUSURA, INDIRIZZO, pianoChiusura } from "../editoriale/piani/chiusura";
 import { fase, uscita } from "../editoriale/regia";
 import { allineaFlesso, useStile } from "../editoriale/stili";
 import { conAlfa } from "../editoriale/stili/alfa";
@@ -19,14 +19,14 @@ export const FASCIA = { y: FONDO_UTILE - 10, altezza: 290 };
 const VELO_FERMA = 0.35;
 
 // La chiusura integrata: sopra l'ultima scena, ferma (vedi Ferma) e un po' velata, entra la fascia nei colori dello
-// stile con la domanda detta e l'invito a commentare, coi tempi della cartolina.
+// stile con la domanda detta e, a voce finita, il marchio con l'indirizzo, coi tempi della cartolina.
 export const ChiusuraIntegrata: React.FC<ScenaDi<"chiusura">> = (props) => {
   const f = useCurrentFrame();
   const stile = useStile();
   const livello = useContext(LivelloVoce);
   const piano = pianoChiusura(props, props.durata);
   const t = uscita(fase(f, 0, ENTRATA_CHIUSURA));
-  const invito = uscita(fase(f, piano.invito, piano.invito + ENTRATA_CHIUSURA));
+  const marchio = uscita(fase(f, piano.marchio, piano.marchio + ENTRATA_CHIUSURA));
   const domanda = domandaScritta(props);
   const allinea = allineaFlesso(stile);
   return (
@@ -41,10 +41,10 @@ export const ChiusuraIntegrata: React.FC<ScenaDi<"chiusura">> = (props) => {
         <div data-impaginazione="sottotitolo" style={{ fontFamily: stile.caratteri.titolo, fontWeight: 800, fontSize: (domanda.length <= 45 ? 58 : 48) / stile.larghezza, lineHeight: 1.1, color: stile.colori.testo, textAlign: allinea === "center" ? "center" : "left" }}>
           {domanda}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: invito, transform: `translateY(${(1 - invito) * 16}px)` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, opacity: marchio, transform: `translateY(${(1 - marchio) * 16}px)` }}>
           <LogoMark size={64} color={stile.colori.testo} livello={livello} />
-          <div data-impaginazione="sottotitolo" style={{ fontFamily: stile.caratteri.testo, fontWeight: 800, fontSize: 44 / stile.larghezza, color: stile.colori.accento }}>
-            {INVITO} ↓
+          <div data-impaginazione="sottotitolo" style={{ fontFamily: stile.caratteri.testo, fontWeight: 700, fontSize: 40 / stile.larghezza, color: stile.colori.testo }}>
+            {INDIRIZZO}
           </div>
         </div>
       </div>

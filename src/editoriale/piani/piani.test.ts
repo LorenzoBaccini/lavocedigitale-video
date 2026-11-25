@@ -12,7 +12,7 @@ import { CORPO_NOTIFICA } from "../set/disegni.ts";
 import { CORPO_NOTIFICA_TELEFONO, NOTIFICA_TELEFONO_PX, rettangoloTelefono } from "../set/telefono.ts";
 import { cameraAllarme, cameraAllarmeTelefono, NOTIFICA_IN_QUADRO, pianoAllarme } from "./allarme.ts";
 import { pianoChecklist } from "./checklist.ts";
-import { INDIRIZZO, INVITO, pianoChiusura } from "./chiusura.ts";
+import { INDIRIZZO, pianoChiusura } from "./chiusura.ts";
 import { pianoData } from "./data.ts";
 import { FRECCIA, PASSO_NOTE, pianoDocumenti } from "./documenti.ts";
 import { pianoGancio } from "./gancio.ts";
@@ -99,15 +99,17 @@ test("sul portatile indica e' il pulsante: si cerchia dopo i titoli e prima dell
   assert.ok(piano.testi.some((t) => t.testo === "Iscriviti ora"));
 });
 
-test("la chiusura scrive subito la domanda, poi l'invito a commentare quando la voce ha finito", () => {
+// Meta penalizza i video che chiedono commenti, like o condivisioni, anche scritti nel video: solo la domanda.
+test("la chiusura scrive subito la domanda e non chiede di commentare; il marchio entra quando la voce ha finito", () => {
   const sb: Storyboard = { slug: "x", frasi: [{ testo: "Tu lo reinstalleresti o cambieresti PC?", chiave: "cambieresti PC", scena: { tipo: "chiusura" } }] };
   const [p] = senzaVoce(sb, 2.5);
   if (p.tipo !== "chiusura") throw new Error("chiusura");
   const piano = pianoChiusura(p, p.durata);
   assert.ok(piano.domanda <= 6, `domanda a ${piano.domanda}`);
   const ultima = p.voce.parole.at(-1)!;
-  assert.ok(piano.invito >= ultima.da, `invito a ${piano.invito}, ultima parola a ${ultima.da}`);
-  assert.deepEqual(piano.testi.map((t) => t.testo), ["Tu lo reinstalleresti o cambieresti PC?", INVITO, INDIRIZZO]);
+  assert.ok(piano.marchio >= ultima.da, `marchio a ${piano.marchio}, ultima parola a ${ultima.da}`);
+  assert.deepEqual(piano.testi.map((t) => t.testo), ["Tu lo reinstalleresti o cambieresti PC?", INDIRIZZO]);
+  assert.ok(piano.testi.every((t) => !/comment|condivid|like|segui/i.test(t.testo)));
 });
 
 test("con ogni domanda, anche brevissima, la chiusura scrive tutto prima della fine", () => {
@@ -117,7 +119,7 @@ test("con ogni domanda, anche brevissima, la chiusura scrive tutto prima della f
       const [p] = senzaVoce(sb, secondi);
       if (p.tipo !== "chiusura") throw new Error("chiusura");
       const piano = pianoChiusura(p, p.durata);
-      assert.ok(piano.invito + 12 <= p.durata, `${testo} ${secondi}s: invito ${piano.invito} su ${p.durata}`);
+      assert.ok(piano.marchio + 12 <= p.durata, `${testo} ${secondi}s: marchio ${piano.marchio} su ${p.durata}`);
       assert.ok(piano.testi.every((t) => t.da < p.durata));
     }
   }

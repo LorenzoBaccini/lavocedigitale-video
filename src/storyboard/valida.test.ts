@@ -377,6 +377,19 @@ test("niente rimandi al link o all'articolo, ma Linkedin passa", () => {
   assert.ok(!(validaStoryboard(sb, "lunga").ok ? [] : (validaStoryboard(sb, "lunga") as any).errori).some((e: string) => e.startsWith("frasi[5].testo")));
 });
 
+test("mai chiedere commenti, like, condivisioni o follow: Meta lo penalizza anche detto nel video", () => {
+  const sb = nuovo();
+  const ultima = sb.frasi.length - 1;
+  for (const testo of ["Scrivilo nei commenti: a te è successo?", "Condividi con chi usa Windows, ti è successo?", "Fammi sapere: a te è successo?", "Tagga un amico: a te è successo?", "Metti like se a te è successo?", "Commenta: a te è successo?"]) {
+    sb.frasi[ultima].testo = testo;
+    sb.frasi[ultima].chiave = "successo";
+    assert.ok(errori(sb).includes(`frasi[${ultima}].testo: non chiedere commenti, like, condivisioni o follow, Meta lo penalizza; la domanda basta`), testo);
+  }
+  sb.frasi[ultima].testo = "A te è mai successo?";
+  const esito = validaStoryboard(sb, "lunga");
+  assert.ok(esito.ok || !esito.errori.some((e) => e.startsWith(`frasi[${ultima}].testo: non chiedere`)));
+});
+
 test("nessuna parentesi quadra nel testo: ElevenLabs la leggerebbe come regia", () => {
   const sb = nuovo();
   sb.frasi[5].testo = "Poi iscrivi il PC all'ESU [beta].";

@@ -4,6 +4,8 @@ export interface FacebookResult {
   ok: boolean;
   postId?: string;
   error?: string;
+  /** il reel e' uscito ma qualcosa di contorno no (il commento col link) */
+  avviso?: string;
 }
 
 async function graphPost(path: string, params: Record<string, string>): Promise<Record<string, unknown>> {
@@ -23,10 +25,12 @@ async function graphPost(path: string, params: Record<string, string>): Promise<
 /**
  * Pubblica un Reel sulla pagina in tre fasi: start (crea il video e restituisce l'id), upload
  * (Facebook scarica il file dal nostro URL https, che deve restare raggiungibile fino alla fine)
- * e finish (pubblica con la descrizione). Limite: 30 Reel via API ogni 24 ore.
- * Env: FB_PAGE_ID e FB_PAGE_TOKEN (token di pagina, scope `pages_manage_posts`).
+ * e finish (pubblica con la descrizione). Poi il `commento` col link sotto il reel: se non passa il reel resta e
+ * torna un avviso. Limite: 30 Reel via API ogni 24 ore.
+ * Env: FB_PAGE_ID e FB_PAGE_TOKEN (token di pagina, scope `pages_manage_posts`; per il commento anche
+ * `pages_manage_engagement`).
  */
-export async function postReelToFacebook(videoUrl: string, description: string): Promise<FacebookResult> {
+export async function postReelToFacebook(videoUrl: string, description: string, commento?: string): Promise<FacebookResult> {
   const pageId = process.env.FB_PAGE_ID;
   const token = process.env.FB_PAGE_TOKEN;
   if (!pageId || !token) {
@@ -54,7 +58,14 @@ export async function postReelToFacebook(videoUrl: string, description: string):
       description,
       access_token: token,
     });
-    return { ok: true, postId: typeof r.post_id === "string" ? r.post_id : videoId };
+    const postId = typeof r.post_id === "string" ? r.post_id : videoId;
+    if (!commento) return { ok: true, postId };
+    try {
+      await graphPost(`/${videoId}/comments`, { message: commento, access_token: token });
+      return { ok: true, postId };
+    } catch (e) {
+      return { ok: true, postId, avviso: `commento col link non pubblicato: ${e instanceof Error ? e.message : String(e)}` };
+    }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }

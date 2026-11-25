@@ -115,8 +115,11 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    `https://lavocedigitale.it/images/video/<slug>.mp4`. Poi lo storico, prima dei post: se non si
    scrive, non si posta.
 6. **Post**: Reel su Facebook (`pipeline/canali/facebook.ts`), X via Buffer
-   (`pipeline/canali/buffer.ts`) con il testo di `pipeline/post-video.ts` (il gancio, la domanda finale, il
-   link, gli hashtag, nei 280 caratteri di X: se non ci sta via gli hashtag, poi la domanda). Poi il resoconto di solo testo su Telegram privato.
+   (`pipeline/canali/buffer.ts`) con il testo di `pipeline/post-video.ts` (il gancio, la domanda finale, gli
+   hashtag, nei 280 caratteri di X: se non ci sta via gli hashtag, poi la domanda). Il link all'articolo va nel
+   primo commento: sotto il reel su Facebook (serve anche `pages_manage_engagement` sul token), come risposta in
+   thread su X. Se il commento non passa il post resta, con un ⚠ nel resoconto (su X esce il video col link nel
+   testo). Poi il resoconto di solo testo su Telegram privato.
 
 Ogni errore chiude il job con il resoconto su Telegram; se il job cade fuori da node (setup,
 timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta
@@ -330,13 +333,14 @@ domande da 64 caratteri con la chiave da 18 all'inizio, in mezzo e in fondo.
 
 L'ultima frase è una domanda a chi guarda, scritta da Claude (regola 6 di `agent-video.md`): sì o no, una scelta fra
 due, la propria esperienza. La domanda è scritta per intero entro 4 frame (chi guarda muto la legge mentre la voce la
-dice); quando la voce ha finito entra «Scrivilo nei commenti» (`INVITO`) con una freccia verso il basso
-(`piani/chiusura.ts`). Dopo l'ultima parola la chiusura resta 1,5 s (`CODA_S` in `linea.ts`): il tempo di leggere la
+dice). Nessun invito a commentare, condividere o mettere like, né scritto né detto: dal 2019 Meta penalizza
+l'engagement bait anche dentro il video; una domanda genuina sull'esperienza di chi guarda invece è ammessa
+(`piani/chiusura.ts`, fonti in `docs/superpowers/specs/2026-11-25-viralita.md`). Dopo l'ultima parola la chiusura resta 1,5 s (`CODA_S` in `linea.ts`): il tempo di leggere la
 domanda; la musica esce in tutta la coda.
 
 **cartolina** (`scenes/Chiusura.tsx`): la scheda finale sulla superficie delle grafiche dello stile (`Foglio`: carta,
 poster, griglia, scheda). La domanda in grande (96 px fino a 40 caratteri, 82 oltre, divisi per la `larghezza` dello
-stile), sotto l'invito con la freccia che pulsa, in fondo marchio e indirizzo piccoli.
+stile), in fondo marchio e indirizzo piccoli.
 
 **integrata**: nessuna scena finale. In `Notizia` l'ultima scena di contenuto resta montata anche per la durata della
 chiusura dentro `Ferma` (`editoriale/Ferma.tsx`): oltre la sua fine vede sempre il suo ultimo frame (lo stesso trucco della
@@ -345,10 +349,10 @@ sequenza) e si avvicina piano del 2 % (`scalaFerma` in `editoriale/fermo.ts`). N
 lampo dello stile: la chiusura non è un cambio di scena. Sopra, la scena ferma si vela (il `velo` dello stile al 35 %) e
 la fascia (`scenes/ChiusuraIntegrata.tsx`) sale dal basso in 6 frame, nel velo dello stile col filo dell'accento in cima:
 la domanda (58 px fino a 45 caratteri, 48 oltre, divisi per la `larghezza` dello stile) e sotto, quando la voce ha
-finito, il marchio piccolo con l'invito a commentare (tempi della cartolina). La fascia sta nel terzo basso, da
+finito, il marchio piccolo con l'indirizzo (tempi della cartolina). La fascia sta nel terzo basso, da
 `FONDO_UTILE - 10` (1350) per 290 px: sopra ci sono i titoli bassi delle scene, che finiscono prima di `FONDO_UTILE`, e
 una fascia più alta li coprirebbe in quasi ogni scena del set. Prende il posto del sottotitolo, che durante la chiusura
-integrata non c'è (`Overlay`): la fascia scrive la domanda e l'invito. I suoi testi si misurano come sottotitolo (nella sua zona,
+integrata non c'è (`Overlay`): la fascia scrive la domanda e l'indirizzo. I suoi testi si misurano come sottotitolo (nella sua zona,
 mai sopra), e la fascia pubblica il suo ingombro pieno (`data-ingombro="fascia"`): il controllo d'impaginazione segnala
 ogni testo della scena ferma che le finisse sotto. Niente fruscio della carta: non c'è un foglio. Sotto la fascia
 grana e vignettatura seguono la scena ferma, non la chiusura (`Overlay`). Vale uguale in schermo: la fascia è 2D e

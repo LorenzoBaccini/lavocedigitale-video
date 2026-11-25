@@ -68,6 +68,30 @@ test("il reel fa start, upload con file_url, finish PUBLISHED", async () => {
   assert.match(finish, /description=testo/);
 });
 
+test("il reel pubblica poi il link nel primo commento", async () => {
+  process.env.FB_PAGE_ID = "123";
+  process.env.FB_PAGE_TOKEN = "tok";
+  fakeFetch([{ body: { video_id: "v1" } }, { body: { success: true } }, { body: { success: true, post_id: "p1" } }, { body: { id: "c1" } }]);
+
+  const r = await postReelToFacebook(VIDEO, "testo", "L'articolo: https://lavocedigitale.it/a");
+
+  assert.equal(r.ok, true);
+  assert.equal(r.avviso, undefined);
+  assert.equal(calls[3].url, "https://graph.facebook.com/v25.0/v1/comments");
+  assert.match(String(calls[3].init.body), /message=L%27articolo%3A\+https/);
+});
+
+test("se il commento col link non passa il reel resta pubblicato, con un avviso", async () => {
+  process.env.FB_PAGE_ID = "123";
+  process.env.FB_PAGE_TOKEN = "tok";
+  fakeFetch([{ body: { video_id: "v1" } }, { body: { success: true } }, { body: { success: true, post_id: "p1" } }, { status: 403, body: { error: { message: "permesso mancante" } } }]);
+
+  const r = await postReelToFacebook(VIDEO, "testo", "link");
+
+  assert.equal(r.ok, true);
+  assert.match(r.avviso ?? "", /permesso mancante/);
+});
+
 test("il reel restituisce ok false se lo start fallisce", async () => {
   process.env.FB_PAGE_ID = "123";
   process.env.FB_PAGE_TOKEN = "tok";
@@ -89,6 +113,33 @@ test("postVideoToX manda l'asset video", async () => {
 
   assert.deepEqual(r, { ok: true, postId: "b1" });
   assert.match(String(calls[0].init.body), /"assets":\[\{"video":\{"url":"https:\/\/example.com\/x.mp4"\}\}\]/);
+});
+
+test("postVideoToX con il commento fa un thread: il video nel primo post, il link nella risposta", async () => {
+  process.env.BUFFER_API_KEY = "k";
+  process.env.BUFFER_X_CHANNEL_ID = "c";
+  fakeFetch([{ body: { data: { createPost: { post: { id: "b1" } } } } }]);
+
+  const r = await postVideoToX("ciao", VIDEO, "link https://lavocedigitale.it/a");
+
+  assert.deepEqual(r, { ok: true, postId: "b1" });
+  const input = JSON.parse(String(calls[0].init.body)).variables.input;
+  assert.equal(input.text, "ciao");
+  assert.deepEqual(input.metadata.twitter.thread, [{ text: "ciao", assets: [{ video: { url: VIDEO } }] }, { text: "link https://lavocedigitale.it/a" }]);
+});
+
+test("se Buffer rifiuta il thread, il video esce da solo col link nel testo", async () => {
+  process.env.BUFFER_API_KEY = "k";
+  process.env.BUFFER_X_CHANNEL_ID = "c";
+  fakeFetch([{ body: { errors: [{ message: "thread non valido" }] } }, { body: { data: { createPost: { post: { id: "b2" } } } } }]);
+
+  const r = await postVideoToX("ciao", VIDEO, "link https://lavocedigitale.it/a");
+
+  assert.equal(r.ok, true);
+  assert.match(r.avviso ?? "", /thread non valido/);
+  const input = JSON.parse(String(calls[1].init.body)).variables.input;
+  assert.equal(input.text, "ciao\n\nlink https://lavocedigitale.it/a");
+  assert.equal(input.metadata, undefined);
 });
 
 test("sendMessageToOwner usa sendMessage e la chat privata", async () => {

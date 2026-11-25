@@ -48,8 +48,8 @@ export interface Dipendenze {
   render: (props: PropsNotizia, uscita: string) => Promise<void>;
   /** Restituisce l'URL pubblico del video caricato. */
   caricaVideo: (file: string, slug: string) => Promise<string>;
-  postReelToFacebook: (videoUrl: string, description: string) => Promise<FacebookResult>;
-  postVideoToX: (text: string, videoUrl: string) => Promise<BufferResult>;
+  postReelToFacebook: (videoUrl: string, description: string, commento?: string) => Promise<FacebookResult>;
+  postVideoToX: (text: string, videoUrl: string, commento?: string) => Promise<BufferResult>;
   sendMessageToOwner: (text: string) => Promise<TelegramResult>;
 }
 
@@ -86,10 +86,10 @@ async function cronometra<T>(fn: () => Promise<T>): Promise<[T, number]> {
   return [valore, Math.round((Date.now() - inizio) / 1000)];
 }
 
-async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postId?: string; error?: string }>): Promise<string> {
+async function canale(nome: string, pubblica: () => Promise<{ ok: boolean; postId?: string; error?: string; avviso?: string }>): Promise<string> {
   try {
     const r = await pubblica();
-    return r.ok ? `✓ ${nome}: pubblicato (${r.postId ?? "id n/d"})` : `✗ ${nome}: ${r.error}`;
+    return r.ok ? `✓ ${nome}: pubblicato (${r.postId ?? "id n/d"})${r.avviso ? ` ⚠ ${r.avviso}` : ""}` : `✗ ${nome}: ${r.error}`;
   } catch (e) {
     return `✗ ${nome}: ${messaggio(e)}`;
   }
@@ -247,8 +247,8 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
 
   const url = await dip.caricaVideo(p.video, slug);
   esito.file = url;
-  const testo = buildVideoPost(articolo, storyboard);
-  const aMano = `Il post va fatto a mano con l'URL dell'mp4: ${url}\nTesto: ${testo}`;
+  const { testo, commento } = buildVideoPost(articolo, storyboard);
+  const aMano = `Il post va fatto a mano con l'URL dell'mp4: ${url}\nTesto: ${testo}\nPrimo commento: ${commento}`;
   // Prima dei post: senza lo slug nello storico, dopo la scadenza dell'mp4 un nuovo lancio ripubblicherebbe.
   const errStorico = await scriviConUnRitentativo(() => dip.scriviStorico(JSON.stringify(aggiungi(storico, riassunto(storyboard, scelta.variante, oggi(), scelta.impronta)))));
   if (errStorico) {
@@ -257,8 +257,8 @@ async function produci(slug: string, opz: { prova: boolean }, dip: Dipendenze, e
     return;
   }
   // In sequenza e ognuno nel suo try: un canale che fallisce non ferma l'altro.
-  esito.righe.push(await canale("Facebook", () => dip.postReelToFacebook(url, testo)));
-  esito.righe.push(await canale("X", () => dip.postVideoToX(testo, url)));
+  esito.righe.push(await canale("Facebook", () => dip.postReelToFacebook(url, testo, commento)));
+  esito.righe.push(await canale("X", () => dip.postVideoToX(testo, url, commento)));
   const almenoUno = esito.righe.some((r) => r.startsWith("✓"));
   if (almenoUno) {
     esito.stato = "pubblicato";

@@ -186,15 +186,16 @@ test("un canale che fallisce non ferma l'altro", async () => {
   assert.equal(esito.stato, "pubblicato");
 });
 
-test("pubblica con il testo del video (non quello del post dell'articolo) e l'URL pubblico dell'mp4", async () => {
+test("pubblica con il testo del video (non quello del post dell'articolo), l'URL pubblico dell'mp4 e il link nel primo commento", async () => {
   const f = finte();
   await eseguiPipeline(SLUG, { prova: false }, f.dip);
-  const [url, testo] = f.chiamate.postReelToFacebook[0] as [string, string];
+  const [url, testo, commento] = f.chiamate.postReelToFacebook[0] as [string, string, string];
   assert.equal(url, URL_VIDEO);
-  assert.equal(testo, buildVideoPost(articolo, storyboard));
+  assert.deepEqual({ testo, commento }, buildVideoPost(articolo, storyboard));
   assert.ok(!testo.startsWith(articolo.titolo));
-  assert.ok(testo.includes(`https://lavocedigitale.it/software/${SLUG}`));
-  assert.deepEqual(f.chiamate.postVideoToX[0], [testo, URL_VIDEO]);
+  assert.ok(!testo.includes("https://"));
+  assert.ok(commento.includes(`https://lavocedigitale.it/software/${SLUG}`));
+  assert.deepEqual(f.chiamate.postVideoToX[0], [testo, URL_VIDEO, commento]);
 });
 
 test("se nessun canale pubblica lo stato è errore", async () => {

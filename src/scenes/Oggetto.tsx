@@ -45,6 +45,12 @@ const BORDO_ALTO = [puntoSchermo(0, 0), puntoSchermo(SCHERMO_PX.w / 2, 0), punto
 /** Il primo piano sul pulsante: quanto e' largo il pulsante nel fotogramma e a che quota sta. */
 const PRIMO_PIANO = { larghezza: 640, quota: 1170 };
 const PRIMO_PIANO_CHIARO = { larghezza: 560, quota: 1190 };
+/** Il primo piano sul pulsante; la pagina chiara scende finche' il suo bordo alto non e' sotto i titoli. */
+function sulPulsante({ larghezza, quota }: typeof PRIMO_PIANO, chiara: boolean, limite: number): Camera {
+  const a = (q: number) => inAsse(puntoSchermo(CENTRO_PRIMO_PIANO_PX, PULSANTE_PX.y + PULSANTE_PX.h / 2), distanzaPer(LARGHEZZA_PULSANTE, larghezza), q);
+  const alto = rettangoloInQuadro(FINESTRA_PX, a(quota)).y;
+  return chiara && alto < limite ? a(quota + limite - alto) : a(quota);
+}
 const PUNTI_SPUNTA = spunta(6, 14, SPUNTA - 18, 5);
 
 /** Il cerchio a mano intorno al punto caldo e dove appoggiare il richiamo, nel fotogramma della camera. */
@@ -88,11 +94,9 @@ export const Oggetto: React.FC<ScenaDi<"oggetto">> = (props) => {
   const primoPiano = chiara ? PRIMO_PIANO_CHIARO : PRIMO_PIANO;
   const suPulsante = oggetto === "portatile" && piano.indica !== undefined && f >= piano.indica;
   const telefono = oggetto === "smartphone";
-  const base = suPulsante
-    ? inAsse(puntoSchermo(CENTRO_PRIMO_PIANO_PX, PULSANTE_PX.y + PULSANTE_PX.h / 2), distanzaPer(LARGHEZZA_PULSANTE, primoPiano.larghezza), primoPiano.quota)
-    : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
-  const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
   const { righe, limite } = titoliOggetto(props, piano, stile);
+  const base = suPulsante ? sulPulsante(primoPiano, chiara, limite) : deriva(telefono ? TELEFONO_A_SINISTRA : stretta(oggetto), fase(f, 0, durata));
+  const avvicinata = avvicina(base, 0.88 ** piano.stacchi.filter((s) => f >= s && !(suPulsante && s < piano.indica!)).length);
   const cam = telefono
     ? fraTitoloEConferma(avvicinata, limite, conferma ? ALTEZZA - FONDO_SCENA - RESPIRO - ALTEZZA_CONFERMA : FONDO_UTILE)
     : oggetto === "portatile" && !suPulsante

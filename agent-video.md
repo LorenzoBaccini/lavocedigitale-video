@@ -54,7 +54,7 @@ Il tono segue il senso della frase, non va messo a caso. Le reazioni forti (`sus
     - **una procedura**, cioè passaggi da fare in quell'ordine → `passi`: «Apri la sezione Consensi e autorizza la consultazione» sono due passi;
     - **una catena di causa ed effetto o un passaggio fra servizi** (da qui si arriva lì, questo porta a quello) → `flusso`: «Dall'app entri solo con lo SPID» è SPID → app → fascicolo;
     - **un posto fisico in città: dove si va, dove si è, un tragitto, una zona di strade** → `mappa`: «Il punto grigio è l'ultima posizione in cui sei stato» è uno spillo sulla piantina; «Lo ritiri allo sportello del comune» è uno spillo; «La copertura c'è solo nei quartieri del centro» è una zona. **Mai per un paese, una regione, il mondo o per dire dove un servizio è disponibile**: «L'app non è disponibile nel tuo paese» non è un posto sulla piantina, sembrerebbe una cartina vera sbagliata; lì va un `simbolo`, un `numero` o una `citazione`. La validazione scarta i `luoghi` che nominano paesi, regioni, nazioni, il mondo o l'estero. Se l'articolo parla di un'app o di un sito e non di un posto dove andare, la `mappa` quasi mai serve. La `mappa` è sempre un disegno generico, mai una cartina vera: mai nomi di città, vie o luoghi veri, nemmeno se l'articolo li nomina, perché la piantina è inventata. I `luoghi` sono etichette generiche («Ultima posizione», «Sportello del comune»), mai marchi. I pittogrammi ammessi sono quelli dell'elenco dopo la tabella delle scene.
-15 bis. **Nella cronaca il fatto si vede su un `reperto`.** Quando la frase racconta il momento in cui il reato succede o il danno arriva, mostralo con l'oggetto grande che reagisce sulla `chiave`: `telefono` (il vetro si crepa; `messaggio` è il testo dell'SMS, solo se l'articolo lo riporta), `carta` (si spezza in due: soldi, conto, pagamenti), `lucchetto` (si apre: account, password, accessi rubati). La `chiave` è la parola del danno («svuotano», «rubato», «entrano»). Al massimo due reperti per video: è il colpo, non la regola. Nessun reperto nelle guide.
+15 bis. **Nella cronaca il fatto si vede su un `reperto`.** Quando la frase racconta il momento in cui il reato succede o il danno arriva, mostralo con l'oggetto grande che reagisce sulla `chiave`: `telefono` (l'SMS: il vetro si crepa; `messaggio` è il testo dell'SMS, solo se l'articolo lo riporta), `chiamata` (la chiamata in arrivo che diventa rossa; `mittente` è chi compare sullo schermo), `email` (la mail di phishing che si marchia di rosso; `mittente` e `messaggio`, l'oggetto della mail), `carta` (si spezza in due: carte, pagamenti), `lucchetto` (si apre: account, password, accessi rubati), `soldi` (le banconote volano via: conti svuotati, bonifici, denaro sparito). `messaggio` e `mittente` sono testi della notizia: scrivili come li riporta l'articolo, senza marchi (regola 11); se l'articolo non li riporta, lasciali fuori. La `chiave` è la parola del danno («svuotano», «rubato», «entrano»). Al massimo due reperti per video: è il colpo, non la regola. Nessun reperto nelle guide.
 16. **Mai lo stesso `tipo` due volte di fila**: la validazione lo scarta. L'unica eccezione è `data`, e solo con due date diverse (la stessa data due volte viene scartata). Varia anche il dispositivo e l'inquadratura: dopo una scena sul telefono, se puoi, la successiva sta altrove (carta, portatile, tavolo).
 16 bis. **Al massimo metà delle scene, chiusura esclusa, su un dispositivo** (una corta di 3 scene: 2; 6 scene: 3; 7 scene: 4; il gancio conta sempre fra quelle su un dispositivo): la validazione scarta il copione che ne ha di più. Contano `gancio`, `allarme`, `rischio`, `telefono` e `oggetto` con `portatile` o `smartphone`; non contano `data`, `numero`, `confronto`, `citazione`, `checklist`, `documenti`, `teaser`, `simbolo`, `passi`, `flusso`, `mappa`, `reperto` e `oggetto` con un altro oggetto (carta, chiavetta, router). Le altre frasi stanno su carta (regola 15).
 17. **L'ambientazione segue il contenuto.** Nelle scene sul set dichiara dove si svolge la frase:
@@ -67,6 +67,7 @@ Il tono segue il senso della frase, non va messo a caso. Le reazioni forti (`sus
 18. Le scritte delle interfacce e delle scene su carta (`mittente`, `menu`, `opzioni`, `indica`, i `passi`, i `nodi`, i `luoghi`) seguono la regola 11: nessun marchio, nessun logo. Il nome di un servizio pubblico (SPID, CIE) va bene solo se è nel copione.
 19. **Non rifare un video recente.** Se sotto queste istruzioni trovi le sequenze di scene degli ultimi video, la tua non deve somigliare a nessuna: la validazione scarta una sequenza di tipi (chiusura esclusa) che ha lo stesso tipo nella stessa posizione per il 70 % o più delle posizioni, contate sulla più lunga delle due sequenze (con 6 scene basta che 5 coincidano, con 3 tutte e 3). Il gancio in apertura conta: cambia i tipi e il loro ordine dopo il gancio, partendo da che cosa si vede in ogni frase (regola 15).
 
+19 bis. **Ogni video si apre e si vede in modo nuovo.** Nelle sequenze dei video recenti il gancio è scritto con quello che mostrava (`gancio:smartphone`, `gancio:reperto:telefono`) e i reperti con il loro oggetto (`reperto:carta`). La validazione scarta un video che si apre come uno degli ultimi due e uno che usa un reperto già usato negli ultimi due. Parti dalla notizia: che cosa c'è di suo da far vedere per primo? L'SMS vero di quella truffa, la chiamata del finto operatore, la mail con quel mittente, i soldi che spariscono. Nella cronaca il gancio può aprirsi direttamente sul reperto (`reperto` nel gancio, con `messaggio` e `mittente` se servono): il primo fotogramma è l'oggetto della notizia, non la scrivania.
 
 ## La durata
 
@@ -96,7 +97,7 @@ Il campo `tipo` sceglie la scena; i campi con `?` sono facoltativi. `oggetto` è
 
 | `tipo` | Campi | Quando |
 |--------|-------|--------|
-| `gancio` | `titolo`, `evidenza`, `sottotitolo`, `oggetto`, `schermata?` | prima frase: a schermo va la frase detta, con la `chiave` in grande; `titolo` ed `evidenza` servono solo se la frase supera i 64 caratteri (con `schermata: "sito"` o `"app"` il `titolo` è anche il titolo della pagina sullo schermo) |
+| `gancio` | `titolo`, `evidenza`, `sottotitolo`, `oggetto`, `schermata?`, `reperto?`, `messaggio?`, `mittente?` | prima frase: a schermo va la frase detta, con la `chiave` in grande; `titolo` ed `evidenza` servono solo se la frase supera i 64 caratteri (con `schermata: "sito"` o `"app"` il `titolo` è anche il titolo della pagina sullo schermo) |
 | `allarme` | `sopra`, `titolo`, `notifica?`, `mittente?`, `azione?`, `dispositivo?` | un avvertimento breve, mostrato come notifica sullo schermo del portatile o sulla schermata di blocco del telefono |
 | `oggetto` | `etichetta`, `titolo`, `evidenza?`, `conferma?`, `indica?`, `oggetto`, `schermata?`, `menu?` | mostra una cosa concreta; sul portatile con `indica` la finestra è d'impostazioni (`sistema`), una pagina web (`sito`) o un'app |
 | `data` | `etichetta`, `data` (AAAA-MM-GG), `barrato?`, `timbro?` | una scadenza o una data |
@@ -112,7 +113,7 @@ Il campo `tipo` sceglie la scena; i campi con `?` sono facoltativi. `oggetto` è
 | `passi` | `etichetta`, `passi` (2-4 di `{ testo, simbolo? }`) | una procedura: i passaggi numerati, nell'ordine in cui si fanno, ciascuno con un pittogramma piccolo facoltativo |
 | `flusso` | `etichetta`, `nodi` (2-3 di `{ testo, simbolo? }`) | una catena di causa ed effetto o un passaggio fra servizi: riquadri collegati da frecce, dal primo all'ultimo, che resta evidenziato; pittogramma facoltativo per ogni nodo |
 | `mappa` | `etichetta`, `titolo`, `forma`, `luoghi` | un luogo, una zona o un tragitto su una piantina generica disegnata a mano, mai una cartina vera; `forma` è `punto` (uno spillo), `area` (una zona cerchiata) o `percorso` (un tragitto da A a B); `luoghi` sono le etichette: una con `punto` e `area`, due (partenza e arrivo) con `percorso` |
-| `reperto` | `etichetta`, `titolo`, `reperto`, `messaggio?` | la cronaca: un oggetto grande al centro che reagisce quando la voce dice la `chiave`; `reperto` è `telefono` (si crepa), `carta` (si spezza) o `lucchetto` (si apre); `messaggio` è il testo dell'SMS sullo schermo, solo con `telefono` |
+| `reperto` | `etichetta`, `titolo`, `reperto`, `messaggio?`, `mittente?` | la cronaca: un oggetto grande al centro che reagisce quando la voce dice la `chiave`; `reperto` è `telefono`, `chiamata`, `email`, `carta`, `lucchetto` o `soldi` (regola 15 bis); `messaggio` solo con `telefono` ed `email`, `mittente` solo con `telefono`, `chiamata` ed `email` |
 | `chiusura` | nessuno | ultima frase: la domanda a chi guarda, scritta in grande con l'invito a commentare |
 
 I pittogrammi di `simbolo`, `passi` e `flusso` sono un insieme chiuso, disegnati senza marchi: `lucchetto`, `batteria`, `wifi`, `segnale` (le tacche del telefono), `posizione` (lo spillo), `altoparlante`, `documento`, `euro`, `calendario`, `scudo`. Un nome fuori da questo elenco viene scartato: se nessuno è giusto per la frase, scegli un'altra scena (in `passi` e `flusso` il pittogramma si può togliere).
@@ -133,7 +134,7 @@ I pittogrammi di `simbolo`, `passi` e `flusso` sono un insieme chiuso, disegnati
 - `passi` da 2 a 4, il `testo` di ciascun passo al massimo 28 caratteri; `nodi` da 2 a 3, il `testo` di ciascun nodo al massimo 18; ogni `simbolo` uno dei pittogrammi dell'elenco;
 - `luoghi` della `mappa`: esattamente uno con `punto` e `area`, esattamente due con `percorso`, ciascuno di al massimo 20 caratteri; `forma` è `punto`, `area` o `percorso`; `barrato` di `simbolo` è `true` o `false`;
 - in `indica` e nelle `nota` dei pezzi nessuna parola oltre 15 lettere: sono note a mano in una colonna stretta e vanno a capo solo fra le parole;
-- `reperto` è `telefono`, `carta` o `lucchetto`; `messaggio` al massimo 64 caratteri e solo con `telefono`; al massimo due `reperto` per video;
+- `reperto` è `telefono`, `chiamata`, `email`, `carta`, `lucchetto` o `soldi`; `messaggio` al massimo 64 caratteri, solo con `telefono` ed `email`; `mittente` al massimo 28, solo con `telefono`, `chiamata` ed `email`; al massimo due reperti per video, gancio compreso;
 - `dispositivo` è `portatile` o `smartphone`; `schermata` è `sistema`, `sito` o `app`;
 - `data` e `orologio` devono essere giorni che esistono (2026-02-30 viene scartata);
 - senza `notifica` l'allarme usa la frase parlata, tagliata a 3 righe con «…»: se la frase è lunga scrivi la `notifica`.
@@ -343,7 +344,7 @@ Articolo: «Fascicolo sanitario dell'Emilia-Romagna, il nuovo portale e come si 
 }
 ```
 
-Articolo di cronaca: «Truffa del finto pacco in giacenza, l'avviso della Polizia Postale». Famiglia `posta`: il danno concreto, detto con sorpresa. Il messaggio e la carta sono `reperto`: l'oggetto grande che reagisce quando la voce dice la chiave. Il percorso dall'SMS alla carta lo mostra un `flusso`. Il `messaggio` sul telefono è il testo dell'SMS riportato dall'articolo. Durata corta.
+Articolo di cronaca: «Truffa del finto pacco in giacenza, l'avviso della Polizia Postale». Famiglia `posta`: il danno concreto, detto con sorpresa. Il video si apre sul `reperto` della notizia: il telefono con l'SMS vero, riportato dall'articolo, che si crepa su «svuota». Il pacco che non esiste è un `simbolo` barrato, il percorso dall'SMS alla carta un `flusso`, il conto vuoto i `soldi` che volano via. Durata corta.
 
 ```json
 {
@@ -358,7 +359,9 @@ Articolo di cronaca: «Truffa del finto pacco in giacenza, l'avviso della Polizi
         "titolo": "Il finto pacco",
         "evidenza": "svuota il conto",
         "sottotitolo": "tutto parte da un SMS",
-        "oggetto": "smartphone"
+        "oggetto": "smartphone",
+        "reperto": "telefono",
+        "messaggio": "Pacco in giacenza. Paga 1,99 € entro oggi: consegna-pacchi.info"
       }
     },
     {
@@ -366,11 +369,11 @@ Articolo di cronaca: «Truffa del finto pacco in giacenza, l'avviso della Polizi
       "chiave": "Non esiste",
       "tono": "ironico",
       "scena": {
-        "tipo": "reperto",
-        "etichetta": "Il messaggio",
-        "titolo": "Il pacco non esiste",
-        "reperto": "telefono",
-        "messaggio": "Pacco in giacenza. Paga 1,99 € entro oggi: consegna-pacchi.info"
+        "tipo": "simbolo",
+        "etichetta": "Il pacco",
+        "simbolo": "documento",
+        "titolo": "Non esiste",
+        "barrato": true
       }
     },
     {
@@ -403,7 +406,7 @@ Articolo di cronaca: «Truffa del finto pacco in giacenza, l'avviso della Polizi
         "tipo": "reperto",
         "etichetta": "Dopo pochi minuti",
         "titolo": "Conto svuotato",
-        "reperto": "carta"
+        "reperto": "soldi"
       }
     },
     {

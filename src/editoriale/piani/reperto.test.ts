@@ -5,6 +5,7 @@ import type { ScenaDi } from "../../scenes/props.ts";
 import type { Reperto } from "../../storyboard/tipi.ts";
 import { pausaPiuLunga, PAUSA_MAX } from "../regia.ts";
 import type { Voce } from "../voce.ts";
+import { pianoGancio } from "./gancio.ts";
 import { pianoReperto } from "./reperto.ts";
 
 // una parola ogni 6 frame dal frame 0; la chiave e' la parola di indice `chiave`
@@ -51,4 +52,16 @@ test("a schermo: l'occhiello, il titolo e il messaggio dell'SMS se c'e'", () => 
   assert.deepEqual(con.testi.map((t) => t.testo), ["Il messaggio", "Pacco in giacenza: paga 1,99 euro", "Ti svuota il conto"]);
   const senza = pianoReperto(scena(120, voce(DETTA, 8), "carta"), 120);
   assert.deepEqual(senza.testi.map((t) => t.testo), ["Il messaggio", "Ti svuota il conto"]);
+});
+
+test("il gancio aperto sul reperto reagisce sulla chiave, col suono della crepa; senza reperto niente crepa", () => {
+  const v = voce("Un SMS da pochi spiccioli ti svuota il conto", 7);
+  const gancio = (extra: object): ScenaDi<"gancio"> => ({ tipo: "gancio", titolo: "t", evidenza: "e", sottotitolo: "s", oggetto: "smartphone", ...extra, durata: 90, voce: v, contesto: {} }) as ScenaDi<"gancio">;
+  const con = pianoGancio(gancio({ reperto: "telefono", messaggio: "Paga 1,99 euro" }), 90);
+  assert.equal(con.reazione, 42);
+  assert.ok(con.suoni.some((s) => s.suono === "crepa" && s.da === 42));
+  assert.ok(con.testi.some((t) => t.testo === "Paga 1,99 euro" && t.da === 0));
+  const senza = pianoGancio(gancio({}), 90);
+  assert.equal(senza.reazione, undefined);
+  assert.ok(!senza.suoni.some((s) => s.suono === "crepa"));
 });

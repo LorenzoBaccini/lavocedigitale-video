@@ -1,6 +1,6 @@
 import type { NomeDurata } from "../editoriale/variante.ts";
 import { normalizza } from "../sottotitoli.ts";
-import { contaParole, DISPOSITIVI, FORME_MAPPA, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, REPERTI, SCHERMATE, SIMBOLI, TONI, TONI_MARCATI } from "./tipi.ts";
+import { contaParole, DISPOSITIVI, FORME_MAPPA, CON_MESSAGGIO, CON_MITTENTE, LIMITI, LIMITI_DURATA, OGGETTI, PEZZI, REPERTI, SCHERMATE, SIMBOLI, TONI, TONI_MARCATI } from "./tipi.ts";
 import type { Scena, Storyboard } from "./tipi.ts";
 
 export type EsitoValidazione = { ok: true; storyboard: Storyboard } | { ok: false; errori: string[] };
@@ -19,6 +19,15 @@ function testo(o: Dict, campo: string, percorso: string, max: number, errori: st
   } else if (v.length > max) {
     errori.push(`${percorso}.${campo}: ${v.length} caratteri, massimo ${max}`);
   }
+}
+
+/** Il reperto e i testi che porta: il messaggio e il mittente solo sui reperti che li mostrano. */
+function campiReperto(s: Dict, p: string, e: string[]): void {
+  if (!REPERTI.includes(s.reperto as never)) e.push(`${p}.reperto: deve essere uno tra ${REPERTI.join(", ")}`);
+  testo(s, "messaggio", p, LIMITI.notifica, e, true);
+  testo(s, "mittente", p, LIMITI.mittente, e, true);
+  if (s.messaggio !== undefined && !CON_MESSAGGIO.includes(s.reperto as never)) e.push(`${p}.messaggio: il messaggio solo con ${CON_MESSAGGIO.join(" o ")}`);
+  if (s.mittente !== undefined && !CON_MITTENTE.includes(s.reperto as never)) e.push(`${p}.mittente: il mittente solo con telefono, chiamata o email`);
 }
 
 function oggetto(o: Dict, percorso: string, errori: string[]): void {
@@ -132,6 +141,7 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
     testo(s, "sottotitolo", p, LIMITI.sottotitolo, e);
     oggetto(s, p, e);
     unoTra(s, "schermata", SCHERMATE, p, e);
+    if (s.reperto !== undefined || s.messaggio !== undefined || s.mittente !== undefined) campiReperto(s, p, e);
   },
   allarme: (s, p, e) => {
     testo(s, "sopra", p, LIMITI.etichetta, e);
@@ -229,9 +239,7 @@ const CONTROLLI: Record<string, (s: Dict, p: string, e: string[]) => void> = {
   reperto: (s, p, e) => {
     testo(s, "etichetta", p, LIMITI.etichetta, e);
     testo(s, "titolo", p, LIMITI.titolo, e);
-    if (!REPERTI.includes(s.reperto as never)) e.push(`${p}.reperto: deve essere uno tra ${REPERTI.join(", ")}`);
-    testo(s, "messaggio", p, LIMITI.notifica, e, true);
-    if (s.messaggio !== undefined && s.reperto !== "telefono") e.push(`${p}.messaggio: il messaggio solo sul telefono`);
+    campiReperto(s, p, e);
   },
   chiusura: () => {},
 };
@@ -333,12 +341,27 @@ export const SOGLIA_SOMIGLIANZA = 0.7;
 /** Quanti video recenti si confrontano. */
 export const VIDEO_CONFRONTATI = 5;
 
+/**
+ * Il segno di una scena nello storico: il tipo, e per gancio e reperto anche che cosa si vede
+ * (`gancio:smartphone`, `gancio:reperto:telefono`, `reperto:carta`). Lo storico vecchio ha solo il tipo.
+ */
+export function segnoScena(s: Scena): string {
+  if (s.tipo === "reperto") return `reperto:${s.reperto}`;
+  if (s.tipo === "gancio") return s.reperto ? `gancio:reperto:${s.reperto}` : `gancio:${s.oggetto}`;
+  return s.tipo;
+}
+const tipoDi = (segno: string) => segno.split(":")[0];
+const repertiDi = (segni: string[]) => segni.flatMap((s) => /reperto:(\w+)$/.exec(s)?.[1] ?? []);
+
+/** Quanti video recenti contano per l'apertura e per i reperti gia' usati. */
+export const VIDEO_SENZA_RIPETERE = 2;
+
 /** Quota di posizioni con lo stesso tipo, sulla sequenza piu' lunga: 1 = stessa sequenza. */
 export function somiglianza(a: string[], b: string[]): number {
   const n = Math.max(a.length, b.length);
   if (n === 0) return 1;
   let uguali = 0;
-  for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] === b[i]) uguali++;
+  for (let i = 0; i < Math.min(a.length, b.length); i++) if (tipoDi(a[i]) === tipoDi(b[i])) uguali++;
   return uguali / n;
 }
 
@@ -375,7 +398,16 @@ export function erroriVarieta(storyboard: Storyboard, recenti: string[][]): stri
   if (allarmi > MASSIMO_ALLARMI) {
     errori.push(`sequenza: ${allarmi} scene «allarme», al massimo ${MASSIMO_ALLARMI}: la notifica solo se l'articolo parla di un messaggio vero, per le altre frasi scegli un'altra scena`);
   }
-  const reperti = sequenza.filter((t) => t === "reperto").length;
+  const segni = storyboard.frasi.filter((f) => f.scena.tipo !== "chiusura").map((f) => segnoScena(f.scena));
+  const ultimi = recenti.slice(0, VIDEO_SENZA_RIPETERE);
+  if (segni[0] && ultimi.some((r) => r[0] === segni[0])) {
+    errori.push(`apertura: il video comincia come uno degli ultimi ${VIDEO_SENZA_RIPETERE} (${segni[0]}): apri su un altro oggetto o su un altro reperto della notizia`);
+  }
+  const giaUsati = new Set(repertiDi(ultimi.flat()));
+  for (const r of new Set(repertiDi(segni))) {
+    if (giaUsati.has(r)) errori.push(`reperto: «${r}» è già negli ultimi ${VIDEO_SENZA_RIPETERE} video: scegli un altro reperto o un'altra scena`);
+  }
+  const reperti = repertiDi(segni).length;
   if (reperti > MASSIMO_REPERTI) {
     errori.push(`sequenza: ${reperti} scene «reperto», al massimo ${MASSIMO_REPERTI}: tienilo per il momento in cui succede il fatto`);
   }

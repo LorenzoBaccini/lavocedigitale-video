@@ -1,6 +1,7 @@
 import type { ScenaDi } from "../../scenes/props.ts";
 import type { Piano } from "../piano.ts";
 import { accentiMancanti } from "../regia.ts";
+import { DURATA_REAZIONE } from "./reperto.ts";
 import type { ParolaTitolo } from "../titoli.ts";
 import { entroLettura, intera, paroleTitolo, testoDi } from "../titoli.ts";
 
@@ -21,6 +22,8 @@ export interface PianoGancio extends Piano {
   notifica?: number;
   /** stacchi in asse aggiunti per la regola del secondo accento */
   stacchi: number[];
+  /** col reperto: il frame in cui reagisce, sulla chiave */
+  reazione?: number;
 }
 
 // Il gancio scrive la frase detta, parola per parola sulla voce; la chiave in grande, sottolineata a pennarello.
@@ -40,7 +43,9 @@ export function pianoGancio(s: ScenaDi<"gancio">, durata: number): PianoGancio {
   const ultima = voce.parole[voce.parole.length - 1]?.da ?? 0;
   const notifica = s.contesto.messaggioSeguente !== undefined ? Math.max(8, Math.min(ultima + 8, durata - 16)) : undefined;
   const spinta = notifica !== undefined ? { da: notifica + 1, a: durata } : { da: Math.min(kDa, durata - DURATA_SPINTA), a: Math.min(kDa, durata - DURATA_SPINTA) + DURATA_SPINTA };
-  const eventi = [...parole.map((p) => p.da), sottolinea, spinta.da, spinta.a, ...(notifica !== undefined ? [notifica] : [])];
+  const chiave = voce.parole[voce.chiave]?.da ?? kDa;
+  const reazione = s.reperto ? Math.max(10, Math.min(durata - DURATA_REAZIONE, chiave)) : undefined;
+  const eventi = [...parole.map((p) => p.da), sottolinea, spinta.da, spinta.a, ...(notifica !== undefined ? [notifica] : []), ...(reazione !== undefined ? [reazione, reazione + DURATA_REAZIONE] : [])];
   const stacchi = accentiMancanti(eventi, durata);
   return {
     parole,
@@ -49,8 +54,9 @@ export function pianoGancio(s: ScenaDi<"gancio">, durata: number): PianoGancio {
     spinta,
     notifica,
     stacchi,
-    testi: [{ testo: usaFrase ? frase : testoDi(parole), da: usaFrase ? 0 : intera(parole[parole.length - 1]) }],
-    suoni: notifica !== undefined ? [{ da: notifica, suono: "notifica" }] : [],
+    reazione,
+    testi: [{ testo: usaFrase ? frase : testoDi(parole), da: usaFrase ? 0 : intera(parole[parole.length - 1]) }, ...(s.reperto && s.messaggio ? [{ testo: s.messaggio, da: 0 }] : [])],
+    suoni: [...(notifica !== undefined ? [{ da: notifica, suono: "notifica" as const }] : []), ...(reazione !== undefined ? [{ da: reazione, suono: "crepa" as const }] : [])],
     eventi: [...eventi, ...stacchi],
   };
 }

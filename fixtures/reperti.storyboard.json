@@ -1,10 +1,92 @@
 {
   "slug": "reperti",
   "frasi": [
-    { "testo": "Arriva un SMS: il tuo pacco è in giacenza, paga un euro e novantanove per riceverlo.", "chiave": "paga", "tono": "malizioso", "scena": { "tipo": "reperto", "etichetta": "Il messaggio", "titolo": "Il pacco non esiste", "reperto": "telefono", "messaggio": "Pacco in giacenza. Paga 1,99 € entro oggi: consegna-pacchi.info" } },
-    { "testo": "Inserisci i dati della carta e in pochi minuti ti svuotano il conto.", "chiave": "svuotano", "tono": "drammatico", "scena": { "tipo": "reperto", "etichetta": "Cosa succede dopo", "titolo": "CONTO SVUOTATO IN MINUTI", "reperto": "carta" } },
-    { "testo": "Poi provano a entrare anche nella tua posta, con la stessa password.", "chiave": "password", "tono": "serio", "scena": { "tipo": "reperto", "etichetta": "Comune sportello accesso credenz", "titolo": "Sportello accesso creden", "reperto": "lucchetto" } },
-    { "testo": "Lo stesso SMS arriva senza testo leggibile a molti.", "chiave": "SMS", "scena": { "tipo": "reperto", "etichetta": "Schermo", "titolo": "Bloccato", "reperto": "telefono" } },
-    { "testo": "Ti è arrivato anche a te?", "chiave": "arrivato", "scena": { "tipo": "chiusura" } }
+    {
+      "testo": "Arriva un SMS: il tuo pacco è in giacenza, paga un euro e novantanove per riceverlo.",
+      "chiave": "paga",
+      "tono": "malizioso",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "Il messaggio",
+        "titolo": "Il pacco non esiste",
+        "reperto": "telefono",
+        "messaggio": "Pacco in giacenza. Paga 1,99 € entro oggi: consegna-pacchi.info"
+      }
+    },
+    {
+      "testo": "Inserisci i dati della carta e in pochi minuti ti svuotano il conto.",
+      "chiave": "svuotano",
+      "tono": "drammatico",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "Cosa succede dopo",
+        "titolo": "CONTO SVUOTATO IN MINUTI",
+        "reperto": "carta"
+      }
+    },
+    {
+      "testo": "Poi provano a entrare anche nella tua posta, con la stessa password.",
+      "chiave": "password",
+      "tono": "serio",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "Comune sportello accesso credenz",
+        "titolo": "Sportello accesso creden",
+        "reperto": "lucchetto"
+      }
+    },
+    {
+      "testo": "Lo stesso SMS arriva senza testo leggibile a molti.",
+      "chiave": "SMS",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "Schermo",
+        "titolo": "Bloccato",
+        "reperto": "telefono"
+      }
+    },
+    {
+      "testo": "Poi squilla il telefono: è l'assistenza della tua carta, dicono.",
+      "chiave": "squilla",
+      "tono": "sussurrato",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "La telefonata",
+        "titolo": "Il finto operatore",
+        "reperto": "chiamata",
+        "mittente": "Assistenza carte sicurezza 2"
+      }
+    },
+    {
+      "testo": "Oppure arriva una mail con un rimborso che non hai mai chiesto.",
+      "chiave": "rimborso",
+      "tono": "curioso",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "La mail",
+        "titolo": "Un rimborso mai chiesto",
+        "reperto": "email",
+        "mittente": "Ufficio rimborsi online",
+        "messaggio": "Hai un rimborso di 312,50 € in attesa: conferma i dati da qui"
+      }
+    },
+    {
+      "testo": "E i soldi spariscono in pochi minuti, verso conti all'estero.",
+      "chiave": "spariscono",
+      "tono": "drammatico",
+      "scena": {
+        "tipo": "reperto",
+        "etichetta": "Dove finiscono",
+        "titolo": "Spariti in pochi minuti",
+        "reperto": "soldi"
+      }
+    },
+    {
+      "testo": "Ti è arrivato anche a te?",
+      "chiave": "arrivato",
+      "scena": {
+        "tipo": "chiusura"
+      }
+    }
   ]
 }

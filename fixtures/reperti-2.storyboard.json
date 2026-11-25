@@ -1,0 +1,10 @@
+{
+  "slug": "reperti-2",
+  "frasi": [
+    { "testo": "Questa mail di rimborso ti ruba i dati della carta in un minuto.", "chiave": "ruba", "tono": "sorpreso", "scena": { "tipo": "gancio", "titolo": "La mail del rimborso", "evidenza": "ti ruba la carta", "sottotitolo": "arriva da un mittente falso", "oggetto": "portatile", "reperto": "email", "mittente": "Ufficio rimborsi pagamenti", "messaggio": "Rimborso di 312,50 € in attesa: conferma i tuoi dati entro oggi" } },
+    { "testo": "Ti chiama un finto operatore e ti chiede il codice appena arrivato.", "chiave": "codice", "tono": "malizioso", "scena": { "tipo": "reperto", "etichetta": "Subito dopo", "titolo": "La chiamata", "reperto": "chiamata" } },
+    { "testo": "Il codice serve a lui, non a te: e i soldi spariscono.", "chiave": "spariscono", "tono": "drammatico", "scena": { "tipo": "reperto", "etichetta": "In pochi minuti", "titolo": "Soldi spariti", "reperto": "soldi" } },
+    { "testo": "Il gancio è sul telefono con l'SMS del truffatore.", "chiave": "SMS", "tono": "serio", "scena": { "tipo": "gancio", "titolo": "SMS", "evidenza": "falso", "sottotitolo": "il messaggio", "oggetto": "smartphone", "reperto": "telefono", "mittente": "Avviso carte", "messaggio": "Pagamento di 1.485 € in corso. Se non sei tu chiama subito" } },
+    { "testo": "Ti è mai arrivata una mail così?", "chiave": "mail", "tono": "curioso", "scena": { "tipo": "chiusura" } }
+  ]
+}

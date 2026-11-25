@@ -7,6 +7,7 @@ import { allargamento, dettaglioDi, FINE_DETTAGLIO, pianoDettaglio, riquadroDett
 import { bloccoDiviso, tingiPerBlocco } from "../editoriale/ganci/diviso";
 import { Parola } from "../editoriale/ganci/Parola";
 import { pianoGancio } from "../editoriale/piani/gancio";
+import { RepertoSulSet } from "../editoriale/set/reperti/RepertoSulSet";
 import { conPeso, fase, liscio } from "../editoriale/regia";
 import { angoliInQuadro, centroDi, fraCamere, NOTIFICA_PX, puntoSchermo, SCHERMO_PX, sferica, sottoLaQuota } from "../editoriale/set/geometria";
 import type { Camera } from "../editoriale/set/geometria";
@@ -22,7 +23,7 @@ import { titoloGancio } from "../editoriale/testate/gancio";
 import { Titolo } from "../editoriale/Titolo";
 import type { NomeGancio } from "../editoriale/variante";
 import { useVariante } from "../editoriale/VarianteVideo";
-import { MARGINE, TITOLO_TOP } from "../impaginazione";
+import { FONDO_UTILE, MARGINE, TITOLO_TOP } from "../impaginazione";
 import type { ScenaDi } from "./props";
 
 const BORDO_ALTO = [puntoSchermo(0, 0), puntoSchermo(SCHERMO_PX.w / 2, 0), puntoSchermo(SCHERMO_PX.w, 0)];
@@ -33,10 +34,28 @@ const versoNotifica = (): Camera => {
   return { pos: sferica(centro, 11.5, 0.3, 0.3), look: centro.toArray() as Camera["look"] };
 };
 
-// Il gancio: il formato della variante sceglie la resa; a parola non c'e' il set.
+// Il gancio: aperto sul reperto della notizia, se il copione ne ha uno; se no il formato della variante sceglie la
+// resa, e a parola non c'e' il set.
 export const Gancio: React.FC<ScenaDi<"gancio">> = (props) => {
   const formato = useVariante().gancio;
+  if (props.reperto) return <GancioSulReperto {...props} />;
   return formato === "parola" ? <Parola {...props} /> : <GancioSulSet {...props} formato={formato} />;
+};
+
+const STACCO_REPERTO = 28;
+
+// Sul reperto: la frase detta scritta in alto, intera dal fotogramma 0, e sotto il reperto che reagisce sulla chiave.
+const GancioSulReperto: React.FC<ScenaDi<"gancio">> = (props) => {
+  const f = useCurrentFrame();
+  const stile = useStile();
+  const piano = pianoGancio(props, props.durata);
+  const { righe, limite } = titoloGancio(piano, stile);
+  return (
+    <>
+      <RepertoSulSet reperto={props.reperto!} messaggio={props.messaggio} mittente={props.mittente} f={f} durata={props.durata} reazione={piano.reazione ?? 0} stacchi={piano.stacchi} alto={limite} basso={FONDO_UTILE - STACCO_REPERTO} />
+      <Titolo nome="titolo" f={f} righe={righe} style={{ position: "absolute", top: TITOLO_TOP, left: MARGINE, right: MARGINE }} />
+    </>
+  );
 };
 
 // Sul set: la scrivania larga, l'oggetto al suo posto, la frase detta scritta parola per parola. A dettaglio si parte da un

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 import { DISPOSITIVI, FORME_MAPPA, OGGETTI, REPERTI, SCHERMATE, SIMBOLI } from "./tipi.ts";
-import { erroriVarieta, validaStoryboard } from "./valida.ts";
+import { erroriVarieta, somiglianza, validaStoryboard } from "./valida.ts";
 
 const leggi = (): any =>
   JSON.parse(readFileSync(new URL("../../fixtures/veloce.storyboard.json", import.meta.url), "utf8"));
@@ -139,7 +139,7 @@ test("le fixture con i testi al limite passano la validazione", () => {
 });
 
 // le scene senza dispositivo hanno le loro fixture al limite, `scene-nuove` e `scene-nuove-2`
-const SCENE_NUOVE = ["scene-nuove.storyboard.json", "scene-nuove-2.storyboard.json", "reperti.storyboard.json"].map(fixture);
+const SCENE_NUOVE = ["scene-nuove.storyboard.json", "scene-nuove-2.storyboard.json", "reperti.storyboard.json", "reperti-2.storyboard.json"].map(fixture);
 
 test("le fixture al limite coprono tutti i tipi di scena e tutti gli oggetti", () => {
   const scene = AL_LIMITE.flatMap((sb) => sb.frasi.map((f: any) => f.scena));
@@ -434,7 +434,7 @@ test("reperto: un oggetto dell'elenco, messaggio solo sul telefono, al massimo d
   assert.ok(errori(sb).includes("frasi[4].scena.messaggio: 65 caratteri, massimo 64"));
   sb.frasi[4].scena.reperto = "carta";
   sb.frasi[4].scena.messaggio = "Paga 1,99 euro";
-  assert.ok(errori(sb).includes("frasi[4].scena.messaggio: il messaggio solo sul telefono"));
+  assert.ok(errori(sb).includes("frasi[4].scena.messaggio: il messaggio solo con telefono o email"));
   delete sb.frasi[4].scena.messaggio;
   assert.equal(validaStoryboard(sb, "lunga").ok, true);
   sb.frasi[2].scena = { tipo: "reperto", etichetta: "La carta", titolo: "Spezzata", reperto: "lucchetto" };
@@ -443,11 +443,50 @@ test("reperto: un oggetto dell'elenco, messaggio solo sul telefono, al massimo d
   assert.ok(erroriVarieta(sb, []).some((e) => e.startsWith("sequenza: 3 scene «reperto», al massimo 2")));
 });
 
-test("reperti: la fixture ha i tre reperti, testi al limite e un telefono senza messaggio", () => {
+test("reperti: la fixture ha tutti i reperti, testi al limite e un telefono senza messaggio", () => {
   const sb = fixture("reperti.storyboard.json");
   assert.deepEqual(erroriDiCampo(sb), []);
   const reperti = sb.frasi.filter((f: any) => f.scena.tipo === "reperto").map((f: any) => f.scena);
   for (const r of REPERTI) assert.ok(reperti.some((s: any) => s.reperto === r), r);
   assert.ok(reperti.some((s: any) => s.titolo.length === 24 && s.etichetta.length === 32));
   assert.ok(reperti.some((s: any) => s.reperto === "telefono" && s.messaggio === undefined));
+});
+
+test("gancio sul reperto: il reperto e i suoi testi sono facoltativi e controllati come nella scena reperto", () => {
+  const sb = leggi();
+  sb.frasi[0].scena = { ...sb.frasi[0].scena, reperto: "telefono", messaggio: "Pagamento sospetto: chiama subito", mittente: "Avviso carte" };
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  sb.frasi[0].scena.reperto = "lucchetto";
+  assert.ok(errori(sb).includes("frasi[0].scena.messaggio: il messaggio solo con telefono o email"));
+  assert.ok(errori(sb).includes("frasi[0].scena.mittente: il mittente solo con telefono, chiamata o email"));
+});
+
+test("chiamata ed email: chi chiama e chi scrive nel mittente, l'oggetto della mail nel messaggio", () => {
+  const sb = leggi();
+  sb.frasi[4].scena = { tipo: "reperto", etichetta: "La telefonata", titolo: "Il finto operatore", reperto: "chiamata", mittente: "x".repeat(28) };
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  sb.frasi[4].scena.mittente = "x".repeat(29);
+  assert.ok(errori(sb).includes("frasi[4].scena.mittente: 29 caratteri, massimo 28"));
+  sb.frasi[4].scena = { tipo: "reperto", etichetta: "La mail", titolo: "Il finto rimborso", reperto: "email", mittente: "Rimborsi", messaggio: "Hai un rimborso in attesa" };
+  assert.equal(validaStoryboard(sb, "lunga").ok, true);
+  sb.frasi[4].scena.reperto = "chiamata";
+  assert.ok(errori(sb).includes("frasi[4].scena.messaggio: il messaggio solo con telefono o email"));
+});
+
+test("varieta': il video non si apre come uno degli ultimi due e non ricicla i loro reperti", () => {
+  const sb = leggi();
+  sb.frasi[0].scena = { ...sb.frasi[0].scena, reperto: "telefono" };
+  sb.frasi[4].scena = { tipo: "reperto", etichetta: "Dopo", titolo: "Conto svuotato", reperto: "carta" };
+  assert.deepEqual(erroriVarieta(sb, []), []);
+  const apre = erroriVarieta(sb, [["citazione"], ["gancio:reperto:telefono", "numero"]]);
+  assert.ok(apre.some((e) => e.startsWith("apertura: ")), apre.join("\n"));
+  assert.deepEqual(erroriVarieta(sb, [["citazione"], ["citazione"], ["gancio:reperto:telefono"]]).filter((e) => e.startsWith("apertura")), [], "il terzo video fa ancora non conta");
+  const ricicla = erroriVarieta(sb, [["gancio:smartphone", "reperto:carta"]]);
+  assert.ok(ricicla.some((e) => e.startsWith("reperto: «carta»")), ricicla.join("\n"));
+  // lo storico vecchio ha solo i tipi: non esclude niente
+  assert.deepEqual(erroriVarieta(sb, [["gancio", "reperto"]]).filter((e) => /^(apertura|reperto):/.test(e)), []);
+});
+
+test("la somiglianza delle sequenze confronta i tipi, non i dettagli", () => {
+  assert.equal(somiglianza(["gancio:smartphone", "reperto:carta"], ["gancio", "reperto:lucchetto"]), 1);
 });

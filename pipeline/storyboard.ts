@@ -43,7 +43,7 @@ export const sezioneRecenti = (recenti: string[][]): string =>
     : `\nSequenze di scene degli ultimi video pubblicati (chiusura esclusa), dal più recente:\n${recenti
         .slice(0, VIDEO_CONFRONTATI)
         .map((s) => `- ${s.join(" → ")}`)
-        .join("\n")}\nNon riprodurle: cambia i tipi e il loro ordine (regola 19).\n`;
+        .join("\n")}\nNon riprodurle: cambia i tipi e il loro ordine (regola 19). Non aprire come i primi due e non riusare i loro reperti (regola 19 bis).\n`;
 
 /** Le dimensioni della variante che decidono il copione: quante frasi e quante parole. */
 export type Misura = Pick<Variante, "durata" | "gancioTesto">;

@@ -14,6 +14,9 @@ export interface Sagoma {
 
 export const SAGOME: Record<Reperto, Sagoma> = {
   telefono: { larghezza: 1.1, altezza: 2.2, profondita: 0.14 },
+  chiamata: { larghezza: 1.1, altezza: 2.2, profondita: 0.14 },
+  email: { larghezza: 2.6, altezza: 1.95, profondita: 0.5 },
+  soldi: { larghezza: 3.0, altezza: 2.2, profondita: 0.8 },
   carta: { larghezza: 2.95, altezza: 1.85, profondita: 0.12 },
   lucchetto: { larghezza: 2.0, altezza: 2.4, profondita: 0.6 },
 };

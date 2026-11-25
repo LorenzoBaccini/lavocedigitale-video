@@ -20,9 +20,22 @@ export const PEZZI: readonly Pezzo[] = ["tessera", "documento", "lettore", "pin"
 export type Simbolo = "lucchetto" | "batteria" | "wifi" | "segnale" | "posizione" | "altoparlante" | "documento" | "euro" | "calendario" | "scudo";
 export const SIMBOLI: readonly Simbolo[] = ["lucchetto", "batteria", "wifi", "segnale", "posizione", "altoparlante", "documento", "euro", "calendario", "scudo"];
 
-/** Gli oggetti grandi della scena `reperto`, ognuno con la sua reazione: il telefono si crepa, la carta si spezza, il lucchetto si apre. */
-export type Reperto = "telefono" | "carta" | "lucchetto";
-export const REPERTI: readonly Reperto[] = ["telefono", "carta", "lucchetto"];
+/**
+ * Gli oggetti grandi della scena `reperto`, ognuno con la sua reazione: il telefono con l'SMS si crepa, la chiamata
+ * in arrivo diventa rossa, la mail si marchia, la carta si spezza, il lucchetto si apre, i soldi volano via.
+ */
+export type Reperto = "telefono" | "chiamata" | "email" | "carta" | "lucchetto" | "soldi";
+export const REPERTI: readonly Reperto[] = ["telefono", "chiamata", "email", "carta", "lucchetto", "soldi"];
+/** I reperti che mostrano un testo della notizia: `messaggio` (l'SMS, l'oggetto della mail) e `mittente` (chi scrive o chiama). */
+export const CON_MESSAGGIO: readonly Reperto[] = ["telefono", "email"];
+export const CON_MITTENTE: readonly Reperto[] = ["telefono", "chiamata", "email"];
+
+/** I campi del reperto, nella scena `reperto` e nel gancio che si apre su un reperto. */
+export interface CampiReperto {
+  reperto: Reperto;
+  messaggio?: string;
+  mittente?: string;
+}
 
 /** Un passo della scena `passi`: il testo e, se serve, un pittogramma piccolo. */
 export interface Passo {
@@ -56,7 +69,8 @@ export interface PezzoSulTavolo {
 }
 
 export type Scena =
-  | { tipo: "gancio"; titolo: string; evidenza: string; sottotitolo: string; oggetto: Oggetto; schermata?: Schermata }
+  /** con `reperto` il gancio si apre sul reperto della notizia invece che sulla scrivania */
+  | ({ tipo: "gancio"; titolo: string; evidenza: string; sottotitolo: string; oggetto: Oggetto; schermata?: Schermata } & Partial<CampiReperto>)
   | { tipo: "allarme"; sopra: string; titolo: string; notifica?: string; mittente?: string; azione?: string; dispositivo?: Dispositivo }
   | { tipo: "oggetto"; etichetta: string; titolo: string; evidenza?: string; conferma?: string; indica?: string; oggetto: Oggetto; schermata?: Schermata; menu?: string[] }
   | { tipo: "data"; etichetta: string; data: string; barrato?: string; timbro?: string }
@@ -73,8 +87,7 @@ export type Scena =
   /** `luoghi`: uno con `punto` e `area`, due (partenza e arrivo) con `percorso` */
   | { tipo: "mappa"; etichetta: string; titolo: string; forma: FormaMappa; luoghi: string[] }
   | { tipo: "simbolo"; etichetta: string; simbolo: Simbolo; titolo: string; barrato?: boolean }
-  /** `messaggio`: il testo dell'SMS sullo schermo, solo con `telefono` */
-  | { tipo: "reperto"; etichetta: string; titolo: string; reperto: Reperto; messaggio?: string }
+  | ({ tipo: "reperto"; etichetta: string; titolo: string } & CampiReperto)
   | { tipo: "chiusura" };
 
 /** Come la voce dice la frase: diventa un tag di eleven_v3 davanti alla frase, mai nel `testo`. */

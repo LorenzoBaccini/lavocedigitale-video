@@ -78,7 +78,8 @@ const GancioSulSet: React.FC<ScenaDi<"gancio"> & { formato: Exclude<NomeGancio, 
   // quasi ferma fino alla spinta, poi un solo movimento con peso; gli stacchi in asse la avvicinano
   const ferma = sotto(avvicina(largaCam, 1 - 0.035 * liscio(fase(f, 0, piano.spinta.da))));
   const mossa = avvicina(fraCamere(ferma, meta, conPeso(fase(f, piano.spinta.da, piano.spinta.a))), 0.88 ** piano.stacchi.filter((s) => f >= s).length);
-  const scena = piano.notifica === undefined ? sotto(mossa) : mossa;
+  // finche' la camera non parte verso la notifica, anche gli stacchi in asse restano sotto il titolo
+  const scena = piano.notifica === undefined || f < piano.spinta.da ? sotto(mossa) : mossa;
   const dettaglio = formato === "dettaglio" ? dettaglioDi(props, piano.notifica !== undefined) : undefined;
   const cam = dettaglio && f < FINE_DETTAGLIO ? allarga(primoPiano(dettaglio, riquadroDettaglio(dettaglio, props), oggetto), scena, allargamento(f)) : scena;
   // andando verso la notifica conta lei, non il bordo dello schermo che la camera taglia di tre quarti

@@ -81,15 +81,29 @@ test("il reel pubblica poi il link nel primo commento", async () => {
   assert.match(String(calls[3].init.body), /message=L%27articolo%3A\+https/);
 });
 
-test("se il commento col link non passa il reel resta pubblicato, con un avviso", async () => {
+test("se il commento col link non passa, il link va in fondo alla descrizione del reel, con un avviso", async () => {
   process.env.FB_PAGE_ID = "123";
   process.env.FB_PAGE_TOKEN = "tok";
-  fakeFetch([{ body: { video_id: "v1" } }, { body: { success: true } }, { body: { success: true, post_id: "p1" } }, { status: 403, body: { error: { message: "permesso mancante" } } }]);
+  fakeFetch([{ body: { video_id: "v1" } }, { body: { success: true } }, { body: { success: true, post_id: "p1" } }, { status: 403, body: { error: { message: "(#200) Permissions error" } } }, { body: { success: true } }]);
+
+  const r = await postReelToFacebook(VIDEO, "testo", "link https://lavocedigitale.it/a");
+
+  assert.equal(r.ok, true);
+  assert.match(r.avviso ?? "", /link nella descrizione/);
+  assert.match(r.avviso ?? "", /Permissions error/);
+  assert.equal(calls[4].url, "https://graph.facebook.com/v25.0/v1");
+  assert.match(String(calls[4].init.body), /description=testo%0A%0Alink\+https/);
+});
+
+test("se non passano ne' il commento ne' la descrizione, il reel resta pubblicato senza link, con un avviso", async () => {
+  process.env.FB_PAGE_ID = "123";
+  process.env.FB_PAGE_TOKEN = "tok";
+  fakeFetch([{ body: { video_id: "v1" } }, { body: { success: true } }, { body: { success: true, post_id: "p1" } }, { status: 403, body: { error: { message: "no commento" } } }, { status: 403, body: { error: { message: "no descrizione" } } }]);
 
   const r = await postReelToFacebook(VIDEO, "testo", "link");
 
   assert.equal(r.ok, true);
-  assert.match(r.avviso ?? "", /permesso mancante/);
+  assert.match(r.avviso ?? "", /senza link/);
 });
 
 test("il reel restituisce ok false se lo start fallisce", async () => {

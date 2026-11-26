@@ -118,8 +118,8 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    (`pipeline/canali/buffer.ts`) con il testo di `pipeline/post-video.ts` (il gancio, la domanda finale, gli
    hashtag, nei 280 caratteri di X: se non ci sta via gli hashtag, poi la domanda). Il link all'articolo va nel
    primo commento: sotto il reel su Facebook (serve anche `pages_manage_engagement` sul token), come risposta in
-   thread su X. Se il commento non passa il post resta, con un ⚠ nel resoconto (su X esce il video col link nel
-   testo). Poi il resoconto di solo testo su Telegram privato.
+   thread su X. Se il commento non passa il post resta, con un ⚠ nel resoconto: su Facebook il link va in fondo
+   alla descrizione del reel, su X esce il video col link nel testo. Poi il resoconto di solo testo su Telegram privato.
 
 Ogni errore chiude il job con il resoconto su Telegram; se il job cade fuori da node (setup,
 timeout, annullamento) lo manda l'ultimo step del workflow. Un video alla volta

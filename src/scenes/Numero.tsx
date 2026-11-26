@@ -4,7 +4,7 @@ import { corpo } from "../anim";
 import { Foglio } from "../editoriale/carta/Foglio";
 import { Occhiello } from "../editoriale/carta/Occhiello";
 import { spintaFoglio } from "../editoriale/piani/carta";
-import { DISSOLVENZA_SOTTO, pianoNumero } from "../editoriale/piani/numero";
+import { cifraAl, DISSOLVENZA_SOTTO, pianoNumero } from "../editoriale/piani/numero";
 import { fase, uscita } from "../editoriale/regia";
 import { allineaFlesso, allineaTesto, useStile } from "../editoriale/stili";
 import { Titolo } from "../editoriale/Titolo";
@@ -28,7 +28,7 @@ export const Numero: React.FC<ScenaDi<"numero">> = (props) => {
           nome="numero"
           f={f}
           tinta="grafica"
-          righe={[{ parole: [{ t: numero, da: piano.numero }], size: corpo(numero, 270, 6, stile.larghezza), peso: 700, sottolinea: { da: piano.sottolinea, durata: 10, colore: stile.colori.accentoSuChiaro, seme: 6 } }]}
+          righe={[{ parole: [{ t: cifraAl(numero, f, piano.conta), da: piano.conta?.da ?? piano.numero }], size: corpo(numero, 270, 6, stile.larghezza), peso: 700, sottolinea: { da: piano.sottolinea, durata: 10, colore: stile.colori.accentoSuChiaro, seme: 6 } }]}
           style={{ alignSelf: "stretch" }}
         />
         {unita && (

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 
 import { cifreMancanti } from "../src/storyboard/cifre.ts";
+import { erroriEmozione } from "../src/storyboard/emozione.ts";
 import type { NomeGancioTesto, Variante } from "../src/editoriale/variante.ts";
 import { LIMITI_DURATA } from "../src/storyboard/tipi.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
@@ -91,7 +92,7 @@ const valida = (risposta: string, misura: Misura, recenti: string[][], testoArti
   const esito = validaStoryboard(json, misura.durata);
   if (!esito.ok) return { errori: esito.errori };
   const cifre = cifreMancanti(esito.storyboard, testoArticolo);
-  const errori = [...erroriVarieta(esito.storyboard, recenti), ...(cifre.length ? [...cifre, CIFRE] : [])];
+  const errori = [...erroriEmozione(esito.storyboard, testoArticolo), ...erroriVarieta(esito.storyboard, recenti), ...(cifre.length ? [...cifre, CIFRE] : [])];
   return errori.length ? { errori } : { storyboard: esito.storyboard };
 };
 
@@ -99,7 +100,7 @@ const valida = (risposta: string, misura: Misura, recenti: string[][], testoArti
  * `misura`: durata e frase finale della variante; il prompt le chiede e la validazione (anche al ritentativo) ne applica i limiti.
  * `recenti`: le sequenze di scene degli ultimi video, dal piu' recente (vuoto senza storico).
  * `conserva` riceve ogni risposta di Claude prima dei controlli, anche quella che verra' scartata.
- * Schema, varieta' e cifre sono un solo giro: gli errori tornano a Claude, un solo ritentativo.
+ * Schema, emozione, varieta' e cifre sono un solo giro: gli errori tornano a Claude, un solo ritentativo.
  */
 export async function scriviStoryboard(
   a: ArticoloVideo,

@@ -1,5 +1,6 @@
 import { dispositivoDi, schermataDi } from "../src/editoriale/set/ambiente.ts";
 import type { Variante } from "../src/editoriale/variante.ts";
+import type { TipoEmozione } from "../src/storyboard/emozione.ts";
 import type { Storyboard } from "../src/storyboard/tipi.ts";
 import { segnoScena, VIDEO_CONFRONTATI } from "../src/storyboard/valida.ts";
 import type { Impronta } from "./somiglianza.ts";
@@ -26,6 +27,8 @@ export interface VoceStorico {
   scene: ScenaStorico[];
   /** parziale nelle voci di prima degli stili o toccate a mano: un campo mancante non esclude niente, `stile` mancante vale scrivania */
   variante: Partial<Variante>;
+  /** l'emozione del copione; assente nelle voci vecchie */
+  emozione?: TipoEmozione;
   /** sei fotogrammi fissi del video pubblicato (somiglianza.ts); assente nelle voci vecchie o se il controllo e' saltato */
   impronta?: Impronta;
 }
@@ -75,7 +78,7 @@ export function riassunto(storyboard: Storyboard, variante: Variante, data: stri
     if (scena.tipo === "reperto") return { tipo: scena.tipo, segno: segnoScena(scena) };
     return { tipo: scena.tipo };
   });
-  return { slug: storyboard.slug, data, scene, variante, ...(impronta && { impronta }) };
+  return { slug: storyboard.slug, data, scene, variante, ...(storyboard.emozione && { emozione: storyboard.emozione.tipo }), ...(impronta && { impronta }) };
 }
 
 export function aggiungi(storico: Storico, voce: VoceStorico): Storico {

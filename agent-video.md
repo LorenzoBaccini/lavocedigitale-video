@@ -47,6 +47,25 @@ La voce è sintetica ma recita, e deve sentirsi: ogni frase può avere un **`ton
 
 Il tono segue il senso della frase, non va messo a caso. Le reazioni forti (`sussurrato`, `ironico`, `drammatico`, `ridendo`, `sospirando`) sono al massimo tre per video: ripetute stancano. **Mai parentesi quadre nel `testo`**: la regia della voce la fa il campo `tono`.
 
+## L'emozione
+
+Un video si condivide quando chi lo guarda prova qualcosa: ansia per un rischio che lo riguarda, indignazione per un'ingiustizia, stupore per una cosa che non sapeva. Ma l'emozione deve nascere dal fatto, non dalle parole: **non si dichiara, si racconta il fatto che la genera**. Chi si sente preso in giro da un titolo gonfiato non condivide, e Meta penalizza i video che promettono più di quello che danno.
+
+Prima di scrivere il copione scegli **`emozione`**: il `tipo` e il `fatto` dell'articolo che la genera, **copiato alla lettera** (da 20 a 220 caratteri). La validazione lo cerca nell'articolo e scarta il copione se non c'è.
+
+| `tipo` | quando | il gancio apre con |
+|---|---|---|
+| `ansia` | un rischio concreto per chi guarda: soldi, dati, accesso, una scadenza | `deciso`, `serio`, `drammatico`, `sussurrato`, `sorpreso` |
+| `indignazione` | qualcuno si comporta in modo scorretto: un truffatore, un'azienda, una regola assurda | `deciso`, `serio`, `ironico`, `sospirando`, `sorpreso`, `drammatico` |
+| `stupore` | un fatto che smentisce quello che tutti pensano, o che pochi conoscono | `deciso`, `sorpreso`, `curioso`, `sussurrato`, `malizioso`, `entusiasta` |
+| `utilità` | nessuno dei tre: l'articolo spiega come si fa una cosa | `deciso`, `curioso`, `malizioso`, `sorpreso`, `sospirando`, `entusiasta` |
+
+- **Se nessun passo dell'articolo regge ansia, indignazione o stupore, scegli `utilità`.** Non tutte le notizie fanno paura, e un consiglio utile si condivide lo stesso, se è chiaro e concreto. Mai alzare i toni per sembrare più importante.
+- Con `ansia` e `indignazione` nessuna frase usa `ridendo`: non si ride di chi rischia o di chi è stato truffato. Con `utilità` nessuna frase usa `drammatico`.
+- Il gancio porta il fatto dell'emozione, detto con parole tue: è lì che chi scorre decide se fermarsi.
+- **Niente parole che gonfiano**: «incredibile», «pazzesco», «scioccante», «shock», «sconvolgente», «clamoroso», «devastante», «terrificante», «da brividi», «non ci crederai», «nessuno te lo dice». La validazione le scarta, a meno che non le usi l'articolo stesso.
+- Il video chiude con la soluzione (regola 7) anche quando l'emozione è ansia: chi condivide un rischio vuole condividere anche il rimedio.
+
 ## Regole delle scene
 
 15. **La scena nasce dalla frase, non da uno schema fisso.** Non esiste una sequenza obbligata (gancio, allarme, data, rischio, checklist, oggetto, chiusura): per ogni frase chiediti che cosa si vede quando la si dice, e scegli il `tipo` che lo mostra. Una frase su un'app si vede sul telefono, una sul sito su una pagina web, una su documenti e tessere sul tavolo, una scadenza sull'agenda. Molte frasi non stanno su uno schermo, e per quelle ci sono quattro scene disegnate su carta:
@@ -87,9 +106,9 @@ Il tono segue il senso della frase, non va messo a caso. Le reazioni forti (`sus
 
 **Rispondi solo con JSON**, senza testo prima o dopo e senza blocchi di codice. Forma:
 
-    { "slug": "<slug dell'articolo>", "frasi": [ { "testo": "...", "chiave": "...", "tono": "...", "scena": { ... } } ] }
+    { "slug": "<slug dell'articolo>", "emozione": { "tipo": "...", "fatto": "..." }, "frasi": [ { "testo": "...", "chiave": "...", "tono": "...", "scena": { ... } } ] }
 
-Ogni frase ha un `testo` (quello che la voce legge), una `chiave`, una `scena` e, se serve, un `tono`.
+`emozione` è obbligatoria (vedi «L'emozione»). Ogni frase ha un `testo` (quello che la voce legge), una `chiave`, una `scena` e, se serve, un `tono`.
 
 ## Scene
 
@@ -124,6 +143,7 @@ I pittogrammi di `simbolo`, `passi` e `flusso` sono un insieme chiuso, disegnati
 - il gancio al massimo 10 parole e mai una domanda; la domanda finale al massimo 12 parole e 80 caratteri, con «?» in fondo;
 - `tono` uno dell'elenco; almeno metà delle frasi con un tono diverso da `deciso`; al massimo tre reazioni forti (`sussurrato`, `ironico`, `drammatico`, `ridendo`, `sospirando`); nessuna parentesi quadra nel `testo`;
 - nessuna frase con «link» o «articolo»;
+- `emozione.tipo` uno fra `ansia`, `indignazione`, `stupore`, `utilità`; `emozione.fatto` da 20 a 220 caratteri, presente alla lettera nell'articolo; il tono del gancio fra quelli della sua emozione; nessuna parola che gonfia, se l'articolo non la usa;
 - `chiave` al massimo 18 caratteri e presente nel `testo`;
 - `titolo` al massimo 24 caratteri, `evidenza` 16, `etichetta` 32, `sopra` 32, `sottotitolo` 36, `conferma` 28, `indica` 28, `barrato` 26, `notifica` 64;
 - `timbro` al massimo 16 caratteri (come `evidenza`); `unita` 32; `nota` 36; `fonte` 32;
@@ -151,6 +171,7 @@ Articolo: «Installare Windows 10 da USB dopo la fine del supporto». Famiglia d
 ```json
 {
   "slug": "installare-windows-10-usb-dopo-fine-supporto",
+  "emozione": { "tipo": "ansia", "fatto": "dopo il 14 ottobre 2025, Windows 10 non riceverà più aggiornamenti software gratuiti, supporto tecnico o correzioni di sicurezza" },
   "orologio": "2025-10-14",
   "frasi": [
     {
@@ -254,6 +275,7 @@ Articolo: «Fascicolo sanitario dell'Emilia-Romagna, il nuovo portale e come si 
 ```json
 {
   "slug": "fascicolo-sanitario-emilia-romagna-nuovo-portale-accesso",
+  "emozione": { "tipo": "utilità", "fatto": "con la sola CIE l'accesso dall'app non è ancora disponibile" },
   "frasi": [
     {
       "testo": "Con la sola CIE, l'app del fascicolo ti blocca.",
@@ -349,6 +371,7 @@ Articolo di cronaca: «Truffa del finto pacco in giacenza, l'avviso della Polizi
 ```json
 {
   "slug": "truffa-sms-finto-pacco-giacenza",
+  "emozione": { "tipo": "ansia", "fatto": "il messaggio chiede di pagare pochi euro per lo svincolo di un pacco che non esiste" },
   "frasi": [
     {
       "testo": "Un SMS da pochi spiccioli ti svuota il conto.",
@@ -426,6 +449,7 @@ Articolo: «Google Maps non trova la tua posizione: il punto blu». Famiglia `sm
 ```json
 {
   "slug": "google-maps-non-trova-posizione-punto-blu-grigio",
+  "emozione": { "tipo": "stupore", "fatto": "il punto grigio indica che Maps sta mostrando l'ultima posizione conosciuta" },
   "frasi": [
     {
       "testo": "Il punto grigio su Maps NON è un errore.",

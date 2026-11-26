@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 import { ATTIVI, DURATE } from "../editoriale/variante.ts";
 import type { NomeDurata } from "../editoriale/variante.ts";
+import { erroriEmozione } from "./emozione.ts";
 import type { Frase, Storyboard } from "./tipi.ts";
 import { contaParole, FORME_MAPPA, LIMITI_DURATA, SIMBOLI } from "./tipi.ts";
 import { erroriVarieta, somiglianza, validaStoryboard } from "./valida.ts";
@@ -111,6 +112,13 @@ test("ogni esempio di agent-video.md passa la validazione e la varieta' nella du
     assert.deepEqual(errori(sb, durata), [], `${sb.slug} (${durata})`);
     assert.deepEqual(erroriVarieta(sb, []), [], `${sb.slug} (${durata})`);
   }
+});
+
+// l'articolo degli esempi non c'e': il fatto vale come articolo, si controllano tipo, toni ed esche
+test("ogni esempio di agent-video.md ha un'emozione coerente con i suoi toni, e non sempre la stessa", () => {
+  for (const { sb } of ESEMPI) assert.deepEqual(erroriEmozione(sb, sb.emozione?.fatto ?? ""), [], sb.slug);
+  assert.ok(new Set(ESEMPI.map((e) => e.sb.emozione?.tipo)).size >= 3, "almeno tre emozioni diverse");
+  assert.ok(ESEMPI.some((e) => e.sb.emozione?.tipo === "utilità"), "un esempio senza emozione forte");
 });
 
 // Claude imita gli esempi: se tutti hanno la notifica, ogni video ha la notifica; se nessuno ha un tono, non lo usa.

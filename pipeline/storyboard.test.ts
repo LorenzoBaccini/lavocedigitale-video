@@ -232,3 +232,13 @@ test("la sezione del gancio dice la famiglia con la sua definizione e un esempio
   assert.ok(p.indexOf("Durata di questo video") < p.indexOf("Famiglia di gancio"));
   assert.ok(p.indexOf("Famiglia di gancio") < p.indexOf("<articolo>"));
 });
+
+test("un'emozione senza il suo fatto nell'articolo torna a Claude, poi lo storyboard la porta", async () => {
+  const inventata = JSON.parse(FIXTURE);
+  inventata.emozione = { tipo: "ansia", fatto: "Windows 10 smetterà di accendersi dal 2026" };
+  const { prompt, chiedi } = scrivi([JSON.stringify(inventata), FIXTURE]);
+  const sb = await scriviStoryboard(articolo, chiedi, LUNGA_MISURA);
+  assert.equal(prompt.length, 2);
+  assert.ok(prompt[1].includes("- emozione.fatto: non è nell'articolo alla lettera"));
+  assert.deepEqual(sb.emozione, { tipo: "ansia", fatto: "Dal 14 ottobre 2025 non arrivano più aggiornamenti di sicurezza" });
+});

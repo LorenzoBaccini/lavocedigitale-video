@@ -69,6 +69,13 @@ test("senza impronta (controllo saltato) la voce non ha il campo", () => {
   assert.equal("impronta" in riassunto(storyboard, VARIANTE_BASE, "2026-11-10"), false);
 });
 
+test("lo storico ricorda l'emozione del copione, senza il fatto", () => {
+  const storyboard = { slug: "a", emozione: { tipo: "stupore", fatto: "un passo dell'articolo" }, frasi: [{ testo: "Fine.", chiave: "Fine", scena: { tipo: "chiusura" } }] } as unknown as Storyboard;
+  const letto = analizzaStorico(JSON.stringify(aggiungi(STORICO_VUOTO, riassunto(storyboard, VARIANTE_BASE, "2026-11-26"))));
+  assert.equal(letto.recenti[0].emozione, "stupore");
+  assert.equal("emozione" in riassunto({ ...storyboard, emozione: undefined }, VARIANTE_BASE, "2026-11-26"), false);
+});
+
 test("lo storico ricorda che cosa si vede nel gancio e nei reperti, e le sequenze recenti lo portano", () => {
   const storyboard = {
     slug: "a",

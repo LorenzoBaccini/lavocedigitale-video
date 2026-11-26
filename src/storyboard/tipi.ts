@@ -1,4 +1,5 @@
 import type { NomeDurata } from "../editoriale/variante.ts";
+import type { Emozione } from "./emozione.ts";
 
 export type Oggetto = "portatile" | "chiavetta" | "smartphone" | "router" | "carta" | "nessuno";
 
@@ -119,6 +120,8 @@ export interface Frase {
 
 export interface Storyboard {
   slug: string;
+  /** l'emozione che il fatto dell'articolo genera (emozione.ts); obbligatoria nei copioni nuovi, assente nelle fixture vecchie */
+  emozione?: Emozione;
   /** la data dell'orologio sugli schermi (AAAA-MM-GG); senza, l'orologio mostra solo l'ora */
   orologio?: string;
   frasi: Frase[];

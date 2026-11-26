@@ -80,7 +80,8 @@ Nessuna chiave fissa, nessun ID di account nel repo.
    [Varianti e stili](#varianti-e-stili).
 1. **Storyboard** (`pipeline/storyboard.ts`): `claude -p` con `agent-video.md`, la durata e la famiglia di gancio
    della variante (`gancioTesto`: errore, segreto, posta, smentita, situazione, `DESCRIZIONE_GANCI`; vedi
-   [La durata](#la-durata)) e le sequenze degli ultimi 5 video. Schema (`src/storyboard/valida.ts`), varietà (`erroriVarieta`) e cifre
+   [La durata](#la-durata)) e le sequenze degli ultimi 5 video. Schema (`src/storyboard/valida.ts`), emozione
+   (`src/storyboard/emozione.ts`, vedi [L'emozione](#lemozione)), varietà (`erroriVarieta`) e cifre
    (`src/storyboard/cifre.ts`: ogni numero deve stare nell'articolo) sono un solo controllo, con un
    ritentativo. La CLI gira senza strumenti, senza MCP, con modello fissato, con un ambiente ridotto
    (nessun segreto del job) e in una cartella temporanea; l'articolo sta fra `<articolo>` e
@@ -328,6 +329,19 @@ apertura (`agent-video.md`), le fixture con più ganci li provano tutti.
 
 Il controllo d'impaginazione misura solo i ganci con `--scene=gancio`; `fixtures/ganci-lunghi.storyboard.json` ha tre
 domande da 64 caratteri con la chiave da 18 all'inizio, in mezzo e in fondo.
+
+### L'emozione
+
+Ogni copione dichiara `emozione: { tipo, fatto }`: `ansia`, `indignazione` o `stupore` (le emozioni che spingono a
+condividere secondo Berger e Milkman 2012; la tristezza le frena) oppure `utilità` quando l'articolo non ne regge
+una. `fatto` è il passo dell'articolo che la genera, copiato alla lettera: `erroriEmozione` lo cerca nel testo
+(maiuscole, apostrofi tipografici, spazi e punteggiatura ai bordi non contano) e scarta il copione se non c'è. Così
+l'emozione nasce da un fatto, non da un aggettivo: senza un passo che la regga Claude deve scegliere `utilità`.
+Lo stesso controllo vuole il tono del gancio fra quelli dell'emozione (`TONI_GANCIO`), vieta `ridendo` con ansia e
+indignazione e `drammatico` con utilità (`TONI_VIETATI`), e scarta le parole che gonfiano («incredibile»,
+«scioccante», «non ci crederai»…) se l'articolo non le usa. Lo storico ricorda il `tipo` di ogni video. Nessuna
+guardia di varietà sull'emozione: imporre un'emozione diversa da quella del fatto sarebbe forzarla. Fonti in
+`docs/superpowers/specs/2026-11-25-viralita.md`.
 
 ### Le chiusure
 

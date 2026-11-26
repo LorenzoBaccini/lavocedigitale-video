@@ -17,7 +17,7 @@ import { pianoData } from "./data.ts";
 import { FRECCIA, PASSO_NOTE, pianoDocumenti } from "./documenti.ts";
 import { pianoGancio } from "./gancio.ts";
 import { pianoScena } from "./index.ts";
-import { pianoNumero } from "./numero.ts";
+import { cifraAl, pianoNumero } from "./numero.ts";
 import { pianoOggetto } from "./oggetto.ts";
 import { pianoTelefono } from "./telefono.ts";
 
@@ -232,4 +232,33 @@ test("numero: la nota detta prima della cifra entra con la voce, non dopo la cif
   const piano = pianoNumero(p, p.durata);
   assert.ok(piano.nota !== undefined && piano.nota < piano.numero, `nota a ${piano.nota}, cifra a ${piano.numero}`);
   assert.ok(Math.abs(piano.nota - p.voce.parole[5].da) <= 1, `la nota entra su «lampeggio»: ${piano.nota} contro ${p.voce.parole[5].da}`);
+});
+
+test("numero: se la voce dice la cifra tardi, la cifra entra subito e conta fino al valore quando la voce lo dice", () => {
+  // la frase vera di Motors Scam (26 nov 2026): «centocinquanta» arriva in fondo, il foglio restava vuoto per 2 s
+  const testo = "La Polizia Postale: quattordici indagati, oltre centocinquanta vittime.";
+  const tempi = [0.1, 0.3, 0.85, 1.6, 2.25, 2.95, 3.3, 4.1];
+  const parole = testo.split(" ").map((t, i) => ({ t, da: tempi[i], a: (tempi[i + 1] ?? 4.6) - 0.04 }));
+  const sb = { slug: "motors", frasi: [{ testo, chiave: "centocinquanta vittime", scena: { tipo: "numero", etichetta: "L'operazione della Polizia", numero: "150", unita: "vittime", nota: "14 indagati, indagini in corso" } }] } as Storyboard;
+  const timing: Timing = { voce: "elevenlabs", clips: [{ file: "s1.wav", secondi: 4.8, inviluppo: Array(145).fill(0.5), parole }] };
+  const p = propsFrase(sb, timing, costruisciLinea(timing, 30), 0);
+  if (p.tipo !== "numero") throw new Error("attesa una scena numero");
+  const piano = pianoNumero(p, p.durata);
+  assert.ok(piano.conta, "la cifra detta tardi conta");
+  assert.ok(piano.conta.da <= 8, `il conteggio parte a ${piano.conta.da}`);
+  assert.equal(piano.conta.a, piano.numero);
+  assert.equal(cifraAl("150", piano.conta.da, piano.conta), "0");
+  assert.equal(cifraAl("150", piano.conta.a, piano.conta), "150");
+  const valori = Array.from({ length: piano.conta.a - piano.conta.da + 1 }, (_, i) => Number(cifraAl("150", piano.conta!.da + i, piano.conta)));
+  assert.ok(valori.every((v, i) => i === 0 || v >= valori[i - 1]), "non torna mai indietro");
+});
+
+test("numero: le cifre con i punti delle migliaia e la percentuale contano nel loro formato; le altre non contano", () => {
+  const conta = { da: 0, a: 30 };
+  assert.equal(cifraAl("1.500", 30, conta), "1.500");
+  assert.match(cifraAl("1.500", 20, conta), /^\d{1,3}(\.\d{3})?$/);
+  assert.equal(cifraAl("95%", 30, conta), "95%");
+  assert.match(cifraAl("95%", 15, conta), /^\d+%$/);
+  assert.equal(cifraAl("1 su 3", 10, conta), "1 su 3");
+  assert.equal(cifraAl("150", 10, undefined), "150");
 });

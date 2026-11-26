@@ -25,8 +25,8 @@ async function graphPost(path: string, params: Record<string, string>): Promise<
 /**
  * Pubblica un Reel sulla pagina in tre fasi: start (crea il video e restituisce l'id), upload
  * (Facebook scarica il file dal nostro URL https, che deve restare raggiungibile fino alla fine)
- * e finish (pubblica con la descrizione). Poi il `commento` col link sotto il reel: se non passa il reel resta e
- * torna un avviso. Limite: 30 Reel via API ogni 24 ore.
+ * e finish (pubblica con la descrizione). Poi il `commento` col link sotto il reel: se non passa il link va in
+ * fondo alla descrizione; il reel resta comunque e torna un avviso. Limite: 30 Reel via API ogni 24 ore.
  * Env: FB_PAGE_ID e FB_PAGE_TOKEN (token di pagina, scope `pages_manage_posts`; per il commento anche
  * `pages_manage_engagement`).
  */
@@ -64,7 +64,15 @@ export async function postReelToFacebook(videoUrl: string, description: string, 
       await graphPost(`/${videoId}/comments`, { message: commento, access_token: token });
       return { ok: true, postId };
     } catch (e) {
-      return { ok: true, postId, avviso: `commento col link non pubblicato: ${e instanceof Error ? e.message : String(e)}` };
+      const perche = e instanceof Error ? e.message : String(e);
+      // senza `pages_manage_engagement` il commento non passa: il link va in fondo alla descrizione, che basta
+      // `pages_manage_posts` (Motors Scam, 26 nov 2026: reel uscito senza link)
+      try {
+        await graphPost(`/${videoId}`, { description: `${description}\n\n${commento}`, access_token: token });
+        return { ok: true, postId, avviso: `commento col link non pubblicato, link nella descrizione (${perche})` };
+      } catch (e2) {
+        return { ok: true, postId, avviso: `reel senza link: commento (${perche}) e descrizione (${e2 instanceof Error ? e2.message : String(e2)}) non riusciti` };
+      }
     }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
